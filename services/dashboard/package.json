@@ -1,0 +1,11 @@
+# ═══════════════════════════════════════
+# ARGUS-PRISM | package.json
+# Engine: PRISM Dashboard
+# Branch: pranav/api
+# ═══════════════════════════════════════
+{
+  "name": "prism-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "description": "PRISM dashboard frontend skeleton"
+}

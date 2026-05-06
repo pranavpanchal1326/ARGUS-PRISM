@@ -1,0 +1,45 @@
+# ═══════════════════════════════════════════════════════
+# ARGUS-PRISM | .gitignore
+# Engine: WarmthScore — Synthetic Dataset Generator
+# Branch: pranav/warmthscore
+# ═══════════════════════════════════════════════════════
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Generated synthetic data (large binary/JSON outputs)
+services/ml/warmthscore/dataset/data/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

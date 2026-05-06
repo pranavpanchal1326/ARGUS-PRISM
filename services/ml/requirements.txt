@@ -1,0 +1,7 @@
+# ═══════════════════════════════════════
+# ARGUS-PRISM | requirements.txt
+# Engine: WarmthScore
+# Branch: pranav/warmthscore
+# ═══════════════════════════════════════
+numpy>=1.26,<3.0
+pandas>=2.0,<3.0

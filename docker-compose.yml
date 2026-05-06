@@ -1,0 +1,51 @@
+# ═══════════════════════════════════════
+# ARGUS-PRISM | docker-compose.yml
+# Engine: PRISM Core
+# Branch: pranav/api
+# ═══════════════════════════════════════
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: prismdb
+      POSTGRES_USER: prism
+      POSTGRES_PASSWORD: prism
+    ports:
+      - "5432:5432"
+    volumes:
+      - prism_postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - prism_redis_data:/data
+
+  neo4j:
+    image: neo4j:5
+    environment:
+      NEO4J_AUTH: neo4j/prism1234
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - prism_neo4j_data:/data
+
+  api:
+    build: ./services/api
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - redis
+      - neo4j
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+volumes:
+  prism_postgres_data:
+  prism_redis_data:
+  prism_neo4j_data:
