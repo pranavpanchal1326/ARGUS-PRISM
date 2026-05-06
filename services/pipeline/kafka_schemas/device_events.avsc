@@ -1,0 +1,103 @@
+{
+  "type": "record",
+  "name": "DeviceEvent",
+  "namespace": "com.argus.prism.pipeline",
+  "doc": "Device fingerprint events — login sessions, UPI device registration, IMEI, SIM swap signals",
+  "fields": [
+    {
+      "name": "event_id",
+      "type": "string",
+      "doc": "UUID for this event"
+    },
+    {
+      "name": "event_type",
+      "type": {
+        "type": "enum",
+        "name": "DeviceEventType",
+        "symbols": [
+          "ACCOUNT_LOGIN",
+          "UPI_DEVICE_REGISTERED",
+          "UPI_DEVICE_CHANGED",
+          "SIM_SWAP_DETECTED",
+          "IMEI_FLAGGED",
+          "NEW_DEVICE_LOGIN"
+        ]
+      },
+      "doc": "Type of device event"
+    },
+    {
+      "name": "account_id",
+      "type": "string",
+      "doc": "Account associated with this device event"
+    },
+    {
+      "name": "imei",
+      "type": "string",
+      "doc": "SHA-256 hashed IMEI (never raw — DPDP Act 2023 compliance)"
+    },
+    {
+      "name": "imei_prefix",
+      "type": "string",
+      "doc": "First 8 digits of IMEI for cluster proximity scoring (not hashed — not PII)"
+    },
+    {
+      "name": "sim_id",
+      "type": "string",
+      "doc": "SHA-256 hashed SIM ICCID"
+    },
+    {
+      "name": "fingerprint",
+      "type": "string",
+      "doc": "Device fingerprint hash (OS version, screen, app version)"
+    },
+    {
+      "name": "is_blocked_imei_cluster",
+      "type": "boolean",
+      "default": false,
+      "doc": "True if IMEI prefix matches known fraud cluster (DoT Chakshu 2025 dataset)"
+    },
+    {
+      "name": "previous_imei",
+      "type": ["null", "string"],
+      "default": null,
+      "doc": "Previous device IMEI hash (for device-change detection)"
+    },
+    {
+      "name": "sim_swap_timestamp",
+      "type": ["null", "long"],
+      "default": null,
+      "logicalType": "timestamp-millis",
+      "doc": "Timestamp of SIM swap from DoT DIP API (epoch millis)"
+    },
+    {
+      "name": "upi_registration_timestamp",
+      "type": ["null", "long"],
+      "default": null,
+      "logicalType": "timestamp-millis",
+      "doc": "Timestamp of UPI device binding (epoch millis)"
+    },
+    {
+      "name": "last_seen",
+      "type": "long",
+      "logicalType": "timestamp-millis",
+      "doc": "Last time this device was seen on this account (epoch millis)"
+    },
+    {
+      "name": "timestamp",
+      "type": "long",
+      "logicalType": "timestamp-millis",
+      "doc": "Event occurrence timestamp (epoch millis)"
+    },
+    {
+      "name": "event_timestamp",
+      "type": "long",
+      "logicalType": "timestamp-millis",
+      "doc": "When this event was emitted (epoch millis)"
+    },
+    {
+      "name": "source_system",
+      "type": "string",
+      "default": "FINACLE"
+    }
+  ]
+}

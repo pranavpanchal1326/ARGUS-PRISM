@@ -1,0 +1,103 @@
+{
+  "type": "record",
+  "name": "KYCEvent",
+  "namespace": "com.argus.prism.pipeline",
+  "doc": "KYC lifecycle events — completion, re-verification triggers, Video KYC, branch verification",
+  "fields": [
+    {
+      "name": "event_id",
+      "type": "string",
+      "doc": "UUID for this event"
+    },
+    {
+      "name": "event_type",
+      "type": {
+        "type": "enum",
+        "name": "KYCEventType",
+        "symbols": [
+          "KYC_COMPLETED",
+          "RE_VERIFICATION_TRIGGERED",
+          "VIDEO_KYC_INITIATED",
+          "VIDEO_KYC_COMPLETED",
+          "BRANCH_VERIFICATION_REQUESTED",
+          "KYC_FAILED",
+          "KYC_EXPIRED"
+        ]
+      },
+      "doc": "Type of KYC event"
+    },
+    {
+      "name": "account_id",
+      "type": "string",
+      "doc": "Account undergoing KYC event"
+    },
+    {
+      "name": "kyc_status",
+      "type": {
+        "type": "enum",
+        "name": "KYCStatusKYC",
+        "symbols": ["PENDING", "VERIFIED", "RE_VERIFICATION_REQUIRED", "FAILED", "EXPIRED"]
+      },
+      "doc": "Resulting KYC status after this event"
+    },
+    {
+      "name": "triggered_by",
+      "type": {
+        "type": "enum",
+        "name": "KYCTrigger",
+        "symbols": [
+          "WARMTH_SCORE_60",
+          "WARMTH_SCORE_75",
+          "WARMTH_SCORE_85",
+          "MANUAL_MLRO",
+          "SCHEDULED_REVIEW",
+          "DORMANCY_REACTIVATION",
+          "SYSTEM_INITIAL"
+        ]
+      },
+      "doc": "What triggered this KYC event — maps to legal authority"
+    },
+    {
+      "name": "legal_authority",
+      "type": "string",
+      "default": "RBI KYC Master Direction 2016 S.38",
+      "doc": "Legal basis for this KYC action"
+    },
+    {
+      "name": "mlro_id",
+      "type": ["null", "string"],
+      "default": null,
+      "doc": "MLRO who triggered or approved (if manual)"
+    },
+    {
+      "name": "warmth_score_at_trigger",
+      "type": ["null", "float"],
+      "default": null,
+      "doc": "WarmthScore at the time of this trigger"
+    },
+    {
+      "name": "resolution_deadline",
+      "type": ["null", "long"],
+      "default": null,
+      "logicalType": "timestamp-millis",
+      "doc": "Deadline for customer to complete KYC (epoch millis)"
+    },
+    {
+      "name": "timestamp",
+      "type": "long",
+      "logicalType": "timestamp-millis",
+      "doc": "KYC event occurrence timestamp (epoch millis)"
+    },
+    {
+      "name": "event_timestamp",
+      "type": "long",
+      "logicalType": "timestamp-millis",
+      "doc": "When this event was emitted (epoch millis)"
+    },
+    {
+      "name": "source_system",
+      "type": "string",
+      "default": "PRISM"
+    }
+  ]
+}

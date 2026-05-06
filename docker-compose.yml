@@ -1,0 +1,196 @@
+version: "3.9"
+
+# ============================================================
+# ARGUS-PRISM — Docker Compose Stack
+# Services: Kafka (KRaft), Flink, Neo4j 5, PostgreSQL 16, Redis
+# ============================================================
+
+networks:
+  prism-net:
+    driver: bridge
+
+volumes:
+  neo4j_data:
+  neo4j_logs:
+  postgres_data:
+  redis_data:
+  kafka_data:
+  flink_data:
+
+services:
+
+  # ──────────────────────────────────────────────
+  # KAFKA (KRaft mode — no Zookeeper required)
+  # ──────────────────────────────────────────────
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: prism-kafka
+    hostname: kafka
+    networks:
+      - prism-net
+    ports:
+      - "9092:9092"
+      - "9101:9101"
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092"
+      KAFKA_JMX_PORT: 9101
+      KAFKA_JMX_HOSTNAME: localhost
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:29093"
+      KAFKA_LISTENERS: "PLAINTEXT://kafka:29092,CONTROLLER://kafka:29093,PLAINTEXT_HOST://0.0.0.0:9092"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_LOG_DIRS: "/var/lib/kafka/data"
+      CLUSTER_ID: "MkU3OEVBNTcwNTJENDM2Qk"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_LOG_RETENTION_HOURS: 168
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+  # Kafka topic initializer — creates the 4 PRISM topics on startup
+  kafka-init:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: prism-kafka-init
+    networks:
+      - prism-net
+    depends_on:
+      kafka:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command: |
+      "
+      echo 'Creating PRISM Kafka topics...'
+      kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic account_events --replication-factor 1 --partitions 4
+      kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic txn_events --replication-factor 1 --partitions 8
+      kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic device_events --replication-factor 1 --partitions 4
+      kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic kyc_events --replication-factor 1 --partitions 4
+      echo 'Topics created:'
+      kafka-topics --bootstrap-server kafka:29092 --list
+      echo 'Done.'
+      "
+
+  # ──────────────────────────────────────────────
+  # APACHE FLINK
+  # ──────────────────────────────────────────────
+  flink-jobmanager:
+    image: apache/flink:1.18-scala_2.12
+    container_name: prism-flink-jobmanager
+    hostname: flink-jobmanager
+    networks:
+      - prism-net
+    ports:
+      - "8081:8081"
+    volumes:
+      - flink_data:/opt/flink/data
+    command: jobmanager
+    environment:
+      FLINK_PROPERTIES: |
+        jobmanager.rpc.address: flink-jobmanager
+        taskmanager.numberOfTaskSlots: 4
+        parallelism.default: 2
+        rest.address: flink-jobmanager
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/overview"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  flink-taskmanager:
+    image: apache/flink:1.18-scala_2.12
+    container_name: prism-flink-taskmanager
+    hostname: flink-taskmanager
+    networks:
+      - prism-net
+    depends_on:
+      - flink-jobmanager
+    command: taskmanager
+    environment:
+      FLINK_PROPERTIES: |
+        jobmanager.rpc.address: flink-jobmanager
+        taskmanager.numberOfTaskSlots: 4
+        parallelism.default: 2
+
+  # ──────────────────────────────────────────────
+  # NEO4J 5.x
+  # ──────────────────────────────────────────────
+  neo4j:
+    image: neo4j:5.18-community
+    container_name: prism-neo4j
+    hostname: neo4j
+    networks:
+      - prism-net
+    ports:
+      - "7474:7474"   # HTTP Browser
+      - "7687:7687"   # Bolt
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    environment:
+      NEO4J_AUTH: neo4j/prism_password
+      NEO4J_PLUGINS: '["graph-data-science", "apoc"]'
+      NEO4J_dbms_security_procedures_unrestricted: "gds.*,apoc.*"
+      NEO4J_dbms_memory_heap_initial__size: "512m"
+      NEO4J_dbms_memory_heap_max__size: "2G"
+      NEO4J_dbms_memory_pagecache_size: "512m"
+    healthcheck:
+      test: ["CMD", "wget", "-O", "-", "http://localhost:7474"]
+      interval: 15s
+      timeout: 10s
+      retries: 15
+      start_period: 60s
+
+  # ──────────────────────────────────────────────
+  # POSTGRESQL 16
+  # ──────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: prism-postgres
+    hostname: postgres
+    networks:
+      - prism-net
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: prism_db
+      POSTGRES_USER: prism_user
+      POSTGRES_PASSWORD: prism_password
+      PGDATA: /var/lib/postgresql/data/pgdata
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U prism_user -d prism_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  # ──────────────────────────────────────────────
+  # REDIS 7.2
+  # ──────────────────────────────────────────────
+  redis:
+    image: redis:7.2-alpine
+    container_name: prism-redis
+    hostname: redis
+    networks:
+      - prism-net
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
