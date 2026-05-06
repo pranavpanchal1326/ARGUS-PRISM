@@ -26,7 +26,8 @@ gives PRISM persistent memory across every confirmed case.
 Apache Kafka | Apache Flink | Neo4j | XGBoost | Python | FastAPI | React | PostgreSQL | Redis | DoT DIP API | AES-256 + HSM
 
 ## Team
-- Pranav Panchal — Backend, ML, Graph Engine
-- [Friend name] — Frontend, Dashboard, Demo
+- Pranav Panchal
+- Aditya B
+- Pranita Panchal
 
 ## iDEA 2.0 | Union Bank of India | March 2026
