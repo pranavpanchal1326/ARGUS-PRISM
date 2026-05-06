@@ -1,0 +1,119 @@
+{
+  "type": "record",
+  "name": "AccountEvent",
+  "namespace": "com.argus.prism.pipeline",
+  "doc": "Account lifecycle events from Finacle CBS — creation, KYC updates, status changes",
+  "fields": [
+    {
+      "name": "event_id",
+      "type": "string",
+      "doc": "UUID for this event"
+    },
+    {
+      "name": "event_type",
+      "type": {
+        "type": "enum",
+        "name": "AccountEventType",
+        "symbols": ["ACCOUNT_CREATED", "KYC_UPDATED", "STATUS_CHANGED", "PROFILE_UPDATED"]
+      },
+      "doc": "Type of account event"
+    },
+    {
+      "name": "account_id",
+      "type": "string",
+      "doc": "Unique account identifier (e.g. UBI-2026-DEMO-001)"
+    },
+    {
+      "name": "name",
+      "type": "string",
+      "doc": "Account holder name"
+    },
+    {
+      "name": "kyc_status",
+      "type": {
+        "type": "enum",
+        "name": "KYCStatus",
+        "symbols": ["PENDING", "VERIFIED", "RE_VERIFICATION_REQUIRED", "FAILED"]
+      },
+      "doc": "Current KYC status"
+    },
+    {
+      "name": "kyc_income",
+      "type": ["null", "long"],
+      "default": null,
+      "doc": "Declared annual income in INR (from KYC)"
+    },
+    {
+      "name": "kyc_occupation",
+      "type": ["null", "string"],
+      "default": null,
+      "doc": "Declared occupation (e.g. student, vegetable_vendor, salaried)"
+    },
+    {
+      "name": "account_type",
+      "type": {
+        "type": "enum",
+        "name": "AccountType",
+        "symbols": ["SAVINGS", "CURRENT", "JAN_DHAN", "SALARY", "NRE", "NRO"]
+      },
+      "doc": "Type of bank account"
+    },
+    {
+      "name": "branch_code",
+      "type": "string",
+      "doc": "Branch code where account was opened"
+    },
+    {
+      "name": "mobile_number",
+      "type": "string",
+      "doc": "SHA-256 hashed mobile number (never raw PII)"
+    },
+    {
+      "name": "warmth_score",
+      "type": "float",
+      "default": 0.0,
+      "doc": "Current WarmthScore (0-100)"
+    },
+    {
+      "name": "taint_score",
+      "type": "float",
+      "default": 0.0,
+      "doc": "Propagated taint score from confirmed mule network"
+    },
+    {
+      "name": "status",
+      "type": {
+        "type": "enum",
+        "name": "AccountStatus",
+        "symbols": ["ACTIVE", "FROZEN", "RESTRICTED_OUTBOUND", "KYC_HOLD", "CLOSED"]
+      },
+      "default": "ACTIVE",
+      "doc": "Current account operational status"
+    },
+    {
+      "name": "created_at",
+      "type": "long",
+      "logicalType": "timestamp-millis",
+      "doc": "Account creation timestamp (epoch millis)"
+    },
+    {
+      "name": "last_active",
+      "type": ["null", "long"],
+      "default": null,
+      "logicalType": "timestamp-millis",
+      "doc": "Last transaction or activity timestamp (epoch millis)"
+    },
+    {
+      "name": "event_timestamp",
+      "type": "long",
+      "logicalType": "timestamp-millis",
+      "doc": "When this event was emitted from Finacle (epoch millis)"
+    },
+    {
+      "name": "source_system",
+      "type": "string",
+      "default": "FINACLE",
+      "doc": "Origin system"
+    }
+  ]
+}

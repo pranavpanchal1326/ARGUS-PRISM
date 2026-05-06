@@ -1,0 +1,94 @@
+{
+  "type": "record",
+  "name": "TransactionEvent",
+  "namespace": "com.argus.prism.pipeline",
+  "doc": "Transaction posting events — credits, debits, UPI, NEFT, RTGS, IMPS, ATM, branch counter",
+  "fields": [
+    {
+      "name": "event_id",
+      "type": "string",
+      "doc": "UUID for this event"
+    },
+    {
+      "name": "txn_id",
+      "type": "string",
+      "doc": "Unique transaction reference ID from Finacle"
+    },
+    {
+      "name": "txn_type",
+      "type": {
+        "type": "enum",
+        "name": "TransactionType",
+        "symbols": ["CREDIT", "DEBIT"]
+      },
+      "doc": "Direction of transaction relative to from_account"
+    },
+    {
+      "name": "channel",
+      "type": {
+        "type": "enum",
+        "name": "TransactionChannel",
+        "symbols": ["UPI", "NEFT", "RTGS", "IMPS", "ATM", "BRANCH_COUNTER", "NETBANKING", "INTERNAL"]
+      },
+      "doc": "Payment channel used"
+    },
+    {
+      "name": "from_account",
+      "type": "string",
+      "doc": "Source account ID"
+    },
+    {
+      "name": "to_account",
+      "type": "string",
+      "doc": "Destination account ID"
+    },
+    {
+      "name": "amount",
+      "type": "long",
+      "doc": "Transaction amount in paise (INR * 100)"
+    },
+    {
+      "name": "currency",
+      "type": "string",
+      "default": "INR"
+    },
+    {
+      "name": "description",
+      "type": ["null", "string"],
+      "default": null,
+      "doc": "Narration or payment remark"
+    },
+    {
+      "name": "upi_vpa",
+      "type": ["null", "string"],
+      "default": null,
+      "doc": "UPI Virtual Payment Address if channel=UPI"
+    },
+    {
+      "name": "status",
+      "type": {
+        "type": "enum",
+        "name": "TransactionStatus",
+        "symbols": ["SUCCESS", "FAILED", "PENDING", "REVERSED"]
+      },
+      "doc": "Transaction outcome"
+    },
+    {
+      "name": "timestamp",
+      "type": "long",
+      "logicalType": "timestamp-millis",
+      "doc": "Transaction posting timestamp (epoch millis)"
+    },
+    {
+      "name": "event_timestamp",
+      "type": "long",
+      "logicalType": "timestamp-millis",
+      "doc": "When this event was emitted from Finacle (epoch millis)"
+    },
+    {
+      "name": "source_system",
+      "type": "string",
+      "default": "FINACLE"
+    }
+  ]
+}
