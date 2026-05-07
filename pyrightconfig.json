@@ -1,0 +1,18 @@
+{
+  "pythonVersion": "3.13",
+  "typeCheckingMode": "basic",
+  "extraPaths": [
+    "services/pipeline",
+    "src/flowgraph",
+    "src/taint",
+    "src/recruiter",
+    "src/warmthscore",
+    "services/api",
+    "services/autostr"
+  ],
+  "exclude": [
+    "**/__pycache__",
+    "**/*.pyc",
+    "services/ml/warmthscore/model/artifacts"
+  ]
+}

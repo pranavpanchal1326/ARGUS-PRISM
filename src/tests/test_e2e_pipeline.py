@@ -1,18 +1,16 @@
 """
 ARGUS-PRISM — Full E2E Pipeline Integration Test — Day 7 W1 Sync
+Paths configured by conftest.py in this directory.
 """
-import sys, os, pytest
-REPO = os.path.join(os.path.dirname(__file__), '..', '..')
-sys.path.insert(0, os.path.join(REPO, 'services', 'pipeline'))
-sys.path.insert(0, os.path.join(REPO, 'src', 'flowgraph'))
-sys.path.insert(0, os.path.join(REPO, 'src', 'taint'))
-sys.path.insert(0, os.path.join(REPO, 'src', 'recruiter'))
+import os
+import pytest
 
+# Config loaded from services/pipeline/config.py (via conftest.py sys.path)
 try:
     from config import NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD
 except ImportError:
-    NEO4J_URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")
-    NEO4J_USER = os.getenv("NEO4J_USER", "neo4j")
+    NEO4J_URI      = os.getenv("NEO4J_URI", "bolt://localhost:7687")
+    NEO4J_USER     = os.getenv("NEO4J_USER", "neo4j")
     NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "prism_password")
 
 from neo4j import GraphDatabase
