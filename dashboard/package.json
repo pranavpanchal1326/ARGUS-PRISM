@@ -1,0 +1,21 @@
+{
+  "name": "argus-prism-dashboard",
+  "version": "1.0.0",
+  "description": "ARGUS-PRISM — Pre-crime Intelligence System for Mule Detection",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "recharts": "^2.10.0",
+    "d3": "^7.9.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.0.1",
+    "vite": "^8.0.11"
+  }
+}

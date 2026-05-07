@@ -1,0 +1,289 @@
+.recruiter-map-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--void);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Technical Sector Overlays */
+.recruiter-map-container::before {
+  content: "CAMPAIGN_GRID // SECTOR_SIGMA_01";
+  position: absolute;
+  top: 92px;
+  left: 24px;
+  font-family: 'Suisse Int\'l Mono', monospace;
+  font-size: 8px;
+  color: var(--instrument-ghost);
+  letter-spacing: 0.3em;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* Header */
+.campaign-header {
+  height: 80px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--instrument-dark);
+  background: var(--void);
+  z-index: 20;
+}
+
+.header-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.header-title {
+  font-family: 'Suisse Int\'l', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--instrument-white);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.header-subtitle {
+  font-family: 'Suisse Int\'l Mono', monospace;
+  font-size: 11px;
+  color: var(--instrument-grey);
+  margin-top: 2px;
+}
+
+.header-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.class-badge {
+  padding: 6px 20px;
+  font-family: 'Suisse Int\'l', sans-serif;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  border: 1px solid var(--instrument-dark);
+  transition: all 0.3s steps(2);
+}
+
+.class-badge.orchestrator {
+  border-color: var(--phosphor);
+  background: rgba(184, 255, 107, 0.05);
+  color: var(--phosphor);
+}
+
+.class-badge.platform {
+  background: var(--phosphor);
+  color: var(--void);
+}
+
+.header-stats {
+  display: flex;
+  gap: 32px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.stat-label {
+  font-family: 'Suisse Int\'l', sans-serif;
+  font-size: 9px;
+  color: var(--instrument-grey);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.stat-value {
+  font-family: 'Suisse Int\'l Mono', monospace;
+  font-size: 13px;
+  color: var(--instrument-white);
+}
+
+.stat-value.highlight {
+  color: var(--phosphor);
+}
+
+/* Layout Split */
+.map-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.canvas-area {
+  width: 70%;
+  position: relative;
+  border-right: 1px solid var(--instrument-dark);
+  overflow: hidden;
+  background-image: radial-gradient(var(--instrument-ghost) 0.5px, transparent 0.5px);
+  background-size: 60px 60px;
+}
+
+.panel-area {
+  width: 30%;
+  background: var(--void);
+  overflow-y: auto;
+  border-left: 1px solid var(--instrument-dark);
+}
+
+/* D3 Elements */
+.ring-line {
+  fill: none;
+  stroke: var(--instrument-ghost);
+  stroke-width: 1px;
+  stroke-dasharray: 4 12;
+  opacity: 0.3;
+}
+
+.ring-label {
+  font-family: 'Suisse Int\'l', sans-serif;
+  font-size: 8px;
+  fill: var(--instrument-grey);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+}
+
+/* Recruiter Node */
+.recruiter-inner {
+  fill: var(--phosphor);
+  stroke: var(--void);
+  stroke-width: 2px;
+}
+
+.recruiter-outer-ring {
+  fill: none;
+  stroke: var(--phosphor);
+  stroke-width: 1px;
+  animation: outerRingPulse 1.2s ease-in-out infinite;
+}
+
+.recruiter-glow {
+  fill: none;
+  stroke: var(--phosphor);
+  stroke-width: 1px;
+  stroke-opacity: 0.2;
+  animation: outerRingPulse 1.8s ease-in-out infinite reverse;
+}
+
+.recruiter-label {
+  font-family: 'Suisse Int\'l', sans-serif;
+  font-size: 8px;
+  text-transform: uppercase;
+  fill: var(--void);
+  text-anchor: middle;
+  font-weight: 600;
+}
+
+.recruiter-score {
+  font-family: 'Monument Extended', sans-serif;
+  font-size: 20px;
+  fill: var(--void);
+  text-anchor: middle;
+}
+
+/* Warming Nodes */
+.mule-square rect {
+  transition: all 0.2s steps(2);
+}
+
+.mule-square.selected rect {
+  stroke: var(--phosphor);
+  stroke-width: 2px;
+  stroke-dasharray: 4 2;
+  animation: dashMove 2s linear infinite;
+}
+
+@keyframes dashMove {
+  to { stroke-dashoffset: -20; }
+}
+
+/* Edges */
+.edge-line {
+  stroke: var(--instrument-dark);
+  stroke-width: 1px;
+  stroke-opacity: 0.2;
+  fill: none;
+  transition: all 0.3s ease;
+}
+
+.edge-line.active {
+  stroke: var(--phosphor);
+  stroke-width: 2px;
+  stroke-opacity: 0.8;
+}
+
+/* Animations */
+@keyframes outerRingPulse {
+  0%, 100% { stroke-opacity: 0.2; transform: scale(1); }
+  50%       { stroke-opacity: 0.6; transform: scale(1.02); }
+}
+
+.payment-dot {
+  width: 6px;
+  height: 2px;
+  background: var(--phosphor);
+  box-shadow: 0 0 4px var(--phosphor);
+  animation: travelEdge 1.5s linear infinite;
+}
+
+/* Panel Design */
+.panel-section {
+  padding: 24px;
+  border-bottom: 1px solid var(--instrument-dark);
+}
+
+.section-title {
+  font-family: 'Suisse Int\'l', sans-serif;
+  font-size: 10px;
+  color: var(--instrument-grey);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+
+.callout-box {
+  border: 1px solid var(--instrument-dark);
+  background: rgba(184, 255, 107, 0.03);
+  padding: 16px;
+  margin-top: 20px;
+  position: relative;
+}
+
+.callout-box::before {
+  content: "⚠ COORD_INSIGHT";
+  position: absolute;
+  top: -6px;
+  left: 12px;
+  background: var(--void);
+  padding: 0 6px;
+  font-family: 'Suisse Int\'l Mono', monospace;
+  font-size: 8px;
+  color: var(--phosphor);
+}
+
+/* Actions */
+.campaign-btn {
+  width: 100%;
+  background: var(--void);
+  border: 1px solid var(--instrument-dark);
+  color: var(--instrument-white);
+  padding: 12px 16px;
+  font-family: 'Suisse Int\'l', sans-serif;
+  font-size: 11px;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.1s steps(2);
+}
+
+.campaign-btn:hover {
+  border-color: var(--phosphor);
+  color: var(--phosphor);
+  background: var(--instrument-ghost);
+}

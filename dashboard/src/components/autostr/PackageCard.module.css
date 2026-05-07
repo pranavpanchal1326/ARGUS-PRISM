@@ -1,0 +1,215 @@
+.card {
+  background-color: var(--surface);
+  border: 1px solid var(--instrument-dark);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background-image: 
+    linear-gradient(var(--instrument-ghost) 1px, transparent 1px),
+    linear-gradient(90deg, var(--instrument-ghost) 1px, transparent 1px);
+  background-size: 24px 24px;
+  transition: border-color 150ms steps(4);
+}
+
+.complete {
+  border-color: var(--phosphor);
+}
+
+.header {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.index {
+  font-family: 'Oswald', sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--instrument-dark);
+  line-height: 1;
+}
+
+.complete .index {
+  color: var(--phosphor);
+}
+
+.titleArea {
+  display: flex;
+  flex-direction: column;
+}
+
+.name {
+  font-family: 'Inter', sans-serif;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--instrument-white);
+}
+
+.status {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  color: var(--instrument-grey);
+  margin-top: 2px;
+}
+
+.complete .status {
+  color: var(--phosphor);
+}
+
+.pulse {
+  animation: phosphorBreathe 2s infinite;
+}
+
+.dots {
+  display: inline-block;
+  width: 12px;
+}
+
+.divider {
+  height: 1px;
+  background: var(--instrument-dark);
+  margin: 12px 0;
+}
+
+.metaSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 110px;
+}
+
+.metaRow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.label {
+  font-family: 'Inter', sans-serif;
+  text-transform: uppercase;
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  color: var(--instrument-grey);
+}
+
+.monoValue {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--instrument-grey);
+}
+
+.mandateLabel {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--phosphor);
+}
+
+.mandateDetail {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--instrument-grey);
+  margin-top: 2px;
+}
+
+.progressSection {
+  margin: 8px 0;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  margin-top: 8px;
+  margin-bottom: 12px;
+  background: var(--void);
+}
+
+.segment {
+  flex: 1;
+  height: 4px;
+  background: var(--instrument-ghost);
+}
+
+.filled {
+  background: var(--phosphor);
+}
+
+.percent {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--phosphor);
+  margin-left: 8px;
+  min-width: 48px;
+}
+
+.jitter {
+  font-size: 8px;
+  opacity: 0.6;
+}
+
+.complete::after {
+  content: 'PRISM VERIFIED';
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 7px;
+  letter-spacing: 0.2em;
+  color: var(--phosphor);
+  border: 1px solid var(--phosphor);
+  padding: 2px 6px;
+  opacity: 0.4;
+  pointer-events: none;
+  animation: stampIn 0.2s steps(4);
+}
+
+@keyframes stampIn {
+  from { transform: scale(2); opacity: 0; }
+  to { transform: scale(1); opacity: 0.4; }
+}
+
+.comparison {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.compareRow {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Inter', sans-serif;
+  text-transform: uppercase;
+  font-size: 8px;
+  letter-spacing: 0.08em;
+}
+
+.greyText { color: var(--instrument-grey); }
+.phosphorText { color: var(--phosphor); font-weight: 700; }
+
+.previewArea {
+  margin-bottom: 16px;
+}
+
+.downloadBtn {
+  width: 100%;
+  padding: 12px;
+  background: transparent;
+  border: 1px solid var(--phosphor);
+  color: var(--phosphor);
+  font-family: 'Inter', sans-serif;
+  text-transform: uppercase;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: all 150ms steps(4);
+}
+
+.downloadBtn:hover {
+  background: var(--phosphor);
+  color: var(--void);
+}

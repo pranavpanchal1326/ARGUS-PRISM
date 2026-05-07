@@ -1,0 +1,63 @@
+{
+  "timestamp_utc": "2026-05-06T20:02:24.039910+00:00",
+  "total_records": 400000,
+  "chunk_size": 10000,
+  "random_seed": 42,
+  "class_distribution": {
+    "0": {
+      "name": "CLEAN",
+      "count": 280000
+    },
+    "1": {
+      "name": "WARMING",
+      "count": 60000
+    },
+    "2": {
+      "name": "HOT",
+      "count": 40000
+    },
+    "3": {
+      "name": "CRITICAL",
+      "count": 12000
+    },
+    "4": {
+      "name": "IMMINENT",
+      "count": 8000
+    }
+  },
+  "features": {
+    "signal_1": [
+      "micro_credit_count",
+      "micro_credit_avg_amount",
+      "source_account_age_days",
+      "inter_credit_timing_variance_seconds"
+    ],
+    "signal_2": [
+      "device_switch_within_24h",
+      "imei_cluster_proximity_score",
+      "cross_account_device_sharing"
+    ],
+    "signal_3": [
+      "velocity_second_derivative_max",
+      "convexity_detected",
+      "velocity_curve_shape"
+    ],
+    "signal_4": [
+      "dormancy_duration_days",
+      "reactivation_device_changed",
+      "days_since_reactivation"
+    ],
+    "signal_5": [
+      "fri_risk_tier",
+      "fri_score_numeric",
+      "internal_signal_partial_score",
+      "contradiction_magnitude"
+    ],
+    "signal_6": [
+      "sim_swap_within_7_days",
+      "sim_swap_delta_hours",
+      "swap_frequency_30_days",
+      "iccid_changed"
+    ]
+  }
+}

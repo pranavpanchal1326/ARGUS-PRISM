@@ -1,0 +1,41 @@
+.wrapper {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.bar {
+  width: 2px;
+  height: 24px;
+  background: var(--instrument-dark);
+}
+
+.label {
+  font-family: 'Suisse Int\'l', 'Inter', sans-serif;
+  font-size: 9px;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: var(--instrument-grey);
+  letter-spacing: 0.1em;
+  line-height: 1.2;
+}
+
+.value {
+  font-family: 'Suisse Int\'l Mono', 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--instrument-white);
+  line-height: 1.4;
+}
+
+.inverted .bar {
+  background: rgba(12, 12, 9, 0.4);
+}
+
+.inverted .label {
+  color: rgba(12, 12, 9, 0.6);
+}
+
+.inverted .value {
+  color: rgba(12, 12, 9, 0.7);
+}

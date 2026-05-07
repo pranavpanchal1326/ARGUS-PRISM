@@ -1,5 +1,3 @@
-# ═══════════════════════════════════════
-# ARGUS-PRISM | __init__.py
-# Engine: WarmthScore
-# Branch: pranav/api
-# ═══════════════════════════════════════
+from .signal_1_test_credit import evaluate
+
+__all__ = ["evaluate"]

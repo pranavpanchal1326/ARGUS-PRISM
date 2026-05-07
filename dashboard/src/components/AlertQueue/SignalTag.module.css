@@ -1,0 +1,31 @@
+.wrapper {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border: 1px solid var(--instrument-dark);
+  border-radius: 0;
+  gap: 6px;
+  background: transparent;
+}
+
+.name, .divider, .contribution {
+  font-family: 'Suisse Int\'l Mono', 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--instrument-grey);
+  letter-spacing: 0.05em;
+}
+
+.inverted {
+  border-color: rgba(12, 12, 9, 0.3);
+}
+
+.inverted .name, 
+.inverted .divider, 
+.inverted .contribution {
+  color: rgba(12, 12, 9, 0.7);
+}
+
+.divider {
+  opacity: 0.5;
+}

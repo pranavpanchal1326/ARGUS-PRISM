@@ -1,0 +1,95 @@
+.container {
+  padding: 0 0 24px 0;
+  border-bottom: 1px solid var(--instrument-dark);
+  margin-bottom: 24px;
+}
+
+.topRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.title {
+  font-family: 'Suisse Int\'l', 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--instrument-grey);
+  letter-spacing: 0.15em;
+  margin: 0;
+}
+
+.refresh {
+  font-family: 'Suisse Int\'l Mono', 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--instrument-ghost);
+  text-transform: uppercase;
+}
+
+.divider {
+  height: 1px;
+  background: var(--instrument-dark);
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.statsRow {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.statBand {
+  display: flex;
+  flex-direction: column;
+}
+
+.count {
+  font-family: 'Monument Extended', 'Oswald', sans-serif;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--instrument-dark);
+}
+
+.label {
+  font-family: 'Suisse Int\'l', 'Inter', sans-serif;
+  font-size: 9px;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: var(--instrument-dark);
+  letter-spacing: 0.05em;
+  margin-top: 4px;
+}
+
+.imminentActive .count { color: var(--phosphor); }
+.imminentActive .label { color: var(--phosphor); }
+
+.criticalActive .count,
+.hotActive .count { 
+  color: var(--instrument-white); 
+}
+.criticalActive .label,
+.hotActive .label { 
+  color: var(--instrument-white); 
+}
+
+.statBand:last-child .count,
+.statBand:last-child .label {
+  color: var(--instrument-grey);
+}
+
+.statDivider {
+  width: 1px;
+  height: 24px;
+  background: var(--instrument-dark);
+}
+
+.footerRow {
+  margin-top: 16px;
+  font-family: 'Suisse Int\'l Mono', 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--instrument-grey);
+  text-transform: uppercase;
+}

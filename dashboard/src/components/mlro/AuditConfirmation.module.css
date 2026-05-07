@@ -1,0 +1,126 @@
+.container {
+  width: 100%;
+  background-color: var(--surface);
+  border: 1px solid var(--phosphor);
+  padding: 24px;
+  position: relative;
+  background-image: 
+    linear-gradient(var(--instrument-ghost) 1px, transparent 1px),
+    linear-gradient(90deg, var(--instrument-ghost) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.headerTitle {
+  font-family: 'Inter', sans-serif;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--phosphor);
+  margin-bottom: 12px;
+}
+
+.divider {
+  height: 1px;
+  background: var(--instrument-dark);
+}
+
+.auditLog {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 280px;
+  position: relative;
+}
+
+.submittedStamp {
+  position: absolute;
+  top: 0;
+  right: 0;
+  border: 2px solid var(--phosphor);
+  color: var(--phosphor);
+  padding: 8px 16px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  text-transform: uppercase;
+  transform: rotate(15deg);
+  opacity: 0.15;
+  pointer-events: none;
+  animation: stampSlam 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes stampSlam {
+  from { transform: scale(3) rotate(45deg); opacity: 0; }
+  to { transform: scale(1) rotate(15deg); opacity: 0.15; }
+}
+
+.fieldRow {
+  display: flex;
+  align-items: baseline;
+  gap: 24px;
+}
+
+.fieldLabel {
+  font-family: 'Inter', sans-serif;
+  text-transform: uppercase;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: var(--instrument-grey);
+  width: 120px;
+}
+
+.fieldValue {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  position: relative;
+  padding-top: 24px;
+}
+
+.scanline {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--phosphor);
+  animation: scanReveal 90ms linear forwards;
+}
+
+@keyframes scanReveal {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+.secondaryBtn {
+  background: transparent;
+  border: 1px solid var(--instrument-dark);
+  color: var(--instrument-white);
+  padding: 10px 24px;
+  font-family: 'Inter', sans-serif;
+  text-transform: uppercase;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+
+.primaryBtn {
+  background: transparent;
+  border: 1px solid var(--phosphor);
+  color: var(--phosphor);
+  padding: 10px 24px;
+  font-family: 'Inter', sans-serif;
+  text-transform: uppercase;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}

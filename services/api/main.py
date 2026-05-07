@@ -1,102 +1,81 @@
-# ═══════════════════════════════════════
-# ARGUS-PRISM | main.py
-# Engine: PRISM Core
-# Branch: pranav/api
-# ═══════════════════════════════════════
-from datetime import datetime, timezone
-import time
-
+import logging
+from contextlib import asynccontextmanager
+import httpx
 from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from core.logging import get_logger
-from routes import accounts, health, warmthscore
+from .config import get_settings
+from .middleware.logging import RequestLoggingMiddleware
+from .routes import health, accounts, warmthscore, autostr
 
-logger = get_logger("prism.api")
+logger = logging.getLogger("prism.main")
+settings = get_settings()
 
-app = FastAPI(title="ARGUS-PRISM API", version="2.0.0")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    logger.info(f"Starting {settings.app_name} v{settings.app_version} in {settings.environment} mode")
+    logger.info(f"Loaded thresholds: MONITORING={settings.warmth_threshold_monitoring}, "
+                f"KYC={settings.warmth_threshold_kyc}, RESTRICTION={settings.warmth_threshold_restriction}, "
+                f"AUTOSTR={settings.warmth_threshold_autostr}, CBI={settings.warmth_threshold_cbi}")
+    
+    # Verify Neo4j API
+    try:
+        async with httpx.AsyncClient(timeout=settings.neo4j_api_timeout) as client:
+            resp = await client.get(f"{settings.neo4j_api_url.rstrip('/')}/health")
+            resp.raise_for_status()
+            logger.info("Aditya's Neo4j API is reachable")
+    except Exception as e:
+        logger.warning(f"Aditya's Neo4j API is currently unreachable: {e}. PRISM starting anyway.")
+    
+    yield
+    
+    # Shutdown
+    logger.info(f"{settings.app_name} shutting down cleanly.")
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-    allow_credentials=True,
+
+app = FastAPI(
+    title="ARGUS-PRISM — Pre-crime Intelligence System",
+    version=settings.app_version,
+    description="Real-time mule account detection for Union Bank of India",
+    docs_url="/docs" if settings.environment == "development" else None,
+    redoc_url="/redoc" if settings.environment == "development" else None,
+    lifespan=lifespan,
 )
 
-app.include_router(health.router, prefix="/health", tags=["health"])
-app.include_router(accounts.router, prefix="/api/accounts", tags=["accounts"])
-app.include_router(warmthscore.router, prefix="/api/warmthscore", tags=["warmthscore"])
+# Middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"] if settings.environment == "development" else ["https://prism.unionbankofindia.co.in"],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PATCH"],
+    allow_headers=["*"],
+)
+app.add_middleware(RequestLoggingMiddleware)
 
+# Routers
+app.include_router(health.router, prefix="/health", tags=["Health"])
+app.include_router(accounts.router)
+app.include_router(warmthscore.router, prefix="/api/v1/warmthscore", tags=["WarmthScore"])
+app.include_router(autostr.router, prefix="/api")
 
-@app.on_event("startup")
-async def on_startup() -> None:
-    """Start core services and announce PRISM engine availability.
-
-    Returns:
-        None.
-    Connects to:
-        PRISM Core engine.
-    """
-    health.set_start_time(time.monotonic())
-    logger.info("PRISM ENGINE ONLINE")
-
-
-@app.on_event("shutdown")
-async def on_shutdown() -> None:
-    """Stop core services and announce PRISM engine shutdown.
-
-    Returns:
-        None.
-    Connects to:
-        PRISM Core engine.
-    """
-    logger.info("PRISM ENGINE OFFLINE")
-
-
+# Exception Handlers
 @app.exception_handler(Exception)
-async def handle_unhandled_exception(request: Request, exc: Exception) -> JSONResponse:
-    """Return a structured error for unexpected failures in PRISM Core.
-
-    Returns:
-        JSONResponse with error code, detail, and timestamp.
-    Connects to:
-        PRISM Core engine.
-    """
-    timestamp = datetime.now(timezone.utc).isoformat()
-    request_id = getattr(request.state, "request_id", None)
-    logger.exception("Unhandled exception", extra={"request_id": request_id})
+async def generic_exception_handler(request: Request, exc: Exception):
+    req_id = getattr(request.state, "request_id", "unknown")
+    # Never expose stack traces to client
     return JSONResponse(
         status_code=500,
-        content={
-            "error": "PRISM_INTERNAL_ERROR",
-            "detail": str(exc),
-            "timestamp": timestamp,
-        },
+        content={"success": False, "error": "Internal server error", "code": 500}
     )
 
-
-@app.get("/")
-async def root() -> dict[str, object]:
-    """Return the PRISM identity card and operational status for PRISM Core.
-
-    Returns:
-        System identity metadata and current status payload.
-    Connects to:
-        PRISM Core engine.
-    """
-    return {
-        "system": "ARGUS-PRISM",
-        "codename": "The hundred-eyed guardian. Always watching. Never sleeping.",
-        "version": "2.0.0",
-        "engines": [
-            "FlowGraph",
-            "WarmthScore",
-            "AutoSTR",
-            "TaintEngine",
-            "RecruiterMap",
-        ],
-        "status": "OPERATIONAL",
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-    }
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    req_id = getattr(request.state, "request_id", "unknown")
+    errors = [{"loc": e["loc"], "msg": e["msg"], "type": e["type"]} for e in exc.errors()]
+    return JSONResponse(
+        status_code=422,
+        content={"success": False, "error": "Validation failed", "details": errors, "code": 422}
+    )

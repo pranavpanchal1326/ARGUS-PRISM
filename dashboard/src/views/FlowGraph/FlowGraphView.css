@@ -1,0 +1,456 @@
+.flow-graph-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--void);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Technical Overlay */
+.flow-graph-container::before {
+  content: "SECTOR_DELTA // NETWORK_TOPOLOGY_v4.2";
+  position: absolute;
+  top: 72px;
+  left: 24px;
+  font-family: 'Suisse Int\'l Mono', monospace;
+  font-size: 8px;
+  color: var(--instrument-ghost);
+  letter-spacing: 0.2em;
+  pointer-events: none;
+}
+
+.flow-graph-container::after {
+  content: "DATA_STREAMS_ACTIVE // UBI_BACKBONE_01";
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  font-family: 'Suisse Int\'l Mono', monospace;
+  font-size: 8px;
+  color: var(--instrument-ghost);
+  letter-spacing: 0.2em;
+  pointer-events: none;
+}
+
+/* Header */
+.graph-header {
+  height: 64px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--instrument-dark);
+  background: var(--void);
+  z-index: 20;
+}
+
+.header-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.header-title {
+  font-family: 'Suisse Int\'l', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--instrument-white);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 2px;
+}
+
+.header-subtitle {
+  font-family: 'Suisse Int\'l Mono', monospace;
+  font-size: 11px;
+  color: var(--instrument-grey);
+}
+
+.header-stats {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+.stat-block {
+  display: flex;
+  flex-direction: column;
+  padding-right: 24px;
+  border-right: 1px solid var(--instrument-dark);
+}
+
+.stat-block:last-child {
+  border-right: none;
+}
+
+.stat-label {
+  font-family: 'Suisse Int\'l', sans-serif;
+  font-size: 9px;
+  color: var(--instrument-grey);
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.stat-value {
+  font-family: 'Suisse Int\'l Mono', monospace;
+  font-size: 13px;
+  color: var(--instrument-white);
+}
+
+.header-filters {
+  display: flex;
+  gap: 8px;
+}
+
+.filter-btn {
+  background: var(--void);
+  border: 1px solid var(--instrument-dark);
+  color: var(--instrument-grey);
+  font-family: 'Suisse Int\'l', sans-serif;
+  font-size: 10px;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: all 0.2s steps(2);
+}
+
+.filter-btn.active {
+  border-color: var(--phosphor);
+  color: var(--phosphor);
+  background: var(--instrument-ghost);
+}
+
+/* Split Layout */
+.graph-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.canvas-container {
+  width: 75%;
+  position: relative;
+  background: var(--void);
+  border-right: 1px solid var(--instrument-dark);
+}
+
+.detail-panel {
+  width: 25%;
+  background: var(--void);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  border-left: 1px solid var(--instrument-dark);
+}
+
+/* D3 SVG Elements */
+svg {
+  width: 100%;
+  height: 100%;
+}
+
+.node rect {
+  cursor: pointer;
+  transition: stroke-width 0.1s steps(2);
+}
+
+.node.selected rect {
+  stroke: var(--phosphor);
+  stroke-width: 2px;
+  stroke-dasharray: 4 2;
+  animation: dashMove 2s linear infinite;
+}
+
+@keyframes dashMove {
+  to { stroke-dashoffset: -20; }
+}
+
+.node text {
+  pointer-events: none;
+  user-select: none;
+}
+
+.edge {
+  fill: none;
+  transition: stroke-opacity 0.3s ease;
+}
+
+.edge-label-bg {
+  fill: var(--void);
+  stroke: var(--instrument-dark);
+  stroke-width: 1px;
+}
+
+.edge-label-text {
+  font-family: 'Suisse Int\'l Mono', monospace;
+  font-size: 9px;
+  fill: var(--instrument-grey);
+}
+
+/* Breathing Animations - Refined Frequency */
+@keyframes breatheSlow {
+  0%, 100% { stroke-opacity: 0.3; }
+  50%       { stroke-opacity: 0.8; }
+}
+@keyframes breatheMedium {
+  0%, 100% { stroke-opacity: 0.4; }
+  50%       { stroke-opacity: 1.0; }
+}
+@keyframes breatheFast {
+  0%, 100% { stroke-opacity: 0.5; }
+  50%       { stroke-opacity: 1.0; }
+}
+@keyframes breatheCritical {
+  0%, 100% { stroke-opacity: 1.0; fill-opacity: 1.0; filter: brightness(1); }
+  50%       { stroke-opacity: 0.6; fill-opacity: 0.85; filter: brightness(1.2); }
+}
+@keyframes breatheRecruiter {
+  0%   { stroke-opacity: 1.0; filter: contrast(1); }
+  30%  { stroke-opacity: 0.4; filter: contrast(1.2); }
+  55%  { stroke-opacity: 0.9; }
+  75%  { stroke-opacity: 0.3; }
+  100% { stroke-opacity: 1.0; filter: contrast(1); }
+}
+
+.breathe-slow     { animation: breatheSlow     3.33s ease-in-out infinite; }
+.breathe-medium   { animation: breatheMedium   1.25s ease-in-out infinite; }
+.breathe-fast     { animation: breatheFast     0.83s ease-in-out infinite; }
+.breathe-critical { animation: breatheCritical 0.5s steps(2) infinite; }
+.breathe-recruiter{ animation: breatheRecruiter 1.5s ease-in-out infinite; }
+
+/* Scan-line Reveal */
+.scan-line-rect {
+  pointer-events: none;
+  z-index: 100;
+}
+
+/* Zoom Controls */
+.zoom-controls {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--instrument-dark);
+  border: 1px solid var(--instrument-dark);
+  z-index: 30;
+}
+
+.zoom-btn {
+  width: 28px;
+  height: 28px;
+  background: var(--void);
+  border: none;
+  color: var(--instrument-white);
+  cursor: pointer;
+  font-family: 'Suisse Int\'l Mono', monospace;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.1s steps(2);
+}
+
+.zoom-btn:hover {
+  color: var(--phosphor);
+  background: var(--instrument-ghost);
+}
+
+.zoom-btn.fit {
+  font-size: 9px;
+  font-family: 'Suisse Int\'l', sans-serif;
+}
+
+/* Tooltip */
+.graph-tooltip {
+  position: absolute;
+  width: 200px;
+  background: var(--void);
+  border: 1px solid var(--instrument-dark);
+  padding: 12px;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.tooltip-id {
+  font-family: 'Suisse Int\'l Mono', monospace;
+  font-size: 11px;
+  color: var(--phosphor);
+  margin-bottom: 8px;
+}
+
+.tooltip-sep {
+  height: 1px;
+  background: var(--instrument-dark);
+  margin: 8px 0;
+}
+
+.tooltip-score {
+  font-family: 'Monument Extended', sans-serif;
+  font-size: 24px;
+}
+
+.tooltip-risk {
+  font-family: 'Suisse Int\'l', sans-serif;
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--instrument-grey);
+}
+
+.tooltip-detail {
+  font-family: 'Suisse Int\'l Mono', monospace;
+  font-size: 10px;
+  color: var(--instrument-white);
+  margin-bottom: 2px;
+}
+
+.tooltip-badge {
+  font-family: 'Suisse Int\'l', sans-serif;
+  font-size: 10px;
+  text-transform: uppercase;
+  padding: 4px;
+  margin-top: 8px;
+}
+
+.badge-recruiter {
+  color: var(--phosphor);
+}
+
+.badge-mule {
+  background: var(--phosphor);
+  color: var(--void);
+}
+
+/* Detail Panel */
+.panel-placeholder {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Suisse Int\'l', sans-serif;
+  font-size: 12px;
+  color: var(--instrument-ghost);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.panel-header {
+  padding: 24px;
+  border-bottom: 1px solid var(--instrument-dark);
+}
+
+.type-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  font-family: 'Suisse Int\'l', sans-serif;
+  font-size: 10px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.type-badge.recruiter { background: var(--phosphor); color: var(--void); }
+.type-badge.mule { background: var(--phosphor); color: var(--void); border: 1px solid var(--void); }
+.type-badge.high-risk { background: var(--instrument-dark); color: var(--phosphor); }
+.type-badge.clean { background: var(--instrument-dark); color: var(--instrument-grey); }
+
+.panel-id {
+  font-family: 'Suisse Int\'l Mono', monospace;
+  font-size: 12px;
+  color: var(--instrument-white);
+}
+
+.panel-score-block {
+  padding: 24px;
+}
+
+.panel-score-val {
+  font-family: 'Monument Extended', sans-serif;
+  font-size: 48px;
+  line-height: 1;
+}
+
+.panel-risk-label {
+  font-family: 'Suisse Int\'l', sans-serif;
+  font-size: 11px;
+  color: var(--instrument-grey);
+  text-transform: uppercase;
+  margin-top: 8px;
+}
+
+.panel-details-grid {
+  padding: 0 24px 24px 24px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-label {
+  font-family: 'Suisse Int\'l', sans-serif;
+  font-size: 9px;
+  color: var(--instrument-grey);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.detail-value {
+  font-family: 'Suisse Int\'l Mono', monospace;
+  font-size: 11px;
+  color: var(--instrument-white);
+}
+
+.panel-list-section {
+  padding: 24px;
+  border-top: 1px solid var(--instrument-dark);
+}
+
+.panel-list-title {
+  font-family: 'Suisse Int\'l', sans-serif;
+  font-size: 9px;
+  color: var(--instrument-grey);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.txn-row {
+  display: flex;
+  gap: 8px;
+  font-family: 'Suisse Int\'l Mono', monospace;
+  font-size: 10px;
+  color: var(--instrument-grey);
+  margin-bottom: 8px;
+}
+
+.txn-row.suspicious {
+  color: var(--phosphor);
+}
+
+.panel-actions {
+  padding: 24px;
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.action-btn {
+  width: 100%;
+  background: var(--void);
+  border: 1px solid var(--instrument-dark);
+  color: var(--instrument-white);
+  padding: 10px;
+  font-family: 'Suisse Int\'l', sans-serif;
+  font-size: 11px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s steps(2);
+}
+
+.action-btn:hover {
+  border-color: var(--phosphor);
+  color: var(--phosphor);
+}

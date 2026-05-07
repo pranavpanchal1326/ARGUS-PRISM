@@ -1,0 +1,188 @@
+.panel {
+  width: 100%;
+  padding: 32px;
+  background-color: var(--void);
+  background-image: 
+    linear-gradient(var(--instrument-ghost) 1px, transparent 1px),
+    linear-gradient(90deg, var(--instrument-ghost) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.headerTitle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.uiText {
+  font-family: 'Inter', sans-serif;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--instrument-grey);
+}
+
+.monoText {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--instrument-white);
+}
+
+.divider {
+  height: 1px;
+  background: var(--instrument-dark);
+  margin: 16px 0;
+}
+
+.metadataArea {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 32px;
+}
+
+.metaRow {
+  display: flex;
+  gap: 48px;
+}
+
+.metaCell {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-family: 'Inter', sans-serif;
+  text-transform: uppercase;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: var(--instrument-grey);
+}
+
+.monoValue {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--instrument-white);
+}
+
+.scoreCell {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.scoreValue {
+  font-family: 'Oswald', sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--phosphor);
+  line-height: 1;
+}
+
+.packageGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin: 32px 0;
+}
+
+@media (max-width: 1200px) {
+  .packageGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.completionSection {
+  margin-top: 32px;
+  position: relative;
+  padding-top: 32px;
+}
+
+.scanline {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--phosphor);
+  animation: scanReveal 60ms linear forwards;
+}
+
+@keyframes scanReveal {
+  from { top: 0; }
+  to { top: 100%; }
+}
+
+.timingSummary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border: 1px solid var(--instrument-dark);
+  margin-bottom: 32px;
+  background: rgba(12, 12, 9, 0.5);
+}
+
+.timingCell {
+  padding: 24px;
+  border-right: 1px solid var(--instrument-dark);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.timingLabel {
+  font-family: 'Inter', sans-serif;
+  text-transform: uppercase;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: var(--instrument-grey);
+}
+
+.timingValue {
+  font-family: 'Oswald', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--instrument-white);
+  line-height: 1;
+}
+
+.submitBtn {
+  width: 100%;
+  height: 56px;
+  background: var(--phosphor);
+  border: none;
+  color: var(--void);
+  font-family: 'Oswald', sans-serif;
+  text-transform: uppercase;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  animation: phosphorPulse 3s infinite;
+}
+
+@keyframes phosphorPulse {
+  0%, 100% { box-shadow: 0 0 0px var(--phosphor); }
+  50% { box-shadow: 0 0 10px var(--phosphor); }
+}
+
+.submitBtn:hover {
+  opacity: 0.9;
+}
+
+.footerNote {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--instrument-grey);
+  text-align: center;
+  margin-top: 16px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}

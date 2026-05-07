@@ -1,0 +1,211 @@
+.card {
+  position: relative;
+  background: var(--surface);
+  padding: 24px;
+  border: 1px solid var(--instrument-dark);
+  border-radius: 0;
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  min-height: 200px;
+  transition: border-color 0.1s steps(2);
+}
+
+/* Scanning Overlay */
+.card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(184, 255, 107, 0.05), transparent);
+  animation: cardScan 8s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes cardScan {
+  0% { left: -100%; }
+  20%, 100% { left: 200%; }
+}
+
+.mounting {
+  height: 0;
+  min-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  border: none;
+}
+
+.entering {
+  animation: expand steps(6) 180ms forwards;
+}
+
+@keyframes expand {
+  from { height: 0; min-height: 0; padding-top: 0; padding-bottom: 0; }
+  to { height: auto; min-height: 200px; padding-top: 24px; padding-bottom: 24px; }
+}
+
+.exiting {
+  animation: collapse steps(4) 120ms forwards;
+}
+
+@keyframes collapse {
+  from { height: auto; min-height: 200px; opacity: 1; }
+  to { height: 0; min-height: 0; padding: 0; opacity: 0; }
+}
+
+/* States */
+.warming {
+  border-left: 2px solid var(--instrument-dark);
+}
+
+.hot {
+  border-left: 2px solid var(--instrument-white);
+}
+
+.critical {
+  background: var(--elevated);
+  border-left: 2px solid var(--phosphor);
+}
+
+@keyframes pulseInvert {
+  0%, 100% { background: var(--phosphor); color: var(--void); }
+  50% { background: var(--void); color: var(--phosphor); }
+}
+
+.imminent {
+  background: var(--phosphor);
+  border: none;
+  color: var(--void);
+  animation: pulseInvert 1s steps(1) infinite;
+}
+
+/* Typography */
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.9; }
+}
+
+.score {
+  font-family: 'Monument Extended', sans-serif;
+  font-weight: 800;
+  line-height: 1;
+  animation: flicker 0.1s steps(2) infinite;
+}
+
+.warming .score { color: var(--instrument-grey); }
+.hot .score { color: var(--instrument-white); }
+.critical .score { color: var(--phosphor); }
+.imminent .score { color: var(--void); }
+
+.meta {
+  margin-left: auto;
+  text-align: right;
+}
+
+.activeTime, .alertId {
+  font-family: 'Suisse Int\'l Mono', monospace;
+  font-size: 10px;
+  color: var(--instrument-grey);
+  text-transform: uppercase;
+}
+
+.imminent .activeTime, 
+.imminent .alertId {
+  color: inherit;
+  opacity: 0.7;
+}
+
+.accountId {
+  font-family: 'Suisse Int\'l Mono', monospace;
+  font-size: 13px;
+  color: var(--instrument-white);
+  margin-top: 12px;
+  text-transform: uppercase;
+}
+
+.imminent .accountId {
+  color: inherit;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.divider {
+  height: 1px;
+  background: var(--instrument-dark);
+  margin: 16px 0;
+  width: 100%;
+}
+
+.imminent .divider {
+  background: currentColor;
+  opacity: 0.2;
+}
+
+.signals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  opacity: 0;
+}
+
+.taint {
+  margin-top: 12px;
+  opacity: 0;
+}
+
+.visible {
+  opacity: 1;
+}
+
+/* Action Buttons */
+.actionBtn {
+  align-self: flex-start;
+  padding: 10px 20px;
+  font-family: 'Suisse Int\'l', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  border-radius: 0;
+  transition: all 0.1s steps(2);
+}
+
+.hot .actionBtn {
+  border: 1px solid var(--instrument-dark);
+  color: var(--instrument-white);
+  background: transparent;
+}
+
+.hot .actionBtn:hover {
+  background: var(--elevated);
+}
+
+.critical .actionBtn {
+  border: 1px solid var(--phosphor);
+  color: var(--phosphor);
+  background: transparent;
+}
+
+.critical .actionBtn:hover {
+  background: var(--phosphor);
+  color: var(--void);
+}
+
+.imminent .actionBtn {
+  background: var(--void);
+  color: var(--phosphor);
+  border: 1px solid var(--phosphor);
+}
+
+.imminent .actionBtn:hover {
+  background: var(--instrument-dark);
+}

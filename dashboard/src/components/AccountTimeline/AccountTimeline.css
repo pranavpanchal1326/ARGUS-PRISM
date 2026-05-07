@@ -1,0 +1,246 @@
+.account-timeline {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+}
+
+/* Header & Stats Bar */
+.account-timeline__header {
+  height: 48px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--instrument-dark);
+}
+
+.account-timeline__stats-bar {
+  height: 72px;
+  display: flex;
+  border-bottom: 1px solid var(--instrument-dark);
+}
+
+.stat-block {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 24px;
+  border-right: 1px solid var(--instrument-dark);
+}
+
+.stat-block:last-child {
+  border-right: none;
+}
+
+.stat-block--imminent {
+  background-color: var(--phosphor);
+}
+
+.stat-block--imminent .stat-label,
+.stat-block--imminent .stat-value {
+  color: var(--void) !important;
+}
+
+.sync-status {
+  position: absolute;
+  top: 12px;
+  right: 24px;
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  animation: phosphorBreathe 2s infinite;
+}
+
+.stat-label {
+  font-family: var(--font-ui);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--instrument-grey);
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  font-family: var(--font-display);
+  font-size: 32px;
+  line-height: 1;
+}
+
+/* Account Selector */
+.account-selector {
+  position: relative;
+  cursor: pointer;
+}
+
+.account-selector__trigger {
+  padding: 8px 16px;
+  border: 1px solid var(--instrument-dark);
+  color: var(--instrument-white);
+  font-family: var(--font-data);
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.account-selector__dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background-color: var(--void);
+  border: 1px solid var(--instrument-dark);
+  z-index: 1100;
+  margin-top: -1px;
+}
+
+.account-selector__option {
+  padding: 10px 16px;
+  font-family: var(--font-data);
+  font-size: 11px;
+  color: var(--instrument-grey);
+  transition: all 150ms ease;
+}
+
+.account-selector__option:hover {
+  background-color: rgba(184, 255, 107, 0.06);
+  color: var(--instrument-white);
+}
+
+.account-selector__option--selected {
+  color: var(--phosphor);
+}
+
+/* Replay Button */
+.replay-btn {
+  padding: 8px 16px;
+  border: 1px solid var(--instrument-dark);
+  background: transparent;
+  color: var(--instrument-white);
+  font-family: var(--font-ui);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+.replay-btn:hover:not(:disabled) {
+  border-color: var(--phosphor);
+  color: var(--phosphor);
+}
+
+.replay-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cursor-blink {
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Chart Area */
+.account-timeline__chart-area {
+  position: relative;
+  flex: 1;
+  padding: 24px;
+  overflow: hidden;
+}
+
+.chart-noise-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.signal-markers-overlay {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  right: 24px;
+  bottom: 24px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Signal Markers */
+.signal-marker {
+  position: absolute;
+  top: 0;
+  height: calc(100% - 72px); /* Subtract xAxis height approx */
+}
+
+.signal-marker__line {
+  width: 1px;
+  height: 100%;
+  background-color: var(--instrument-dark);
+}
+
+.signal-marker__label {
+  position: absolute;
+  top: 0;
+  left: 4px;
+  writing-mode: vertical-rl;
+  white-space: nowrap;
+  font-family: var(--font-data);
+  font-size: 9px;
+  display: flex;
+  gap: 8px;
+}
+
+.signal-number {
+  color: var(--phosphor);
+  font-weight: 600;
+}
+
+.signal-name {
+  color: var(--instrument-grey);
+}
+
+/* FRI Badge */
+.fri-badge {
+  position: absolute;
+  top: 48px;
+  right: 168px;
+  background: rgba(12, 12, 9, 0.7);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--instrument-dark);
+  padding: 12px;
+  z-index: 20;
+}
+
+.fri-badge__label {
+  font-family: var(--font-ui);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--instrument-grey);
+  margin-bottom: 4px;
+}
+
+.fri-badge__value {
+  font-family: var(--font-data);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.fri-badge__contradiction {
+  margin-top: 8px;
+  font-family: var(--font-ui);
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--phosphor);
+}

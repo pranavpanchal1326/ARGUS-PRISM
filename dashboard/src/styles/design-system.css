@@ -1,0 +1,157 @@
+/* Section 1: Google Fonts Imports */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&family=Bebas+Neue&family=Anton&display=swap');
+
+/* Section 2: CSS Custom Properties */
+:root {
+  /* Color Palette */
+  --void:              #0C0C09;
+  --phosphor:          #B8FF6B;
+  --instrument-white:  #D4D0C4;
+  --instrument-grey:   #7A7868;
+  --instrument-dark:   #3A3A30;
+  --instrument-ghost:  #1E1E18;
+
+  /* Typography */
+  --font-display:      'Monument Extended', 'Bebas Neue', 'Anton', sans-serif;
+  --font-data:         'JetBrains Mono', monospace;
+  --font-ui:           'Inter', sans-serif;
+
+  /* Spacing */
+  --grid-unit:         24px;
+  --grid-half:         12px;
+}
+
+/* Section 3: Global Reset & Atmosphere */
+*, *::before, *::after {
+  box-sizing: border-box;
+  border-radius: 0 !important;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--void);
+  background-image: 
+    radial-gradient(circle at 50% 50%, rgba(184, 255, 107, 0.03) 0%, transparent 100%),
+    linear-gradient(var(--instrument-ghost) 1px, transparent 1px),
+    linear-gradient(90deg, var(--instrument-ghost) 1px, transparent 1px);
+  background-size: 100% 100%, var(--grid-unit) var(--grid-unit), var(--grid-unit) var(--grid-unit);
+  color: var(--instrument-white);
+  font-family: var(--font-ui);
+  min-height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Noise Grain Filter */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.04;
+  pointer-events: none;
+  z-index: 9998;
+}
+
+/* Scanline Effect */
+body::after {
+  content: " ";
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%), linear-gradient(90deg, rgba(184, 255, 107, 0.01), rgba(184, 255, 107, 0.005), rgba(184, 255, 107, 0.01));
+  z-index: 9999;
+  background-size: 100% 3px, 4px 100%;
+  pointer-events: none;
+  opacity: 0.2;
+}
+
+/* Vignette Effect */
+body::before {
+  content: " ";
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, transparent 40%, rgba(0,0,0,0.6) 100%);
+  z-index: 9998;
+  pointer-events: none;
+}
+
+/* Hide scrollbars for programmatic panning */
+body::-webkit-scrollbar { display: none; }
+body { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Section 4: Typography Utility Classes */
+.font-display { 
+  font-family: var(--font-display); 
+  font-weight: 800; 
+  letter-spacing: -0.02em;
+}
+
+.font-data { 
+  font-family: var(--font-data); 
+}
+
+.font-ui { 
+  font-family: var(--font-ui); 
+  text-transform: uppercase; 
+  letter-spacing: 0.08em; 
+}
+
+/* Section 5: Animation Keyframes */
+@keyframes scanReveal {
+  0%   { clip-path: inset(0 100% 0 0); }
+  100% { clip-path: inset(0 0% 0 0); }
+}
+
+@keyframes inversionPulse {
+  0%, 100% { border-color: var(--phosphor); background-color: var(--phosphor); }
+  50%       { border-color: var(--void); background-color: rgba(184, 255, 107, 0.85); }
+}
+
+@keyframes phosphorBreathe {
+  0%, 100% { opacity: 1; transform: scaleX(1); }
+  50%       { opacity: 0.4; transform: scaleX(0.98); }
+}
+
+@keyframes flicker {
+  0% { opacity: 0.98; }
+  5% { opacity: 0.95; }
+  10% { opacity: 0.99; }
+  15% { opacity: 0.94; }
+  20% { opacity: 0.98; }
+  100% { opacity: 1; }
+}
+
+@keyframes slideLine {
+  0%   { transform: translateX(-120px); }
+  100% { transform: translateX(100vw); }
+}
+
+/* Section 6: Structural Utility Classes */
+.instrument-border { border: 1px solid var(--instrument-dark); }
+.phosphor-text     { color: var(--phosphor); }
+.ghost-text        { color: var(--instrument-grey); }
+.data-text         { font-family: var(--font-data); color: var(--instrument-white); }
+
+/* Section 7: Inversion State Class */
+.state-imminent {
+  background-color: var(--phosphor) !important;
+  color: var(--void) !important;
+  border-color: var(--phosphor) !important;
+  animation: inversionPulse 1000ms step-end infinite;
+}
+
+.state-imminent * {
+  color: var(--void) !important;
+}

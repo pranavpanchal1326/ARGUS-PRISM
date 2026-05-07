@@ -1,0 +1,322 @@
+.account-timeline-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--void);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Technical Overlays */
+.account-timeline-container::before {
+  content: "CHRONO_ANALYSIS // PERSISTENCE_LOG_v1.0";
+  position: absolute;
+  top: 140px;
+  left: 24px;
+  font-family: 'Suisse Int\'l Mono', monospace;
+  font-size: 8px;
+  color: var(--instrument-ghost);
+  letter-spacing: 0.2em;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.account-timeline-container::after {
+  content: "DATA_STREAMS_ACTIVE // UBI_BACKBONE_01";
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  font-family: 'Suisse Int\'l Mono', monospace;
+  font-size: 8px;
+  color: var(--instrument-ghost);
+  letter-spacing: 0.2em;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* Animations */
+@keyframes scanNumber {
+  0%, 100% { opacity: 1; filter: brightness(1); }
+  50% { opacity: 0.8; filter: brightness(1.2); }
+}
+
+@keyframes criticalPulse {
+  0%, 100% { border-color: var(--phosphor); background: var(--phosphor); color: var(--void); }
+  50% { border-color: var(--void); background: var(--void); color: var(--phosphor); }
+}
+
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes eventReveal {
+  0% { background: var(--phosphor); color: var(--void); transform: translateX(-4px); }
+  100% { background: transparent; transform: translateX(0); }
+}
+
+/* Section 1 - Account Header */
+.account-header {
+  height: 120px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 32px;
+  border-bottom: 1px solid var(--instrument-dark);
+  background: var(--void);
+  transition: all 0.3s steps(2);
+  z-index: 10;
+}
+
+.account-header.inverted {
+  background: var(--phosphor);
+  color: var(--void);
+  animation: criticalPulse 1s steps(1) infinite;
+}
+
+.header-label {
+  font-family: 'Suisse Int\'l', sans-serif;
+  font-size: 10px;
+  color: var(--instrument-grey);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 4px;
+}
+
+.header-value-mono {
+  font-family: 'Suisse Int\'l Mono', monospace;
+  font-size: 14px;
+  color: var(--instrument-white);
+}
+
+.score-display {
+  font-family: 'Monument Extended', sans-serif;
+  font-size: 72px;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  animation: scanNumber 0.24s steps(2) infinite;
+}
+
+.risk-label {
+  font-family: 'Suisse Int\'l', sans-serif;
+  font-size: 11px;
+  color: var(--instrument-grey);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin-top: 4px;
+}
+
+/* Section 2 - Chart Area */
+.chart-container {
+  height: 320px;
+  background: var(--void);
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid var(--instrument-dark);
+}
+
+.chart-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: linear-gradient(var(--instrument-ghost) 1px, transparent 1px),
+                    linear-gradient(90deg, var(--instrument-ghost) 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+.playback-controls-row {
+  height: 48px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  background: var(--instrument-ghost);
+  border-bottom: 1px solid var(--instrument-dark);
+}
+
+.playback-btn {
+  background: var(--void);
+  border: 1px solid var(--instrument-dark);
+  color: var(--instrument-white);
+  font-family: 'Suisse Int\'l', sans-serif;
+  font-size: 10px;
+  text-transform: uppercase;
+  padding: 6px 16px;
+  cursor: pointer;
+  transition: all 0.1s steps(2);
+}
+
+.playback-btn.active {
+  background: var(--phosphor);
+  color: var(--void);
+  border-color: var(--phosphor);
+}
+
+/* Section 3 - Timeline Panels */
+.timeline-panels {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.panel-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.left-column { width: 40%; border-right: 1px solid var(--instrument-dark); }
+.right-column { width: 60%; }
+
+.panel-title {
+  padding: 12px 24px;
+  background: var(--instrument-dark);
+  font-family: 'Suisse Int\'l', sans-serif;
+  font-size: 10px;
+  color: var(--instrument-white);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+
+.panel-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 0;
+}
+
+/* Signal Rows */
+.signal-row {
+  height: 54px;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--instrument-ghost);
+  opacity: 0.4;
+  transition: all 0.3s steps(2);
+}
+
+.signal-row.fired {
+  opacity: 1;
+  background: rgba(184, 255, 107, 0.05);
+}
+
+.signal-info {
+  width: 140px;
+}
+
+.signal-num {
+  font-family: 'Suisse Int\'l Mono', monospace;
+  font-size: 9px;
+  color: var(--instrument-grey);
+}
+
+.signal-name {
+  font-family: 'Suisse Int\'l', sans-serif;
+  font-size: 11px;
+  color: var(--instrument-white);
+  text-transform: uppercase;
+}
+
+.signal-bar-track {
+  flex: 1;
+  height: 6px;
+  background: var(--instrument-dark);
+  margin: 0 24px;
+  position: relative;
+}
+
+.signal-bar-fill {
+  height: 100%;
+  background: var(--phosphor);
+  transition: width 0.3s ease;
+}
+
+.signal-meta {
+  width: 100px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.signal-value {
+  font-family: 'Suisse Int\'l Mono', monospace;
+  font-size: 11px;
+}
+
+.signal-value.active { color: var(--phosphor); }
+
+.fired-indicator {
+  font-family: 'Suisse Int\'l', sans-serif;
+  font-size: 8px;
+  color: var(--phosphor);
+  font-weight: 600;
+}
+
+/* Event Log Rows */
+.event-row {
+  display: flex;
+  align-items: center;
+  padding: 10px 24px;
+  gap: 16px;
+  border-bottom: 1px solid var(--instrument-ghost);
+}
+
+.event-row.just-revealed {
+  animation: eventReveal 0.5s ease-out forwards;
+}
+
+.event-hour {
+  width: 40px;
+  font-family: 'Suisse Int\'l Mono', monospace;
+  font-size: 10px;
+  color: var(--instrument-grey);
+}
+
+.event-badge {
+  font-family: 'Suisse Int\'l', sans-serif;
+  font-size: 8px;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  background: var(--instrument-dark);
+  color: var(--instrument-grey);
+}
+
+.event-badge.priority {
+  background: var(--phosphor);
+  color: var(--void);
+}
+
+.event-label {
+  font-family: 'Suisse Int\'l Mono', monospace;
+  font-size: 11px;
+  color: var(--instrument-white);
+  flex: 1;
+}
+
+.teletype-cursor {
+  display: inline-block;
+  width: 6px;
+  height: 12px;
+  background: var(--phosphor);
+  margin-left: 4px;
+  animation: cursorBlink 0.6s steps(1) infinite;
+  vertical-align: middle;
+}
+
+.event-amount {
+  font-family: 'Suisse Int\'l Mono', monospace;
+  font-size: 11px;
+  color: var(--phosphor);
+  text-align: right;
+  width: 80px;
+}
+
+.recharts-reference-line-label {
+  font-family: 'Suisse Int\'l Mono', monospace !important;
+  font-size: 9px !important;
+  letter-spacing: 0.1em;
+}
