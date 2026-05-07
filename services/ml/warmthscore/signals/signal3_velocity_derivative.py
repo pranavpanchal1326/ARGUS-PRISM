@@ -7,7 +7,7 @@ Legal Basis: BioCatch 2023 validates 72hr warming phase.
 
 import logging
 import json
-from typing import TypedDict, List, Dict, Optional, Any
+from typing import TypedDict, List, Dict, Optional, Any, Tuple
 import numpy as np
 
 logger = logging.getLogger("prism.signals.signal3")
