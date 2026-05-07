@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse
 
 from .config import get_settings
 from .middleware.logging import RequestLoggingMiddleware
-from .routes import health, accounts, warmthscore, autostr
+from .routes import health, accounts, warmthscore, autostr, recruiter
 
 logger = logging.getLogger("prism.main")
 settings = get_settings()
@@ -60,6 +60,7 @@ app.include_router(health.router, prefix="/health", tags=["Health"])
 app.include_router(accounts.router)
 app.include_router(warmthscore.router, prefix="/api/v1/warmthscore", tags=["WarmthScore"])
 app.include_router(autostr.router, prefix="/api")
+app.include_router(recruiter.router, prefix="/api/recruiter", tags=["Recruiter"])
 
 # Exception Handlers
 @app.exception_handler(Exception)
