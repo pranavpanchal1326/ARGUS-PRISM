@@ -46,14 +46,17 @@ async def get_recruiter_map(
                               description="Detection window in hours"),
     min_downstream: int = Query(5, ge=1,
                                 description="Minimum downstream accounts to qualify"),
+    include_frozen: bool = Query(True, description="Include already-frozen recruiters"),
 ):
     """
     Scan the Neo4j graph and return all detected recruiter accounts.
 
     Each recruiter entry includes:
     - Classification tier (Coordinator / Orchestrator / Platform-scale)
-    - Downstream account list
-    - Recruiter warmth score + status
+    - Downstream account list with coordinator_flags
+    - Total frozen accounts
+    - Risk tier label for dashboard
+    - Campaign name if this is a named demo campaign
     """
     detector = _detector()
     try:
@@ -64,17 +67,66 @@ async def get_recruiter_map(
         if classification:
             recruiters = [r for r in recruiters
                           if r["classification"] == classification.upper()]
+        if not include_frozen:
+            recruiters = [r for r in recruiters
+                          if r.get("recruiter_status") != "FROZEN"]
+
+        # Enhance each recruiter entry with coordinator_flags and risk_tier
+        enhanced = []
+        for r in recruiters:
+            count = r.get("downstream_count", 0)
+
+            # Risk tier label for dashboard colour coding
+            if r["classification"] == "PLATFORM_SCALE":
+                risk_tier = "CRITICAL"
+            elif r["classification"] == "INDUSTRIAL_ORCHESTRATOR":
+                risk_tier = "HIGH"
+            else:
+                risk_tier = "MEDIUM"
+
+            # Coordinator flags — which downstream accounts are themselves coordinators
+            coordinator_flags = []
+            try:
+                graph = detector.get_campaign_graph(r["recruiter_id"])
+                frozen_count = sum(
+                    1 for acc in graph.get("downstream_accounts", [])
+                    if acc.get("status") == "FROZEN"
+                )
+                coordinator_flags = [
+                    acc["account_id"]
+                    for acc in graph.get("downstream_accounts", [])
+                    if acc.get("is_recruiter") or acc.get("warmth_score", 0) > 70
+                ]
+            except Exception:
+                frozen_count = 0
+
+            enhanced.append({
+                **r,
+                "risk_tier":          risk_tier,
+                "coordinator_flags":  coordinator_flags,
+                "total_frozen":       frozen_count,
+                "campaign_name":      r.get("campaign_name", "UNKNOWN"),
+            })
+
+        # Summary by tier for dashboard overview panel
+        tiers = {}
+        for r in enhanced:
+            t = r["classification"]
+            tiers[t] = tiers.get(t, 0) + 1
+
         return {
-            "success": True,
-            "total": len(recruiters),
+            "success":      True,
+            "total":        len(enhanced),
             "window_hours": window_hours,
-            "recruiters": recruiters,
+            "tier_summary": tiers,
+            "recruiters":   enhanced,
         }
     except Exception as e:
         log.error("Error detecting recruiters: %s", e, exc_info=True)
         raise HTTPException(status_code=500, detail="Recruiter detection failed")
     finally:
         detector.close()
+
 
 
 # ── GET /api/recruiter/{recruiter_id}/campaign ────────────────────────────────
