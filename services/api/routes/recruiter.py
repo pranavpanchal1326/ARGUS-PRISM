@@ -16,7 +16,7 @@ Mount in main.py:
 
 import logging
 from typing import Optional
-from fastapi import APIRouter, Query, Path, HTTPException
+from fastapi import APIRouter, Query, Path, HTTPException, Depends
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 import sys, os
@@ -24,6 +24,7 @@ import sys, os
 # Allow import of recruiter_detector from src/recruiter
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', '..', 'src', 'recruiter'))
 from recruiter_detector import RecruiterDetector, classify_recruiter
+from ..utils.rbac import require_role, UserRole, RBACUser
 
 router = APIRouter()
 log = logging.getLogger("prism.api.recruiter")
@@ -47,6 +48,7 @@ async def get_recruiter_map(
     min_downstream: int = Query(5, ge=1,
                                 description="Minimum downstream accounts to qualify"),
     include_frozen: bool = Query(True, description="Include already-frozen recruiters"),
+    user: RBACUser = Depends(require_role(UserRole.MLRO, UserRole.FRAUD_ANALYST)),
 ):
     """
     Scan the Neo4j graph and return all detected recruiter accounts.
@@ -135,6 +137,7 @@ async def get_recruiter_map(
             summary="Get full campaign graph for a recruiter")
 async def get_campaign_graph(
     recruiter_id: str = Path(description="Recruiter account_id"),
+    user: RBACUser = Depends(require_role(UserRole.MLRO, UserRole.FRAUD_ANALYST)),
 ):
     """
     Returns the full campaign subgraph:
@@ -176,6 +179,7 @@ class FreezeRequest(BaseModel):
 async def freeze_campaign(
     recruiter_id: str = Path(description="Recruiter account_id to freeze"),
     req: FreezeRequest = FreezeRequest(),
+    user: RBACUser = Depends(require_role(UserRole.MLRO)),
 ):
     """
     One-click campaign freeze.
