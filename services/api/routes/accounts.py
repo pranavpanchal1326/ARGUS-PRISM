@@ -15,6 +15,8 @@ from ..cache.redis_client import (
     get_cached_warmth_timeline, cache_warmth_timeline
 )
 from ..utils.response import success_response, error_response
+from ..utils.rbac import require_role, UserRole, RBACUser
+from ..utils.encryption import PIIEncryptor
 
 router = APIRouter(prefix="/api/accounts", tags=["Accounts"])
 logger = logging.getLogger("prism.api.accounts")
@@ -55,20 +57,25 @@ def to_dict(obj):
 # ROUTES
 
 @router.post("")
-async def create_account(req: CreateAccountRequest, db: AsyncSession = Depends(get_db)):
+async def create_account(
+    req: CreateAccountRequest,
+    db: AsyncSession = Depends(get_db),
+    user: RBACUser = Depends(require_role(UserRole.MLRO, UserRole.ADMIN)),
+):
     try:
         stmt = select(Account).where(Account.account_id == req.account_id)
         result = await db.execute(stmt)
         if result.scalar_one_or_none():
             return error_response(f"Account {req.account_id} already exists.", "409")
 
+        # Encrypt PII before writing to DB — DPDP Act 2023 compliance
         new_account = Account(
             account_id=req.account_id,
-            account_holder_name=req.account_holder_name,
+            account_holder_name=PIIEncryptor.encrypt(req.account_holder_name),
             account_type=req.account_type,
             branch_code=req.account_code if hasattr(req, 'account_code') else req.branch_code,
             ifsc_code=req.ifsc_code,
-            mobile_number=req.mobile_number,
+            mobile_number=PIIEncryptor.encrypt(req.mobile_number),
             account_opened_at=req.account_opened_at,
             current_warmth_score=0.0,
             warmth_risk_level="CLEAN",
@@ -112,7 +119,11 @@ async def create_account(req: CreateAccountRequest, db: AsyncSession = Depends(g
 
 
 @router.get("/{account_id}")
-async def get_account(account_id: str, db: AsyncSession = Depends(get_db)):
+async def get_account(
+    account_id: str,
+    db: AsyncSession = Depends(get_db),
+    user: RBACUser = Depends(require_role(UserRole.MLRO, UserRole.FRAUD_ANALYST, UserRole.AUDIT)),
+):
     cached = await get_cached_account_summary(account_id)
     if cached:
         return success_response(cached)
@@ -150,7 +161,8 @@ async def list_accounts(
     max_score: Optional[float] = Query(None),
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=200),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    user: RBACUser = Depends(require_role(UserRole.MLRO, UserRole.FRAUD_ANALYST, UserRole.AUDIT)),
 ):
     try:
         stmt = select(Account)
@@ -199,7 +211,12 @@ async def list_accounts(
 
 
 @router.patch("/{account_id}/status")
-async def update_account_status(account_id: str, req: UpdateStatusRequest, db: AsyncSession = Depends(get_db)):
+async def update_account_status(
+    account_id: str,
+    req: UpdateStatusRequest,
+    db: AsyncSession = Depends(get_db),
+    user: RBACUser = Depends(require_role(UserRole.MLRO)),
+):
     try:
         stmt = select(Account).where(Account.account_id == account_id)
         result = await db.execute(stmt)
@@ -252,7 +269,12 @@ async def update_account_status(account_id: str, req: UpdateStatusRequest, db: A
 
 
 @router.patch("/{account_id}/kyc")
-async def update_account_kyc(account_id: str, req: UpdateKYCRequest, db: AsyncSession = Depends(get_db)):
+async def update_account_kyc(
+    account_id: str,
+    req: UpdateKYCRequest,
+    db: AsyncSession = Depends(get_db),
+    user: RBACUser = Depends(require_role(UserRole.MLRO)),
+):
     try:
         stmt = select(Account).where(Account.account_id == account_id)
         result = await db.execute(stmt)
@@ -302,7 +324,12 @@ async def update_account_kyc(account_id: str, req: UpdateKYCRequest, db: AsyncSe
 
 
 @router.post("/{account_id}/flag-mule")
-async def flag_mule(account_id: str, req: FlagMuleRequest, db: AsyncSession = Depends(get_db)):
+async def flag_mule(
+    account_id: str,
+    req: FlagMuleRequest,
+    db: AsyncSession = Depends(get_db),
+    user: RBACUser = Depends(require_role(UserRole.MLRO)),
+):
     try:
         stmt = select(Account).where(Account.account_id == account_id)
         result = await db.execute(stmt)
@@ -354,7 +381,11 @@ async def flag_mule(account_id: str, req: FlagMuleRequest, db: AsyncSession = De
 
 
 @router.get("/{account_id}/timeline")
-async def get_account_timeline(account_id: str, db: AsyncSession = Depends(get_db)):
+async def get_account_timeline(
+    account_id: str,
+    db: AsyncSession = Depends(get_db),
+    user: RBACUser = Depends(require_role(UserRole.MLRO, UserRole.FRAUD_ANALYST, UserRole.AUDIT)),
+):
     cached = await get_cached_warmth_timeline(account_id)
     if cached:
         return success_response(cached)
@@ -390,11 +421,12 @@ async def get_account_timeline(account_id: str, db: AsyncSession = Depends(get_d
 
 @router.get("/{account_id}/alerts")
 async def get_account_alerts(
-    account_id: str, 
+    account_id: str,
     acknowledged: Optional[bool] = Query(None),
     severity: Optional[str] = Query(None),
     limit: int = Query(20, le=100),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    user: RBACUser = Depends(require_role(UserRole.MLRO, UserRole.FRAUD_ANALYST, UserRole.AUDIT)),
 ):
     try:
         stmt = select(Account).where(Account.account_id == account_id)
