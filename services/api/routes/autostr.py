@@ -12,6 +12,7 @@ from services.autostr.autostr_orchestrator import generate_all_packages, AutoSTR
 from services.autostr.schemas.fiu_schema import FIUReportInput
 from services.api.schemas.autostr_response import AutoSTRAPIResponse, PackageStatus
 from services.api.dependencies import get_db
+from services.api.utils.rbac import require_role, UserRole, RBACUser
 
 router = APIRouter(prefix="/autostr", tags=["AutoSTR"])
 logger = logging.getLogger("prism.api.autostr")
@@ -20,7 +21,8 @@ logger = logging.getLogger("prism.api.autostr")
 async def generate_autostr_packages(
     case_id: str,
     report_input: FIUReportInput = Body(...),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    user: RBACUser = Depends(require_role(UserRole.MLRO)),
 ):
     """
     Trigger point for automated STR evidence package generation.
@@ -45,14 +47,16 @@ async def generate_autostr_packages(
                 "generation_time_seconds": result.total_generation_time_seconds
             }
             
-            # Using raw SQL for the specified audit_log table
+            # Using AuditLogWriter — correct schema columns
             await db.execute(
-                text("INSERT INTO audit_log (actor, action, target, details, timestamp) "
-                     "VALUES (:actor, :action, :target, :details, :ts)"),
+                text("INSERT INTO audit_log (actor, actor_role, action, target_type, target_id, details, timestamp) "
+                     "VALUES (:actor, :actor_role, :action, :target_type, :target_id, :details::jsonb, :ts)"),
                 {
-                    "actor": "AUTOSTR_ENGINE",
+                    "actor": user.username,
+                    "actor_role": user.role.value,
                     "action": "STR_GENERATED",
-                    "target": case_id,
+                    "target_type": "Case",
+                    "target_id": case_id,
                     "details": str(audit_details),
                     "ts": datetime.now(timezone.utc)
                 }

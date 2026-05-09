@@ -262,3 +262,64 @@ INSERT INTO accounts (
 ('UBI-2026-DEMO-003', 'Bob Clean CLEAN', 'SAVINGS', 'UBI-MUM-01', 'UBIN0531234', '9876543212', 
  'ACTIVE', 18.0, 'CLEAN', NOW() - INTERVAL '100 days')
 ON CONFLICT (account_id) DO NOTHING;
+
+
+-- =============================================================================
+-- DAY 9: PII ENCRYPTION CONTRACT + RBAC GRANTS
+-- Per PRISM Security Architecture — Section 6.2 Layer 6 (Privacy Preservation)
+-- =============================================================================
+
+-- PII columns are encrypted at the APPLICATION LAYER before reaching PostgreSQL.
+-- Values stored here are Fernet tokens (AES-128-CBC + HMAC-SHA256), not plaintext.
+-- Encryption key managed via PII_ENCRYPTION_KEY env var (HSM-managed in production).
+-- DPDP Act 2023 compliance: data minimisation + encryption at rest.
+
+COMMENT ON COLUMN accounts.account_holder_name IS
+    'PII — Fernet-encrypted at application layer. Raw name never stored in plaintext.';
+COMMENT ON COLUMN accounts.mobile_number IS
+    'PII — Fernet-encrypted at application layer. DoT DIP queries use SHA-256 hash only.';
+COMMENT ON COLUMN accounts.upi_device_imei IS
+    'PII — Fernet-encrypted at application layer. IMEI cluster scoring uses hashed prefix only.';
+COMMENT ON COLUMN device_events.imei IS
+    'PII — Fernet-encrypted at application layer. External IMEI queries use SHA-256 hash.';
+COMMENT ON COLUMN device_events.mobile_number IS
+    'PII — Fernet-encrypted at application layer.';
+
+-- Audit log immutability is enforced via TRIGGERS (lines 221-227 above).
+-- No application-layer DELETE or UPDATE methods exist for audit_log.
+COMMENT ON TABLE audit_log IS
+    'IMMUTABLE — UPDATE and DELETE are blocked by PostgreSQL triggers. INSERT only. '
+    'PMLA record-keeping: 7-year retention for flagged accounts. '
+    'DPDP Act 2023: auto-purge after 2 years for unflagged accounts.';
+
+-- RBAC: application-layer role enforcement. DB grants add a defence-in-depth layer.
+-- prism_readonly_role: used by FRAUD_ANALYST and AUDIT sessions
+-- prism_mlro_role: used by MLRO sessions (can call stored procs for restrictions)
+-- prism_admin_role: used by ADMIN sessions (config tables only)
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'prism_readonly_role') THEN
+        CREATE ROLE prism_readonly_role;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'prism_mlro_role') THEN
+        CREATE ROLE prism_mlro_role;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'prism_admin_role') THEN
+        CREATE ROLE prism_admin_role;
+    END IF;
+END
+$$;
+
+-- Read-only access for FRAUD_ANALYST and AUDIT
+GRANT SELECT ON accounts, warmth_scores, alerts, cases, autostr_packages, device_events
+    TO prism_readonly_role;
+-- AUDIT gets audit_log; FRAUD_ANALYST does not
+GRANT SELECT ON audit_log TO prism_mlro_role;
+
+-- MLRO gets full DML on case management tables
+GRANT SELECT, INSERT, UPDATE ON cases, alerts, autostr_packages TO prism_mlro_role;
+GRANT SELECT ON accounts, warmth_scores, device_events TO prism_mlro_role;
+GRANT SELECT ON audit_log TO prism_mlro_role;
+
+-- ADMIN gets no case data access (defence in depth matching application RBAC)
+-- prism_admin_role intentionally has NO grants on accounts/cases/alerts

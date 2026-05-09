@@ -5,7 +5,7 @@ Returns the 72-hour WarmthScore signal timeline for an account.
 Pulls data from Neo4j WarmthEvent nodes (seeded by demo_seeder.py).
 Falls back to PostgreSQL WarmthScore history if Neo4j has no events.
 """
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
 from neo4j import GraphDatabase
 import os
 
@@ -15,6 +15,11 @@ except ImportError:
     NEO4J_URI      = os.getenv("NEO4J_URI", "bolt://localhost:7687")
     NEO4J_USER     = os.getenv("NEO4J_USER", "neo4j")
     NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "prism_password")
+
+try:
+    from ..utils.rbac import require_role, UserRole, RBACUser
+except ImportError:
+    from services.api.utils.rbac import require_role, UserRole, RBACUser
 
 router = APIRouter(prefix="/api/accounts", tags=["account-timeline"])
 
@@ -27,6 +32,7 @@ def _get_driver():
 async def get_signal_timeline(
     account_id: str,
     hours: int = Query(72, ge=1, le=720, description="Hours of history to return"),
+    user: RBACUser = Depends(require_role(UserRole.MLRO, UserRole.FRAUD_ANALYST, UserRole.AUDIT)),
 ):
     """
     Returns the hourly WarmthScore signal timeline for an account.
@@ -114,7 +120,10 @@ async def get_signal_timeline(
 
 
 @router.get("/{account_id}/timeline/graph-events")
-async def get_graph_events(account_id: str):
+async def get_graph_events(
+    account_id: str,
+    user: RBACUser = Depends(require_role(UserRole.MLRO, UserRole.FRAUD_ANALYST, UserRole.AUDIT)),
+):
     """
     Returns Neo4j graph events for an account:
     transactions (in and out), FlowGraph alerts, taint propagation.
