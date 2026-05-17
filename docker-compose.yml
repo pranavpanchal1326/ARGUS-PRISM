@@ -136,7 +136,7 @@ services:
       - neo4j_data:/data
       - neo4j_logs:/logs
     environment:
-      NEO4J_AUTH: neo4j/prism_password
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:-prism_password}
       NEO4J_PLUGINS: '["graph-data-science", "apoc"]'
       NEO4J_dbms_security_procedures_unrestricted: "gds.*,apoc.*"
       NEO4J_dbms_memory_heap_initial__size: "512m"
@@ -163,9 +163,9 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      POSTGRES_DB: prism_db
-      POSTGRES_USER: prism_user
-      POSTGRES_PASSWORD: prism_password
+      POSTGRES_DB: ${POSTGRES_DB:-prism_db}
+      POSTGRES_USER: ${POSTGRES_USER:-prism_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-prism_password}
       PGDATA: /var/lib/postgresql/data/pgdata
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U prism_user -d prism_db"]
@@ -207,7 +207,20 @@ services:
     ports:
       - "8000:8000"
     env_file:
-      - .env
+      - ./services/api/.env
+    environment:
+      - PYTHONPATH=/workspace
+      - DATABASE_URL=postgresql+asyncpg://prism_user:${POSTGRES_PASSWORD:-prism_password}@postgres:5432/prism_db
+      - REDIS_URL=redis://redis:6379/0
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD:-prism_password}
+    volumes:
+      - ./services/api:/workspace/services/api
+      - ./services/ml:/workspace/services/ml
+      - ./services/autostr:/workspace/services/autostr
+      - ./services/__init__.py:/workspace/services/__init__.py
+      - ./src/recruiter:/workspace/src/recruiter
+    working_dir: /workspace
     depends_on:
       postgres:
         condition: service_healthy
@@ -215,4 +228,10 @@ services:
         condition: service_healthy
       neo4j:
         condition: service_healthy
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn services.api.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir /workspace/services/api
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
