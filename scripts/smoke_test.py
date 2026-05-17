@@ -20,7 +20,7 @@ import time
 try:
     import httpx
 except ImportError:
-    print("❌ httpx not installed. Run: pip install httpx")
+    print("[FAIL] httpx not installed. Run: pip install httpx")
     sys.exit(1)
 
 
@@ -85,10 +85,10 @@ def run_tests(base_url: str, verbose: bool = False):
 
                 if ok:
                     passed += 1
-                    icon = "✅"
+                    icon = "[OK]"
                 else:
                     failed += 1
-                    icon = "❌"
+                    icon = "[FAIL]"
 
                 print(f"  {icon} [{r.status_code:3d}] {name:<25s} ({elapsed:.0f}ms)")
 
@@ -109,18 +109,18 @@ def run_tests(base_url: str, verbose: bool = False):
 
             except httpx.ConnectError:
                 failed += 1
-                print(f"  ❌ [---] {name:<25s} (CONNECTION REFUSED)")
+                print(f"  [FAIL] [---] {name:<25s} (CONNECTION REFUSED)")
                 print(f"       Is the API running at {base_url}?")
             except Exception as e:
                 failed += 1
-                print(f"  ❌ [ERR] {name:<25s} ({type(e).__name__}: {e})")
+                print(f"  [FAIL] [ERR] {name:<25s} ({type(e).__name__}: {e})")
 
     print(f"\n{'='*60}")
     print(f"  Results: {passed} passed, {failed} failed ({total_time:.0f}ms total)")
     if failed == 0:
-        print(f"  🎉 All systems operational — safe to demo!")
+        print(f"  [*] All systems operational — safe to demo!")
     else:
-        print(f"  ⚠️  {failed} test(s) failed — investigate before demo.")
+        print(f"  [!] {failed} test(s) failed — investigate before demo.")
     print(f"{'='*60}\n")
 
     return passed, failed
