@@ -36,6 +36,12 @@ jobs:
           flake8 services/ --count --exit-zero --max-complexity=10 --max-line-length=120 --statistics
 
       - name: Run tests
+        env:
+          ENVIRONMENT: development
+          DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/prism
+          REDIS_URL: redis://localhost:6379/0
+          NEO4J_API_URL: bolt://localhost:7687
+          SECRET_KEY: 0123456789abcdef0123456789abcdef
         run: |
           # Placeholder — will populate as Day 2+ tests are added
           pytest services/ --ignore=services/pipeline/synthetic -q --no-header || echo "No tests yet — CI skeleton passing"
