@@ -73,7 +73,7 @@ async def create_account(
             account_id=req.account_id,
             account_holder_name=PIIEncryptor.encrypt(req.account_holder_name),
             account_type=req.account_type,
-            branch_code=req.account_code if hasattr(req, 'account_code') else req.branch_code,
+            branch_code=req.branch_code,
             ifsc_code=req.ifsc_code,
             mobile_number=PIIEncryptor.encrypt(req.mobile_number),
             account_opened_at=req.account_opened_at,
