@@ -3,10 +3,16 @@ FastAPI Routes for PRISM WarmthScore.
 Exposes real-time scoring and batch analysis endpoints.
 """
 
-from fastapi import APIRouter, HTTPException, Body, Query
+from fastapi import APIRouter, HTTPException, Body, Query, Depends
 from typing import List, Dict, Any, Optional
 from datetime import datetime, timezone
 import logging
+
+from sqlalchemy.ext.asyncio import AsyncSession
+from ..dependencies import get_db
+from ..utils.legal_triggers import LegalTriggerEngine
+
+_legal_engine = LegalTriggerEngine()
 
 from services.ml.warmthscore.model.predictor import WarmthScorePredictor, WarmthScoreResult
 from services.ml.warmthscore.model.model_registry import ModelRegistry
@@ -21,15 +27,13 @@ registry = ModelRegistry()
 @router.post("/score", response_model=Dict[str, Any])
 async def score_account(
     account_id: str = Body(...),
-    signal_outputs: Dict[str, Any] = Body(...)
+    signal_outputs: Dict[str, Any] = Body(...),
+    db: AsyncSession = Depends(get_db)
 ):
     """
     Scores a single account based on 6 signal outputs.
-<<<<<<< Updated upstream
-=======
     Automatically fires legal triggers at thresholds 75 and 85.
     Persists every score to warmth_scores table for timeline and audit.
->>>>>>> Stashed changes
     """
     # Validation
     required = ["S1", "S2", "S3", "S4", "S5", "S6"]
@@ -48,9 +52,6 @@ async def score_account(
     
     if result.error:
         raise HTTPException(status_code=500, detail=f"Scoring failed: {result.error}")
-<<<<<<< Updated upstream
-=======
-
     # --- PERSIST SCORE TO POSTGRESQL ---
     # Map signal_contributions list to individual column values
     sig_scores = {}
@@ -96,7 +97,6 @@ async def score_account(
     except Exception as te:
         # Non-blocking: log but don't fail the scoring response
         logger.warning(f"Legal trigger evaluation failed for {account_id}: {te}")
->>>>>>> Stashed changes
         
     return {
         "account_id": result.account_id,
