@@ -121,6 +121,16 @@ class GraphWriter:
             result = session.run("MATCH (a:Account) RETURN count(a) AS cnt")
             return result.single()["cnt"]
 
+    def update_kyc_status(self, account_id: str, kyc_status: str):
+        """Update KYC status and timestamp on an Account node in Neo4j."""
+        with self.driver.session() as session:
+            session.run("""
+                MATCH (a:Account {account_id: $account_id})
+                SET a.kyc_status = $kyc_status,
+                    a.kyc_updated_at = datetime()
+            """, account_id=account_id, kyc_status=kyc_status)
+        log.debug("KYC status updated in Neo4j: %s → %s", account_id, kyc_status)
+
     # ── Transaction edge ──────────────────────────────────────────────────────
 
     def create_transaction(self, txn: dict):
