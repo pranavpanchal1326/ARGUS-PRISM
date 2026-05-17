@@ -60,7 +60,6 @@ async def score_account(
 
     try:
         from services.api.database.models import WarmthScore as WarmthScoreRecord
-        from sqlalchemy.exc import IntegrityError
         score_record = WarmthScoreRecord(
             account_id=account_id,
             warmth_score=result.warmth_score,
@@ -80,19 +79,11 @@ async def score_account(
             computation_duration_ms=None,
         )
         db.add(score_record)
-        await db.commit()
+        await db.flush()
         logger.info(f"Score persisted: account={account_id} score={result.warmth_score} score_id={score_record.score_id}")
-    except IntegrityError:
-        await db.rollback()
-        logger.warning(
-            f"Score NOT persisted for {account_id}: account does not exist in PostgreSQL accounts table. "
-            "Seed the account via POST /api/accounts before scoring."
-        )
     except Exception as pe:
-        await db.rollback()
         logger.error(f"Failed to persist score for {account_id}: {pe}")
         # Non-blocking: don't fail the scoring response over a DB write issue
-
 
     # --- LEGAL TRIGGER EVALUATION ---
     # Evaluate score thresholds and fire legal actions (75 → KYC flag, 85 → full restriction)

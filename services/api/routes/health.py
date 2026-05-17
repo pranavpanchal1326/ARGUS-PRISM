@@ -1,4 +1,5 @@
 import time
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -54,22 +55,17 @@ async def readiness_check(
         dependencies_status["redis"] = {"status": "down"}
         is_ready = False
 
-    # Check 3: Neo4j (bolt connectivity check — not HTTP)
+    # Check 3: Neo4j API
     start = time.monotonic()
     try:
-        from neo4j import AsyncGraphDatabase
-        async with AsyncGraphDatabase.driver(
-            settings.neo4j_api_url,
-            auth=("neo4j", "prism1234"),
-            connection_timeout=settings.neo4j_api_timeout,
-        ) as driver:
-            await driver.verify_connectivity()
-        latency_ms = int((time.monotonic() - start) * 1000)
-        dependencies_status["neo4j"] = {"status": "up", "latency_ms": latency_ms}
+        async with httpx.AsyncClient(timeout=settings.neo4j_api_timeout) as client:
+            resp = await client.get(f"{settings.neo4j_api_url.rstrip('/')}/health")
+            resp.raise_for_status()
+            latency_ms = int((time.monotonic() - start) * 1000)
+            dependencies_status["neo4j_api"] = {"status": "up", "latency_ms": latency_ms}
     except Exception:
-        dependencies_status["neo4j"] = {"status": "down"}
+        dependencies_status["neo4j_api"] = {"status": "down"}
         is_ready = False
-
 
     # Check 4: ML Model (soft dependency — doesn't affect readiness)
     try:
