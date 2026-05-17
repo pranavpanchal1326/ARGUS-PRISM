@@ -67,6 +67,24 @@ async def readiness_check(
         dependencies_status["neo4j_api"] = {"status": "down"}
         is_ready = False
 
+    # Check 4: ML Model (soft dependency — doesn't affect readiness)
+    try:
+        from services.ml.warmthscore.model.predictor import WarmthScorePredictor
+        from services.ml.warmthscore.model.model_registry import ModelRegistry
+        _predictor = WarmthScorePredictor()
+        if not _predictor._loaded:
+            _predictor.load()
+        _registry = ModelRegistry()
+        model_info = _registry.get_model_summary()
+        dependencies_status["ml_model"] = {
+            "status": "up",
+            "version": model_info.get("model_version", "unknown"),
+            "features": model_info.get("total_features", 43),
+        }
+    except Exception:
+        dependencies_status["ml_model"] = {"status": "not_loaded"}
+        # ML is a soft dependency — don't mark service as not ready
+
     status_str = "ready" if is_ready else "degraded"
     if not is_ready and all(d["status"] == "down" for d in dependencies_status.values()):
         status_str = "down"
