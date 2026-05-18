@@ -1,0 +1,16 @@
+/* ── View Transition Wrapper ─────────────────────────────────
+   Overflow hidden prevents horizontal scroll bleed during slide.
+   GPU compositing hint on motion children for 60fps slides.
+   ─────────────────────────────────────────────────────────── */
+
+.view-transition-wrapper {
+  overflow:  hidden;
+  position:  relative;
+  width:     100%;
+  flex:      1;
+}
+
+.motion-view {
+  width:       100%;
+  will-change: transform;
+}

@@ -3,14 +3,55 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>ARGUS · PRISM — Financial Intelligence Platform</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <meta name="description" content="PRISM — Pre-crime mule detection and evidence generation for Union Bank of India." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- THEME FLASH PREVENTION — must run synchronously before first paint -->
+    <script>
+      (function() {
+        try {
+          var theme = localStorage.getItem('prism-theme');
+          if (!theme) {
+            theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          }
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      })();
+    </script>
+
+    <!-- FONT FALLBACK SIZING — eliminates CLS when webfonts arrive -->
     <style>
-      /* Monument Extended Fallback strategy if Google Fonts fails to load or for custom hosting */
-      @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Anton&display=swap');
+      @font-face {
+        font-family: 'Fraunces-fallback';
+        src: local('Georgia');
+        size-adjust: 103%;
+        ascent-override: 95%;
+        descent-override: 22%;
+        line-gap-override: 0%;
+      }
+      @font-face {
+        font-family: 'DM-Sans-fallback';
+        src: local('-apple-system'), local('BlinkMacSystemFont');
+        size-adjust: 100%;
+        ascent-override: 96%;
+        descent-override: 20%;
+        line-gap-override: 0%;
+      }
     </style>
+
+    <!-- FONT PRECONNECT — establishes TCP before font request fires -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- GOOGLE FONTS — single combined request, display=swap for FOUT prevention -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
     <div id="root"></div>

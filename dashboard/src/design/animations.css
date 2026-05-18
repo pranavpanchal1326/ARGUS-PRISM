@@ -1,0 +1,221 @@
+/* ═══════════════════════════════════════════════════════════
+   PRISM CSS KEYFRAME ANIMATIONS
+   Pure CSS only — no JS dependency.
+   All animation names prefixed with prism- to avoid
+   collision with any third-party library.
+   Depends on: tokens.css (must be imported first)
+   Team ARGUS · iDEA 2.0 · Union Bank of India
+   ═══════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────
+   LINE DRAW-IN — Recharts WarmthScore timeline
+   Applied to: .recharts-line-curve
+   Draws the line from left to right like ink flowing.
+   stroke-dasharray must be set to actual path length in JS
+   if the exact path length differs from 2000.
+   ───────────────────────────────────────────────────────── */
+@keyframes prism-line-draw {
+  from {
+    stroke-dashoffset: 2000;
+    opacity: 0.3;
+  }
+  to {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+.recharts-line-curve {
+  stroke-dasharray: 2000;
+  stroke-dashoffset: 2000;
+  animation: prism-line-draw 1.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* ─────────────────────────────────────────────────────────
+   CRISIS TICKER — landing page continuous scroll
+   Applied to: .ticker-track
+   60s per full cycle. Content is duplicated in HTML
+   to create a seamless infinite loop.
+   ───────────────────────────────────────────────────────── */
+@keyframes prism-ticker {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.ticker-track {
+  display: flex;
+  gap: 0;
+  white-space: nowrap;
+  animation: prism-ticker 60s linear infinite;
+  will-change: transform;
+}
+
+.ticker-track:hover {
+  /* Deliberately NOT paused on hover — the crisis never stops */
+  animation-play-state: running;
+}
+
+/* ─────────────────────────────────────────────────────────
+   HEALTH DOT PULSE — navbar service status indicators
+   Applied to: .health-dot.healthy
+   Slow, subtle pulse. Green means live and breathing.
+   ───────────────────────────────────────────────────────── */
+@keyframes prism-health-pulse {
+  0%, 100% { opacity: 1;   transform: scale(1); }
+  50%       { opacity: 0.6; transform: scale(0.85); }
+}
+
+.health-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  display: inline-block;
+}
+
+.health-dot.healthy {
+  background-color: var(--success);
+  animation: prism-health-pulse 2s ease-in-out infinite;
+}
+
+.health-dot.degraded {
+  background-color: var(--warning);
+  /* No animation — degraded is a static warning state */
+}
+
+.health-dot.down {
+  background-color: var(--danger);
+  /* No animation — down is a static critical state */
+}
+
+/* ─────────────────────────────────────────────────────────
+   THRESHOLD STAMP — score crossing event visual
+   Applied to: .stamp-pulse, .threshold-stamp
+   Expanding ring that fades from the crossing point.
+   Framer Motion (pulseRing variant) drives the scale/opacity.
+   CSS defines the visual shape and positioning.
+   ───────────────────────────────────────────────────────── */
+.stamp-pulse {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--accent);
+  top: 50%;
+  left: 0;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.threshold-stamp {
+  position: absolute;
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  transform-origin: left center;
+  pointer-events: none;
+}
+
+.stamp-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+/* ─────────────────────────────────────────────────────────
+   SHAP BAR FILL — Account Timeline signal attribution bars
+   Applied to: .shap-bar-track, .shap-bar-fill
+   Width animates from 0 to target via react-spring animated.div.
+   CSS provides the visual shape only — no width transition here.
+   ───────────────────────────────────────────────────────── */
+.shap-bar-track {
+  width: 100%;
+  height: 4px;
+  background-color: var(--bg-subtle);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.shap-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background-color: var(--accent);
+  width: 0%;
+  transition: none; /* react-spring owns this transition */
+}
+
+/* ─────────────────────────────────────────────────────────
+   STAT COUNTER CONTAINER — landing page hero numbers
+   The number itself is animated by react-spring useSpring.
+   CSS provides the typographic container only.
+   ───────────────────────────────────────────────────────── */
+.stat-counter {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* ─────────────────────────────────────────────────────────
+   SIDEBAR ACTIVE INDICATOR
+   Left-edge accent bar that appears when a nav item is active.
+   Framer Motion AnimatePresence mounts/unmounts this element.
+   CSS defines the visual and origin for the scale animation.
+   ───────────────────────────────────────────────────────── */
+@keyframes prism-sidebar-slide {
+  from { transform: scaleY(0); opacity: 0; }
+  to   { transform: scaleY(1); opacity: 1; }
+}
+
+.sidebar-active-indicator {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background-color: var(--accent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  transform-origin: top center;
+  animation: prism-sidebar-slide 0.2s ease-out forwards;
+}
+
+/* ─────────────────────────────────────────────────────────
+   PERFORMANCE HINTS
+   will-change applied conservatively — only on elements
+   that are KNOWN to animate continuously.
+   Overusing will-change creates GPU memory pressure.
+   ───────────────────────────────────────────────────────── */
+.ticker-track       { will-change: transform; }
+.health-dot.healthy { will-change: opacity, transform; }
+
+/*
+  All other animated elements: Framer Motion manages
+  will-change internally via its own optimiser.
+  Do not add will-change to motion.div elements.
+*/
+
+/* ─────────────────────────────────────────────────────────
+   WARMTH BADGE DOT PULSE
+   Applied to: dot span inside WarmthBadge component.
+   Fires ONLY for CRITICAL (score 75–85) and IMMINENT (85+).
+   CLEAN, WARMING, HOT dots are static — no pulse.
+   ───────────────────────────────────────────────────────── */
+@keyframes prism-badge-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+/* ─────────────────────────────────────────────────────────
+   BUTTON SPINNER ROTATION
+   Applied to: SVG spinner inside Button loading state.
+   0.7s linear infinite — fast enough to read as "processing",
+   slow enough to not feel frantic.
+   ───────────────────────────────────────────────────────── */
+@keyframes prism-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}

@@ -1,293 +1,444 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import FlowGraphCanvas from './FlowGraphCanvas';
-import './FlowGraphView.css';
+import React, { useRef, useEffect, useCallback, useState, useMemo } from 'react';
+import * as d3 from 'd3';
+import { motion, AnimatePresence } from 'framer-motion';
+import { WarmthBadge, Button } from '../../components';
 
-// --- MOCK DATA GENERATOR ---
-const generateMockGraph = () => {
-  const nodes = [
-    { id: 'UBI-M-001', label: 'ACC_001', warmth_score: 88, risk_level: 'IMMINENT', node_type: 'MULE', is_confirmed_mule: true, is_recruiter: false, account_details: { branch: 'MUMBAI CENTRAL', account_type: 'SAVINGS', kyc_occupation: 'LABOURER', total_received: 1240500, total_sent: 1240000 }, taint_score: 92 },
-    { id: 'UBI-M-002', label: 'ACC_002', warmth_score: 86, risk_level: 'IMMINENT', node_type: 'MULE', is_confirmed_mule: true, is_recruiter: false, account_details: { branch: 'THANE WEST', account_type: 'SAVINGS', kyc_occupation: 'UNEMPLOYED', total_received: 850000, total_sent: 845000 }, taint_score: 88 },
-    { id: 'UBI-R-101', label: 'REC_101', warmth_score: 72, risk_level: 'HOT', node_type: 'RECRUITER', is_confirmed_mule: false, is_recruiter: true, account_details: { branch: 'BENGALURU', account_type: 'CURRENT', kyc_occupation: 'CONSULTANT', total_received: 5000000, total_sent: 4900000 }, taint_score: 45 },
-    { id: 'UBI-H-201', label: 'ACC_201', warmth_score: 79, risk_level: 'CRITICAL', node_type: 'MULE', is_confirmed_mule: false, is_recruiter: false, account_details: { branch: 'DELHI', account_type: 'SAVINGS', kyc_occupation: 'STUDENT', total_received: 300000, total_sent: 290000 }, taint_score: 65 },
-    { id: 'UBI-H-202', label: 'ACC_202', warmth_score: 82, risk_level: 'CRITICAL', node_type: 'MULE', is_confirmed_mule: false, is_recruiter: false, account_details: { branch: 'PUNE', account_type: 'SAVINGS', kyc_occupation: 'DRIVER', total_received: 450000, total_sent: 440000 }, taint_score: 72 },
-    { id: 'UBI-H-203', label: 'ACC_203', warmth_score: 68, risk_level: 'HOT', node_type: 'INTERMEDIATE', is_confirmed_mule: false, is_recruiter: false, account_details: { branch: 'CHENNAI', account_type: 'SAVINGS', kyc_occupation: 'FARMER', total_received: 150000, total_sent: 145000 }, taint_score: 30 },
-    { id: 'UBI-C-301', label: 'ACC_301', warmth_score: 22, risk_level: 'CLEAN', node_type: 'SOURCE', is_confirmed_mule: false, is_recruiter: false, account_details: { branch: 'MUMBAI', account_type: 'CURRENT', kyc_occupation: 'BUSINESS', total_received: 10000000, total_sent: 9900000 }, taint_score: 5 },
-    { id: 'UBI-C-302', label: 'ACC_302', warmth_score: 18, risk_level: 'CLEAN', node_type: 'INTERMEDIATE', is_confirmed_mule: false, is_recruiter: false, account_details: { branch: 'MUMBAI', account_type: 'SAVINGS', kyc_occupation: 'SALARIED', total_received: 50000, total_sent: 45000 }, taint_score: 2 },
-    { id: 'UBI-C-303', label: 'ACC_303', warmth_score: 31, risk_level: 'CLEAN', node_type: 'INTERMEDIATE', is_confirmed_mule: false, is_recruiter: false, account_details: { branch: 'HYDERABAD', account_type: 'SAVINGS', kyc_occupation: 'STUDENT', total_received: 20000, total_sent: 18000 }, taint_score: 12 },
-    { id: 'UBI-C-304', label: 'ACC_304', warmth_score: 12, risk_level: 'CLEAN', node_type: 'DESTINATION', is_confirmed_mule: false, is_recruiter: false, account_details: { branch: 'KOLKATA', account_type: 'SAVINGS', kyc_occupation: 'RETIRED', total_received: 15000, total_sent: 5000 }, taint_score: 0 },
-    { id: 'UBI-C-305', label: 'ACC_305', warmth_score: 25, risk_level: 'CLEAN', node_type: 'INTERMEDIATE', is_confirmed_mule: false, is_recruiter: false, account_details: { branch: 'JAIPUR', account_type: 'SAVINGS', kyc_occupation: 'CLERK', total_received: 80000, total_sent: 75000 }, taint_score: 8 },
-    { id: 'UBI-C-306', label: 'ACC_306', warmth_score: 38, risk_level: 'WARMING', node_type: 'INTERMEDIATE', is_confirmed_mule: false, is_recruiter: false, account_details: { branch: 'SURAT', account_type: 'SAVINGS', kyc_occupation: 'TRADER', total_received: 120000, total_sent: 110000 }, taint_score: 15 }
-  ];
+/* ── Stubs for motion variants (Phase 1C exports) ────────── */
+const fadeIn = { initial: { opacity: 0 }, animate: { opacity: 1 } };
 
-  const edges = [
-    { id: 'e1', source: 'UBI-R-101', target: 'UBI-M-001', amount: 150000, channel: 'UPI', timestamp: '2026-03-21T10:00:00Z', transaction_id: 'TXN001', is_suspicious: true },
-    { id: 'e2', source: 'UBI-R-101', target: 'UBI-M-002', amount: 120000, channel: 'UPI', timestamp: '2026-03-21T11:00:00Z', transaction_id: 'TXN002', is_suspicious: true },
-    { id: 'e3', source: 'UBI-R-101', target: 'UBI-H-201', amount: 80000, channel: 'IMPS', timestamp: '2026-03-21T12:00:00Z', transaction_id: 'TXN003', is_suspicious: true },
-    { id: 'e4', source: 'UBI-R-101', target: 'UBI-H-202', amount: 95000, channel: 'UPI', timestamp: '2026-03-21T13:00:00Z', transaction_id: 'TXN004', is_suspicious: true },
-    { id: 'e5', source: 'UBI-R-101', target: 'UBI-H-203', amount: 45000, channel: 'UPI', timestamp: '2026-03-21T14:00:00Z', transaction_id: 'TXN005', is_suspicious: false },
-    { id: 'e6', source: 'UBI-R-101', target: 'UBI-C-306', amount: 12000, channel: 'NEFT', timestamp: '2026-03-21T15:00:00Z', transaction_id: 'TXN006', is_suspicious: false },
-    { id: 'e7', source: 'UBI-C-301', target: 'UBI-R-101', amount: 2000000, channel: 'RTGS', timestamp: '2026-03-21T09:00:00Z', transaction_id: 'TXN007', is_suspicious: false },
-    { id: 'e8', source: 'UBI-M-001', target: 'UBI-C-304', amount: 149000, channel: 'IMPS', timestamp: '2026-03-21T16:00:00Z', transaction_id: 'TXN008', is_suspicious: true },
-    { id: 'e9', source: 'UBI-M-002', target: 'UBI-C-304', amount: 115000, channel: 'UPI', timestamp: '2026-03-21T17:00:00Z', transaction_id: 'TXN009', is_suspicious: true },
-    { id: 'e10', source: 'UBI-C-302', target: 'UBI-C-303', amount: 5000, channel: 'UPI', timestamp: '2026-03-21T18:00:00Z', transaction_id: 'TXN010', is_suspicious: false },
-    { id: 'e11', source: 'UBI-C-303', target: 'UBI-C-305', amount: 8000, channel: 'UPI', timestamp: '2026-03-21T19:00:00Z', transaction_id: 'TXN011', is_suspicious: false },
-    { id: 'e12', source: 'UBI-C-305', target: 'UBI-C-306', amount: 12000, channel: 'NEFT', timestamp: '2026-03-21T20:00:00Z', transaction_id: 'TXN012', is_suspicious: false },
-    { id: 'e13', source: 'UBI-H-201', target: 'UBI-C-304', amount: 75000, channel: 'IMPS', timestamp: '2026-03-22T08:00:00Z', transaction_id: 'TXN013', is_suspicious: false },
-    { id: 'e14', source: 'UBI-H-202', target: 'UBI-C-304', amount: 90000, channel: 'UPI', timestamp: '2026-03-22T09:00:00Z', transaction_id: 'TXN014', is_suspicious: false },
-    { id: 'e15', source: 'UBI-C-301', target: 'UBI-C-302', amount: 45000, channel: 'NEFT', timestamp: '2026-03-22T10:00:00Z', transaction_id: 'TXN015', is_suspicious: false },
-    { id: 'e16', source: 'UBI-R-101', target: 'UBI-C-305', amount: 30000, channel: 'UPI', timestamp: '2026-03-22T11:00:00Z', transaction_id: 'TXN016', is_suspicious: false },
-    { id: 'e17', source: 'UBI-M-001', target: 'UBI-M-002', amount: 50000, channel: 'UPI', timestamp: '2026-03-22T12:00:00Z', transaction_id: 'TXN017', is_suspicious: true },
-    { id: 'e18', source: 'UBI-M-002', target: 'UBI-M-001', amount: 25000, channel: 'UPI', timestamp: '2026-03-22T13:00:00Z', transaction_id: 'TXN018', is_suspicious: true }
-  ];
+/* ── Stub: getScoreLevel — Phase 2A export ───────────────── */
+function getScoreLevel(score) {
+  if (score >= 85) return { level: 'IMMINENT', heatVar: '--heat-4' };
+  if (score >= 75) return { level: 'CRITICAL', heatVar: '--heat-3' };
+  if (score >= 60) return { level: 'HOT',      heatVar: '--heat-2' };
+  if (score >= 40) return { level: 'WARMING',  heatVar: '--heat-1' };
+  return              { level: 'CLEAN',    heatVar: '--heat-0' };
+}
 
-  return {
-    account_id: 'UBI-2026-DEMO-GRAPH',
-    graph: {
-      nodes,
-      edges,
-      graph_metadata: {
-        total_nodes: nodes.length,
-        total_edges: edges.length,
-        confirmed_mules: 2,
-        recruiters_detected: 1,
-        total_flow_value: 8655000,
-        detection_timestamp: new Date().toISOString()
-      }
-    }
-  };
+/* ── Utility: CSS variable extractor ─────────────────────── */
+function getCSSVar(v) {
+  return getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+}
+function getHeatColor(score) {
+  if (score >= 85) return getCSSVar('--heat-4');
+  if (score >= 75) return getCSSVar('--heat-3');
+  if (score >= 60) return getCSSVar('--heat-2');
+  if (score >= 40) return getCSSVar('--heat-1');
+  return getCSSVar('--heat-0');
+}
+function getNodeRadius(score, isRecruiter) {
+  if (isRecruiter) return 20;
+  if (score >= 85) return 26;
+  if (score >= 75) return 22;
+  if (score >= 60) return 18;
+  if (score >= 40) return 14;
+  return 10;
+}
+function getLinkOpacity(value) {
+  if (value > 1_000_000) return 0.9;
+  if (value >   100_000) return 0.6;
+  if (value >    10_000) return 0.4;
+  return 0.2;
+}
+function getLinkWidth(value) { return value > 1_000_000 ? 2 : 1; }
+
+/* ── fitToContent — defined outside component (no state deps) */
+function fitToContent(svg, group, zoom, width, height) {
+  try {
+    const b = group.node().getBBox();
+    if (!b.width || !b.height) return;
+    const pad   = 48;
+    const scale = Math.min((width - pad * 2) / b.width, (height - pad * 2) / b.height, 1.5);
+    const tx    = width  / 2 - (b.x + b.width  / 2) * scale;
+    const ty    = height / 2 - (b.y + b.height / 2) * scale;
+    svg.transition().duration(600).ease(d3.easeCubicOut)
+      .call(zoom.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
+  } catch { /* SVG not yet visible */ }
+}
+
+/* ── Mock data ───────────────────────────────────────────── */
+const MOCK_GRAPH_DATA = {
+  nodes: [
+    { id: 'UBI-2026-DEMO-001', name: 'Rajesh Kumar',         score: 84, isRecruiter: false, isFocus: true,  taintScore: 0,   primarySignal: 'Signal 4 — Dormant Reactivation',          isConfirmed: false },
+    { id: 'UBI-RECV-002',      name: 'Priya Sharma',         score: 67, isRecruiter: false, isFocus: false, taintScore: 80,  primarySignal: 'Signal 1 — Test Credit',                    isConfirmed: false },
+    { id: 'UBI-RECV-003',      name: 'Amit Singh',           score: 71, isRecruiter: false, isFocus: false, taintScore: 55,  primarySignal: 'Signal 2 — Device Fingerprint',             isConfirmed: false },
+    { id: 'UBI-RECV-004',      name: 'Sunita Devi',          score: 45, isRecruiter: false, isFocus: false, taintScore: 30,  primarySignal: 'Signal 3 — Velocity Spike',                 isConfirmed: false },
+    { id: 'UBI-COORD-001',     name: 'Coordinator Account',  score: 15, isRecruiter: true,  isFocus: false, taintScore: 0,   primarySignal: 'Recruiter — 23 downstream accounts',        isConfirmed: false },
+    { id: 'UBI-CONF-001',      name: 'Confirmed Mule',       score: 92, isRecruiter: false, isFocus: false, taintScore: 100, primarySignal: 'Signal 4 + Signal 5 + Signal 6',            isConfirmed: true  },
+  ],
+  links: [
+    { source: 'UBI-COORD-001',      target: 'UBI-2026-DEMO-001', value: 500,     channel: 'UPI',  timestamp: '2026-03-01T08:00:00Z' },
+    { source: 'UBI-COORD-001',      target: 'UBI-RECV-002',      value: 300,     channel: 'UPI',  timestamp: '2026-03-01T08:05:00Z' },
+    { source: 'UBI-COORD-001',      target: 'UBI-RECV-003',      value: 200,     channel: 'UPI',  timestamp: '2026-03-01T08:10:00Z' },
+    { source: 'UBI-2026-DEMO-001',  target: 'UBI-RECV-004',      value: 850_000, channel: 'NEFT', timestamp: '2026-03-03T09:00:00Z' },
+    { source: 'UBI-RECV-002',       target: 'UBI-CONF-001',      value: 1_200_000,channel:'RTGS', timestamp: '2026-03-03T09:15:00Z' },
+    { source: 'UBI-RECV-003',       target: 'UBI-CONF-001',      value: 750_000, channel: 'NEFT', timestamp: '2026-03-03T09:20:00Z' },
+  ],
 };
 
-// --- SUB-COMPONENTS ---
-
-const GraphHeader = ({ metadata, accountId, activeFilter, onFilterChange }) => {
-  return (
-    <div className="graph-header">
-      <div className="header-left">
-        <span className="header-title">TRANSACTION NETWORK</span>
-        <span className="header-subtitle">ACCOUNT ID: {accountId}</span>
-      </div>
-
-      <div className="header-stats">
-        <div className="stat-block">
-          <span className="stat-label">NODES</span>
-          <span className="stat-value">{metadata.total_nodes}</span>
-        </div>
-        <div className="stat-block">
-          <span className="stat-label">EDGES</span>
-          <span className="stat-value">{metadata.total_edges}</span>
-        </div>
-        <div className="stat-block">
-          <span className="stat-label">MULES CONFIRMED</span>
-          <span className="stat-value" style={{ color: 'var(--phosphor)' }}>{metadata.confirmed_mules}</span>
-        </div>
-        <div className="stat-block">
-          <span className="stat-label">FLOW VALUE</span>
-          <span className="stat-value">₹{(metadata.total_flow_value / 100000).toFixed(1)}L</span>
-        </div>
-      </div>
-
-      <div className="header-filters">
-        {['ALL', 'MULES', 'RECRUITERS', 'HIGH_RISK'].map(f => (
-          <button 
-            key={f}
-            className={`filter-btn ${activeFilter === f ? 'active' : ''}`}
-            onClick={() => onFilterChange(f)}
-          >
-            {f.replace('_', ' ')}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-const NodeDetailPanel = ({ selectedNode, edges, onViewTimeline }) => {
-  if (!selectedNode) {
-    return (
-      <div className="detail-panel">
-        <div className="panel-placeholder">SELECT A NODE TO VIEW DETAILS</div>
-      </div>
-    );
-  }
-
-  const connectedEdges = edges.filter(e => 
-    e.source.id === selectedNode.id || e.target.id === selectedNode.id ||
-    e.source === selectedNode.id || e.target === selectedNode.id
-  ).slice(0, 8);
-
-  const getBadgeClass = (d) => {
-    if (d.is_recruiter) return 'recruiter';
-    if (d.is_confirmed_mule) return 'mule';
-    if (d.warmth_score > 60) return 'high-risk';
-    return 'clean';
-  };
-
-  const exportNode = () => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(selectedNode));
-    const downloadAnchorNode = document.createElement('a');
-    downloadAnchorNode.setAttribute("href", dataStr);
-    downloadAnchorNode.setAttribute("download", `node_${selectedNode.id}.json`);
-    document.body.appendChild(downloadAnchorNode);
-    downloadAnchorNode.click();
-    downloadAnchorNode.remove();
-  };
-
-  const getScoreColor = (score) => {
-    if (score >= 85) return 'var(--void)';
-    if (score >= 60) return 'var(--phosphor)';
-    return 'var(--instrument-white)';
-  };
-
-  const isInverted = selectedNode.warmth_score >= 85;
+/* ── NodeTooltip ─────────────────────────────────────────── */
+function NodeTooltip({ node, position, visible }) {
+  if (!visible || !node) return null;
+  const isRight  = position.x > window.innerWidth  * 0.6;
+  const isBottom = position.y > window.innerHeight * 0.7;
+  const heatIdx  = node.score >= 85 ? 4 : node.score >= 75 ? 3 : node.score >= 60 ? 2 : node.score >= 40 ? 1 : 0;
 
   return (
-    <div className="detail-panel">
-      <div className="panel-header">
-        <div className={`type-badge ${getBadgeClass(selectedNode)}`}>
-          {selectedNode.is_recruiter ? 'RECRUITER NODE' : 
-           selectedNode.is_confirmed_mule ? 'CONFIRMED MULE' : 
-           selectedNode.node_type + ' NODE'}
-        </div>
-        <div className="panel-id">{selectedNode.id}</div>
+    <motion.div {...fadeIn} transition={{ duration: 0.1 }} style={{
+      position: 'fixed',
+      left:   isRight  ? 'auto' : position.x + 16,
+      right:  isRight  ? window.innerWidth  - position.x + 16 : 'auto',
+      top:    isBottom ? 'auto' : position.y + 16,
+      bottom: isBottom ? window.innerHeight - position.y + 16 : 'auto',
+      background: 'var(--bg-elevated)', border: '1px solid var(--border-default)',
+      borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-lg)',
+      padding: '12px 16px', minWidth: '220px', maxWidth: '280px',
+      zIndex: 1000, pointerEvents: 'none',
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+        <span style={{ fontFamily: 'var(--font-ui)', fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>
+          {node.name}
+        </span>
+        {node.isRecruiter
+          ? <span style={{ fontFamily: 'var(--font-ui)', fontSize: '9px', fontWeight: 700,
+              letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--accent)',
+              background: 'var(--accent-subtle)', border: '1px solid var(--accent-border)',
+              borderRadius: '4px', padding: '2px 8px' }}>COORDINATOR</span>
+          : <WarmthBadge score={node.score} showDot={false} />
+        }
       </div>
 
-      <div className="panel-score-block" style={{ background: isInverted ? 'var(--phosphor)' : 'transparent' }}>
-        <div className="panel-score-val" style={{ color: getScoreColor(selectedNode.warmth_score) }}>
-          {selectedNode.warmth_score}
-        </div>
-        <div className="panel-risk-label" style={{ color: isInverted ? 'var(--void)' : 'var(--instrument-grey)' }}>
-          {selectedNode.risk_level} RISK PROFILE
-        </div>
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-tertiary)', marginBottom: '8px' }}>
+        {node.id}
       </div>
 
-      <div className="panel-details-grid">
-        <div className="detail-item">
-          <span className="detail-label">ACCOUNT TYPE</span>
-          <span className="detail-value">{selectedNode.account_details.account_type}</span>
+      {!node.isRecruiter && (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          padding: '8px 0', borderTop: '1px solid var(--border-default)' }}>
+          <span style={{ fontFamily: 'var(--font-ui)', fontSize: '10px', fontWeight: 600,
+            letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>
+            WarmthScore
+          </span>
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700,
+            color: `var(--heat-${heatIdx})` }}>
+            {Math.round(node.score)}
+          </span>
         </div>
-        <div className="detail-item">
-          <span className="detail-label">BRANCH</span>
-          <span className="detail-value">{selectedNode.account_details.branch}</span>
-        </div>
-        <div className="detail-item">
-          <span className="detail-label">OCCUPATION</span>
-          <span className="detail-value">{selectedNode.account_details.kyc_occupation}</span>
-        </div>
-        <div className="detail-item">
-          <span className="detail-label">TAINT SCORE</span>
-          <span className="detail-value">{selectedNode.taint_score || 'N/A'}</span>
-        </div>
-        <div className="detail-item">
-          <span className="detail-label">RECEIVED</span>
-          <span className="detail-value">₹{(selectedNode.account_details.total_received / 1000).toFixed(0)}K</span>
-        </div>
-        <div className="detail-item">
-          <span className="detail-label">SENT</span>
-          <span className="detail-value">₹{(selectedNode.account_details.total_sent / 1000).toFixed(0)}K</span>
-        </div>
-      </div>
-
-      <div className="panel-list-section">
-        <div className="panel-list-title">CONNECTED TRANSACTIONS</div>
-        {connectedEdges.map(e => (
-          <div key={e.id} className={`txn-row ${e.is_suspicious ? 'suspicious' : ''}`}>
-            <span>{e.source.id === selectedNode.id || e.source === selectedNode.id ? '↗' : '↘'}</span>
-            <span>₹{e.amount.toLocaleString()}</span>
-            <span>{e.channel}</span>
-            <span>{new Date(e.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-          </div>
-        ))}
-        {edges.length > 8 && <div className="txn-row" style={{ marginTop: 8, opacity: 0.5 }}>AND {edges.length - 8} MORE...</div>}
-      </div>
-
-      <div className="panel-actions">
-        <button className="action-btn" onClick={exportNode}>EXPORT NODE DATA</button>
-        <button className="action-btn" onClick={() => onViewTimeline(selectedNode.id)}>VIEW ACCOUNT TIMELINE</button>
-      </div>
-    </div>
-  );
-};
-
-const Tooltip = ({ node, position }) => {
-  if (!node) return null;
-
-  const getScoreColor = (score) => {
-    if (score >= 60) return 'var(--phosphor)';
-    return 'var(--instrument-white)';
-  };
-
-  return (
-    <div className="graph-tooltip" style={{ left: position.x + 15, top: position.y + 15 }}>
-      <div className="tooltip-id">{node.id}</div>
-      <div className="tooltip-sep" />
-      <div className="tooltip-score" style={{ color: getScoreColor(node.warmth_score) }}>{node.warmth_score}</div>
-      <div className="tooltip-risk">{node.risk_level} RISK</div>
-      <div className="tooltip-sep" />
-      <div className="tooltip-detail">OCC: {node.account_details.kyc_occupation}</div>
-      <div className="tooltip-detail">RECV: ₹{node.account_details.total_received.toLocaleString()}</div>
-      <div className="tooltip-detail">SENT: ₹{node.account_details.total_sent.toLocaleString()}</div>
-      {node.taint_score && <div className="tooltip-detail">TAINT: {node.taint_score}</div>}
-      {node.is_recruiter && (
-        <div className="tooltip-badge badge-recruiter">⬛ RECRUITER NODE</div>
       )}
-      {node.is_confirmed_mule && (
-        <div className="tooltip-badge badge-mule">⬛ CONFIRMED MULE</div>
+
+      {node.primarySignal && (
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-secondary)',
+          paddingTop: '8px', borderTop: '1px solid var(--border-default)' }}>
+          {node.primarySignal}
+        </div>
       )}
+
+      {node.taintScore > 0 && (
+        <div style={{ display: 'flex', justifyContent: 'space-between',
+          paddingTop: '8px', borderTop: '1px solid var(--border-default)' }}>
+          <span style={{ fontFamily: 'var(--font-ui)', fontSize: '10px',
+            textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>Taint Score</span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px',
+            fontWeight: 500, color: 'var(--warning)' }}>{node.taintScore}</span>
+        </div>
+      )}
+
+      {node.isConfirmed && (
+        <div style={{ marginTop: '8px', padding: '4px 8px', background: 'var(--danger-bg)',
+          borderRadius: '4px', fontFamily: 'var(--font-ui)', fontSize: '10px',
+          fontWeight: 600, color: 'var(--danger)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+          ⚠ Confirmed Mule Account
+        </div>
+      )}
+    </motion.div>
+  );
+}
+
+/* ── GraphLegend ─────────────────────────────────────────── */
+function GraphLegend() {
+  const items = [
+    { label: 'Clean (0–40)',     heatVar: '--heat-0', shape: 'circle'  },
+    { label: 'Warming (40–60)', heatVar: '--heat-1', shape: 'circle'  },
+    { label: 'Hot (60–75)',     heatVar: '--heat-2', shape: 'circle'  },
+    { label: 'Critical (75–85)',heatVar: '--heat-3', shape: 'circle'  },
+    { label: 'Imminent (85+)',  heatVar: '--heat-4', shape: 'circle'  },
+    { label: 'Coordinator',     heatVar: '--accent', shape: 'diamond' },
+  ];
+  return (
+    <div style={{ position: 'absolute', bottom: '16px', left: '16px',
+      background: 'var(--bg-elevated)', border: '1px solid var(--border-default)',
+      borderRadius: 'var(--radius-lg)', padding: '12px 16px', zIndex: 10, pointerEvents: 'none' }}>
+      <div style={{ fontFamily: 'var(--font-ui)', fontSize: '10px', fontWeight: 600,
+        letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-tertiary)',
+        marginBottom: '8px' }}>
+        Risk Level
+      </div>
+      {items.map(item => (
+        <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+          <div style={{ width: '8px', height: '8px', flexShrink: 0,
+            borderRadius: item.shape === 'circle' ? '50%' : '2px',
+            background: `var(${item.heatVar})`,
+            transform: item.shape === 'diamond' ? 'rotate(45deg)' : 'none' }} />
+          <span style={{ fontFamily: 'var(--font-ui)', fontSize: '11px', color: 'var(--text-secondary)' }}>
+            {item.label}
+          </span>
+        </div>
+      ))}
     </div>
   );
-};
+}
 
-// --- MAIN VIEW ---
+/* ── FlowGraphView ───────────────────────────────────────── */
+export function FlowGraphView({ nodes = MOCK_GRAPH_DATA.nodes, links = MOCK_GRAPH_DATA.links, onNodeSelect, className = '' }) {
+  const svgRef       = useRef(null);
+  const zoomRef      = useRef(null);
+  const simRef       = useRef(null);
+  const containerRef = useRef(null);
 
-const FlowGraphView = ({ accountId = 'UBI-2026-DEMO-GRAPH', onViewTimeline = (id) => console.log('Timeline for:', id) }) => {
-  const [data, setData] = useState(null);
-  const [selectedNode, setSelectedNode] = useState(null);
-  const [activeFilter, setActiveFilter] = useState('ALL');
-  const [hoverNode, setHoverNode] = useState(null);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [showLabels, setShowLabels] = useState(true);
+  const [tooltip,    setTooltip]    = useState({ node: null, position: { x: 0, y: 0 }, visible: false });
+  const [selectedId, setSelectedId] = useState(null);
+  const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
 
+  /* Deep clone — D3 mutates nodes/links in-place */
+  const graphData = useMemo(() => ({
+    nodes: JSON.parse(JSON.stringify(nodes)),
+    links: JSON.parse(JSON.stringify(links)),
+  }), [nodes, links]);
+
+  /* Track container size */
   useEffect(() => {
-    // Simulate API fetch
-    const mockResponse = generateMockGraph();
-    setData(mockResponse);
+    if (!containerRef.current) return;
+    const obs = new ResizeObserver(entries => {
+      const { width, height } = entries[0].contentRect;
+      setDimensions({ width, height });
+    });
+    obs.observe(containerRef.current);
+    return () => obs.disconnect();
   }, []);
 
-  const handleHover = (node, event) => {
-    setHoverNode(node);
-    if (event) {
-      setMousePos({ x: event.pageX, y: event.pageY });
-    }
-  };
+  /* ── Main D3 render ──────────────────────────────────── */
+  useEffect(() => {
+    if (!svgRef.current) return;
+    const { width, height } = dimensions;
+    const svg = d3.select(svgRef.current);
 
-  if (!data) return <div className="flow-graph-container"><div className="panel-placeholder">LOADING GRAPH DATA...</div></div>;
+    /* Clear previous render */
+    svg.selectAll('*').remove();
+
+    /* Read CSS vars NOW — inside effect, document available */
+    const c = {
+      heat0:        getCSSVar('--heat-0'),
+      heat1:        getCSSVar('--heat-1'),
+      heat2:        getCSSVar('--heat-2'),
+      heat3:        getCSSVar('--heat-3'),
+      heat4:        getCSSVar('--heat-4'),
+      accent:       getCSSVar('--accent'),
+      bgBase:       getCSSVar('--bg-base'),
+      borderStrong: getCSSVar('--border-strong'),
+      textTertiary: getCSSVar('--text-tertiary'),
+    };
+
+    svg.attr('width', width).attr('height', height).style('background', c.bgBase);
+
+    /* Arrowhead marker */
+    svg.append('defs').append('marker')
+      .attr('id', 'arrowhead').attr('viewBox', '0 -5 10 10')
+      .attr('refX', 20).attr('refY', 0)
+      .attr('markerWidth', 6).attr('markerHeight', 6).attr('orient', 'auto')
+      .append('path').attr('d', 'M0,-5L10,0L0,5')
+        .attr('fill', c.borderStrong).attr('opacity', 0.6);
+
+    /* Zoom */
+    const zoom = d3.zoom().scaleExtent([0.3, 4])
+      .on('zoom', e => mainGroup.attr('transform', e.transform));
+    zoomRef.current = zoom;
+    svg.call(zoom);
+
+    const mainGroup = svg.append('g').attr('class', 'main-group');
+
+    /* Force simulation */
+    const sim = d3.forceSimulation(graphData.nodes)
+      .force('link',    d3.forceLink(graphData.links).id(d => d.id)
+        .distance(d => {
+          const src = graphData.nodes.find(n => n.id === (d.source.id || d.source));
+          return src?.isRecruiter ? 180 : 120;
+        }).strength(0.6))
+      .force('charge',  d3.forceManyBody().strength(d => d.isRecruiter ? -600 : -400))
+      .force('center',  d3.forceCenter(width / 2, height / 2))
+      .force('collide', d3.forceCollide().radius(d => getNodeRadius(d.score, d.isRecruiter) + 8).strength(0.8));
+    simRef.current = sim;
+
+    /* Links */
+    const linkEls = mainGroup.append('g').attr('class', 'links')
+      .selectAll('line').data(graphData.links).enter().append('line')
+        .attr('stroke', c.borderStrong)
+        .attr('stroke-width',   d => getLinkWidth(d.value))
+        .attr('stroke-opacity', d => getLinkOpacity(d.value))
+        .attr('marker-end', 'url(#arrowhead)');
+
+    /* Node groups */
+    const nodeGroups = mainGroup.append('g').attr('class', 'nodes')
+      .selectAll('g').data(graphData.nodes).enter().append('g')
+        .attr('class', d => `node-group node--${d.id.replace(/[^a-zA-Z0-9]/g, '-')}`)
+        .attr('cursor', 'pointer')
+        .call(d3.drag()
+          .on('start', (e, d) => { if (!e.active) sim.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
+          .on('drag',  (e, d) => { d.fx = e.x; d.fy = e.y; })
+          .on('end',   (e, d) => { if (!e.active) sim.alphaTarget(0); d.fx = null; d.fy = null; })
+        );
+
+    /* Selection rings (rendered first = below shapes) */
+    nodeGroups.append('circle')
+      .attr('class', 'selection-ring')
+      .attr('r',           d => getNodeRadius(d.score, d.isRecruiter) + 6)
+      .attr('fill',        'none')
+      .attr('stroke',      c.accent)
+      .attr('stroke-width', 2.5)
+      .attr('opacity',     0)
+      .attr('stroke-dasharray', '4 3');
+
+    /* Shapes */
+    graphData.nodes.forEach((nd, i) => {
+      const safeClass = nd.id.replace(/[^a-zA-Z0-9]/g, '-');
+      const g     = mainGroup.select(`.node--${safeClass}`);
+      const r     = getNodeRadius(nd.score, nd.isRecruiter);
+      const fill  = nd.isRecruiter ? c.accent : getHeatColor(nd.score);
+      const strokeColor = nd.isConfirmed ? c.accent : (d3.color(fill)?.darker(0.3).toString() || fill);
+
+      if (nd.isRecruiter) {
+        const side = r * 1.4;
+        g.append('rect')
+          .attr('width', side).attr('height', side)
+          .attr('x', -side / 2).attr('y', -side / 2).attr('rx', 3)
+          .attr('fill', fill).attr('stroke', strokeColor).attr('stroke-width', 2)
+          .attr('transform', 'rotate(45) scale(0)')
+          .transition().delay(i * 40).duration(400).ease(d3.easeBackOut.overshoot(0.5))
+          .attr('transform', 'rotate(45) scale(1)');
+      } else {
+        g.append('circle')
+          .attr('r', r).attr('fill', fill)
+          .attr('stroke', strokeColor).attr('stroke-width', nd.isConfirmed ? 3 : 1.5)
+          .attr('transform', 'scale(0)')
+          .transition().delay(i * 40).duration(400).ease(d3.easeBackOut.overshoot(0.5))
+          .attr('transform', 'scale(1)');
+      }
+    });
+
+    /* Labels */
+    nodeGroups.append('text')
+      .attr('class', 'node-label').attr('text-anchor', 'middle')
+      .attr('dy', d => getNodeRadius(d.score, d.isRecruiter) + 14)
+      .attr('fill', c.textTertiary)
+      .attr('font-family', 'IBM Plex Mono, monospace').attr('font-size', '9px')
+      .attr('pointer-events', 'none').text(d => d.id)
+      .attr('opacity', showLabels ? 1 : 0);
+
+    /* Mouse events */
+    nodeGroups
+      .on('mouseenter', (e, d) => {
+        setTooltip({ node: d, position: { x: e.clientX, y: e.clientY }, visible: true });
+        linkEls.attr('stroke-opacity', l =>
+          l.source.id === d.id || l.target.id === d.id
+            ? Math.min(getLinkOpacity(l.value) + 0.3, 1)
+            : getLinkOpacity(l.value) * 0.3);
+      })
+      .on('mousemove', e => setTooltip(p => ({ ...p, position: { x: e.clientX, y: e.clientY } })))
+      .on('mouseleave', () => {
+        setTooltip(p => ({ ...p, visible: false }));
+        linkEls.attr('stroke-opacity', l => getLinkOpacity(l.value));
+      })
+      .on('click', (e, d) => {
+        e.stopPropagation();
+        setSelectedId(prev => prev === d.id ? null : d.id);
+        onNodeSelect?.(d);
+        mainGroup.selectAll('.selection-ring').attr('opacity', n => n.id === d.id ? 1 : 0);
+      });
+
+    svg.on('click', () => {
+      setSelectedId(null);
+      mainGroup.selectAll('.selection-ring').attr('opacity', 0);
+    });
+
+    /* Tick */
+    sim.on('tick', () => {
+      linkEls.attr('x1', d => d.source.x).attr('y1', d => d.source.y)
+             .attr('x2', d => d.target.x).attr('y2', d => d.target.y);
+      nodeGroups.attr('transform', d => `translate(${d.x},${d.y})`);
+    });
+
+    /* Auto fit after simulation settles */
+    sim.on('end', () => fitToContent(svg, mainGroup, zoom, width, height));
+
+    return () => sim.stop();
+  }, [graphData, dimensions]); /* eslint-disable-line */
+
+  /* Label toggle — isolated effect, no full re-render */
+  useEffect(() => {
+    if (!svgRef.current) return;
+    d3.select(svgRef.current).selectAll('.node-label')
+      .transition().duration(200).attr('opacity', showLabels ? 1 : 0);
+  }, [showLabels]);
+
+  const handleResetView = useCallback(() => {
+    if (!svgRef.current || !zoomRef.current) return;
+    const svg   = d3.select(svgRef.current);
+    const group = svg.select('.main-group');
+    fitToContent(svg, group, zoomRef.current, dimensions.width, dimensions.height);
+  }, [dimensions]);
+
+  const handleExport = useCallback(() => {
+    if (!svgRef.current) return;
+    const blob = new Blob([new XMLSerializer().serializeToString(svgRef.current)], { type: 'image/svg+xml' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `prism-flowgraph-${Date.now()}.svg`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, []);
 
   return (
-    <div className="flow-graph-container">
-      <GraphHeader 
-        metadata={data.graph.graph_metadata}
-        accountId={data.account_id}
-        activeFilter={activeFilter}
-        onFilterChange={setActiveFilter}
-      />
+    <div className={`flowgraph-view ${className}`}
+      style={{ display: 'flex', flexDirection: 'column', height: '100%',
+        background: 'var(--bg-base)', position: 'relative', overflow: 'hidden' }}>
 
-      <div className="graph-body">
-        <FlowGraphCanvas 
-          graphData={data.graph}
-          activeFilter={activeFilter}
-          onNodeSelect={setSelectedNode}
-          onHover={handleHover}
-        />
-
-        <NodeDetailPanel 
-          selectedNode={selectedNode}
-          edges={data.graph.edges}
-          onViewTimeline={onViewTimeline}
-        />
+      {/* Header bar */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        height: '56px', padding: '0 32px', background: 'var(--bg-surface)',
+        borderBottom: '1px solid var(--border-default)', flexShrink: 0 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 700,
+            color: 'var(--text-primary)', fontVariationSettings: "'opsz' 24, 'WONK' 0" }}>
+            Flow Graph
+          </span>
+          <span style={{ fontFamily: 'var(--font-ui)', fontSize: '11px', color: 'var(--text-tertiary)' }}>
+            Transaction network — live
+          </span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Button variant="secondary" size="sm" onClick={() => setShowLabels(v => !v)}>
+            Labels {showLabels ? 'ON' : 'OFF'}
+          </Button>
+          <Button variant="secondary" size="sm" onClick={handleResetView}>Reset View</Button>
+          <Button variant="ghost"     size="sm" onClick={handleExport}>Export →</Button>
+        </div>
       </div>
 
-      <Tooltip node={hoverNode} position={mousePos} />
+      {/* D3 canvas */}
+      <div ref={containerRef} style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+        <svg ref={svgRef} style={{ display: 'block', width: '100%', height: '100%' }} />
+        <GraphLegend />
+      </div>
+
+      {/* Tooltip */}
+      <AnimatePresence>
+        {tooltip.visible && tooltip.node && (
+          <NodeTooltip node={tooltip.node} position={tooltip.position} visible={tooltip.visible} />
+        )}
+      </AnimatePresence>
     </div>
   );
-};
+}
 
 export default FlowGraphView;

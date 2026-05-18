@@ -1,157 +1,181 @@
 import React, { useState, useEffect } from 'react';
-import RecruiterCanvas from './RecruiterCanvas';
-import CampaignPanel from './CampaignPanel';
-import './RecruiterMapView.css';
+import { AnimatePresence } from 'framer-motion';
+import { useRecruiterData }     from './useRecruiterData';
+import { RecruiterCard }        from './RecruiterCard';
+import { RecruiterClassBadge }  from './RecruiterClassBadge';
+import { CampaignStats }        from './CampaignStats';
+import { CampaignGraph }        from './CampaignGraph';
+import { FreezeConfirmModal }   from './FreezeConfirmModal';
 
-// --- MOCK DATA GENERATOR ---
-const generateMockCampaign = () => {
-  const warmingAccounts = [];
-  const now = new Date();
+/* Sort order: PLATFORM_SCALE → ORCHESTRATOR → COORDINATOR */
+const SORT_ORDER = { PLATFORM_SCALE: 0, ORCHESTRATOR: 1, COORDINATOR: 2 };
 
-  // Create 23 accounts with varied scores
-  for (let i = 1; i <= 23; i++) {
-    let score, status;
-    if (i <= 4) { score = 85 + Math.floor(Math.random() * 10); status = "WARMING"; }
-    else if (i <= 12) { score = 60 + Math.floor(Math.random() * 20); status = "WARMING"; }
-    else { score = 15 + Math.floor(Math.random() * 40); status = "WARMING"; }
-
-    warmingAccounts.push({
-      id: `UBI-ACC-${1000 + i}`,
-      label: `ACC_${i.toString().padStart(3, '0')}`,
-      warmth_score: score,
-      risk_level: score >= 85 ? "IMMINENT" : score >= 60 ? "HOT" : "WARMING",
-      is_confirmed_mule: score >= 85,
-      test_payment_received: 50,
-      test_payment_timestamp: new Date(now.getTime() - i * 3600000).toISOString(),
-      current_status: status
-    });
-  }
-
-  return {
-    campaign_id: "PRISM-CMP-2026-042",
-    recruiter: {
-      id: "91-98421-XXXXX",
-      label: "COORDINATOR_A",
-      warmth_score: 18,
-      classification: "INDUSTRIAL_ORCHESTRATOR",
-      accounts_recruited: 23,
-      test_payments_sent: 23,
-      campaign_start: new Date(now.getTime() - 48 * 3600000).toISOString(),
-      campaign_duration_hours: 48,
-      total_test_value: 1150,
-      status: "ACTIVE"
-    },
-    warming_accounts: warmingAccounts,
-    campaign_metadata: {
-      total_accounts_in_campaign: 23,
-      accounts_restricted: 0,
-      accounts_frozen: 0,
-      accounts_still_warming: 23,
-      estimated_intended_fraud_value: 28400000,
-      prism_detection_timestamp: now.toISOString(),
-      campaign_classification: "INDUSTRIAL_ORCHESTRATOR"
-    }
-  };
+const STATUS_DOT = {
+  ACTIVE:        'var(--heat-0)',
+  FROZEN:        'var(--text-disabled)',
+  INVESTIGATING: 'var(--heat-1)',
 };
 
-const RecruiterMapView = ({ 
-  accountId = 'UBI-2026-DEMO-NET',
-  onViewTimeline = (id) => console.log('Timeline:', id)
-}) => {
-  const [campaign, setCampaign] = useState(null);
-  const [selectedNodeId, setSelectedNodeId] = useState(null);
-  const [isFrozen, setIsFrozen] = useState(false);
+const SHIMMER_CSS = `
+  @keyframes shimmer {
+    from { background-position: -200% 0; }
+    to   { background-position:  200% 0; }
+  }
+  .skeleton-shimmer {
+    background: linear-gradient(90deg, var(--bg-subtle) 25%, var(--bg-surface) 50%, var(--bg-subtle) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+    border-radius: 12px;
+  }
+`;
 
+function SkeletonCard() {
+  return <div className="skeleton-shimmer" style={{ height: '160px', marginBottom: '10px' }} />;
+}
+
+export default function RecruiterMapView() {
+  const {
+    recruiters, selectedId, selectedRecruiter,
+    loading, error, freezingId,
+    setSelectedId, freezeCampaign,
+  } = useRecruiterData();
+
+  const [modalRecruiter, setModalRecruiter] = useState(null);
+
+  /* Inject shimmer CSS once */
   useEffect(() => {
-    // Simulate fetch
-    const data = generateMockCampaign();
-    setCampaign(data);
+    const el = document.createElement('style');
+    el.textContent = SHIMMER_CSS;
+    document.head.appendChild(el);
+    return () => document.head.removeChild(el);
   }, []);
 
-  const handleFreeze = () => {
-    setIsFrozen(true);
-    // Update local state to reflect freeze
-    if (campaign) {
-      const updatedAccounts = campaign.warming_accounts.map(a => ({
-        ...a,
-        current_status: "FROZEN"
-      }));
-      setCampaign({
-        ...campaign,
-        warming_accounts: updatedAccounts,
-        recruiter: { ...campaign.recruiter, status: "FROZEN" },
-        campaign_metadata: {
-          ...campaign.campaign_metadata,
-          accounts_frozen: campaign.campaign_metadata.total_accounts_in_campaign,
-          accounts_still_warming: 0
-        }
-      });
-    }
-  };
-
-  if (!campaign) return <div className="recruiter-map-container"><div className="panel-placeholder">LOADING RECRUITER NETWORK...</div></div>;
-
-  const meta = campaign.campaign_metadata;
+  const sorted = [...recruiters].sort((a, b) =>
+    (SORT_ORDER[a.classification] ?? 9) - (SORT_ORDER[b.classification] ?? 9)
+  );
 
   return (
-    <div className="recruiter-map-container">
-      {/* CAMPAIGN HEADER */}
-      <div className="campaign-header">
-        <div className="header-left">
-          <span className="header-title">RECRUITER NETWORK</span>
-          <span className="header-subtitle">CAMPAIGN ID: {campaign.campaign_id}</span>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--bg-base)' }}>
+
+      {/* Page header */}
+      <div style={{ padding: '0 0 20px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexShrink: 0 }}>
+        <div>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 700,
+            fontVariationSettings: "'opsz' 24, 'WONK' 0", color: 'var(--text-primary)', margin: 0 }}>
+            Recruiter Map
+          </h1>
+          <p style={{ fontFamily: 'var(--font-ui)', fontSize: '13px', color: 'var(--text-secondary)', margin: '4px 0 0' }}>
+            Coordinator accounts orchestrating mule campaigns. One source. Many targets.
+          </p>
+        </div>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-tertiary)',
+          whiteSpace: 'nowrap', paddingTop: '4px' }}>
+          {recruiters.length} Recruiter Network{recruiters.length !== 1 ? 's' : ''} Detected
+        </span>
+      </div>
+
+      {/* Body: left + right */}
+      <div style={{ display: 'flex', flex: 1, overflow: 'hidden', gap: '0' }}>
+
+        {/* LEFT PANEL */}
+        <div style={{
+          width: '360px', minWidth: '360px',
+          borderRight: '1px solid var(--border-default)',
+          overflowY: 'auto',
+          padding: '0 12px 16px 0',
+          display: 'flex', flexDirection: 'column',
+        }}>
+          <div style={{ fontFamily: 'var(--font-ui)', fontSize: '9px', fontWeight: 600,
+            letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-tertiary)',
+            marginBottom: '12px' }}>
+            Sorted by Scale ↓
+          </div>
+
+          {error && recruiters.length === 0 && (
+            <div style={{ fontFamily: 'var(--font-ui)', fontSize: '12px', color: 'var(--heat-1)',
+              padding: '8px 12px', background: 'var(--warning-bg)', borderRadius: '8px',
+              marginBottom: '12px' }}>
+              Failed to load recruiter data. Using demo data.
+            </div>
+          )}
+
+          {loading
+            ? [0,1,2].map(i => <SkeletonCard key={i} />)
+            : sorted.map((rec, i) => (
+                <div key={rec.id} style={{ marginBottom: '10px' }}>
+                  <RecruiterCard
+                    recruiter={rec}
+                    isSelected={rec.id === selectedId}
+                    isFreezing={freezingId === rec.id}
+                    onSelect={() => setSelectedId(rec.id)}
+                    onFreezeClick={r => setModalRecruiter(r)}
+                    index={i}
+                  />
+                </div>
+              ))
+          }
         </div>
 
-        <div className="header-center">
-          <div className={`class-badge ${campaign.recruiter.classification === 'INDUSTRIAL_ORCHESTRATOR' ? 'orchestrator' : 'platform'}`}>
-            {campaign.recruiter.classification.replace(/_/g, ' ')}
-          </div>
-          {campaign.recruiter.classification === 'PLATFORM_SCALE_OPERATION' && (
-            <span style={{ fontSize: '9px', color: 'var(--instrument-grey)', marginTop: '4px' }}>
-              ⚠ SUPREME COURT WRIT 03/2025 TRIGGER
-            </span>
+        {/* RIGHT PANEL */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '0 0 16px 24px' }}>
+          {!selectedRecruiter ? (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center',
+              justifyContent: 'center', height: '60%', gap: '12px' }}>
+              <span style={{ fontSize: '48px', color: 'var(--text-tertiary)' }}>◈</span>
+              <span style={{ fontFamily: 'var(--font-ui)', fontSize: '14px',
+                color: 'var(--text-tertiary)', textAlign: 'center' }}>
+                Select a recruiter network
+              </span>
+            </div>
+          ) : (
+            <>
+              {/* Right panel sub-header */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                marginBottom: '20px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <RecruiterClassBadge classification={selectedRecruiter.classification} size="lg" />
+                    <span style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 600,
+                      fontVariationSettings: "'opsz' 20, 'WONK' 0", color: 'var(--text-primary)' }}>
+                      {selectedRecruiter.holderName}
+                    </span>
+                  </div>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-tertiary)' }}>
+                    {selectedRecruiter.accountId}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <div style={{ width: '8px', height: '8px', borderRadius: '50%',
+                    background: STATUS_DOT[selectedRecruiter.status] || 'var(--text-tertiary)' }} />
+                  <span style={{ fontFamily: 'var(--font-ui)', fontSize: '11px', fontWeight: 600,
+                    textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-secondary)' }}>
+                    {selectedRecruiter.status}
+                  </span>
+                </div>
+              </div>
+
+              <CampaignStats recruiter={selectedRecruiter} />
+              <CampaignGraph key={selectedId} recruiter={selectedRecruiter} />
+            </>
           )}
         </div>
-
-        <div className="header-stats">
-          <div className="stat-item">
-            <span className="stat-label">ACCOUNTS IN CAMPAIGN</span>
-            <span className="stat-value">{meta.total_accounts_in_campaign}</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-label">STILL WARMING</span>
-            <span className="stat-value">{meta.accounts_still_warming}</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-label">RESTRICTED</span>
-            <span className="stat-value">{meta.accounts_restricted}</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-label">ESTIMATED FRAUD VALUE</span>
-            <span className="stat-value highlight">₹{(meta.estimated_intended_fraud_value / 10000000).toFixed(2)} CR</span>
-          </div>
-        </div>
       </div>
 
-      <div className="map-body">
-        <RecruiterCanvas 
-          campaign={campaign}
-          selectedNodeId={selectedNodeId}
-          onNodeSelect={setSelectedNodeId}
-          isFrozen={isFrozen}
-        />
-
-        <CampaignPanel 
-          campaign={campaign}
-          selectedNodeId={selectedNodeId}
-          isFrozen={isFrozen}
-          onFreeze={handleFreeze}
-          onGenerateAutoSTR={(id) => console.log('AutoSTR for:', id)}
-          onEscalate={() => console.log('Escalating...')}
-        />
-      </div>
+      {/* Freeze modal */}
+      <AnimatePresence>
+        {modalRecruiter && (
+          <FreezeConfirmModal
+            key="freeze-modal"
+            recruiter={modalRecruiter}
+            isFreezing={freezingId === modalRecruiter.id}
+            onConfirm={() => {
+              freezeCampaign(modalRecruiter.id);
+              setModalRecruiter(null);
+            }}
+            onDismiss={() => setModalRecruiter(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
-};
-
-export default RecruiterMapView;
+}

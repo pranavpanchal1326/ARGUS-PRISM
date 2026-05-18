@@ -1,0 +1,166 @@
+/* ============================================================
+   PRISM — GLOBAL RESET + BASE STYLES + UTILITY CLASSES
+   Depends on: tokens.css (must be imported first)
+   Team ARGUS · iDEA 2.0 · Union Bank of India
+   ============================================================ */
+
+/* === RESET === */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* === ROOT BINDING === */
+html {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  scroll-behavior: smooth;
+}
+
+
+/* === SMOOTH THEME TRANSITION === */
+/* Applies to all elements — background, border, and text colour only.
+   transform and opacity are intentionally excluded to avoid
+   interfering with Framer Motion animation values. */
+*,
+*::before,
+*::after {
+  transition:
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    color var(--transition-fast);
+}
+
+/* Override: motion elements must have zero transition interference */
+.motion-element,
+.motion-element * {
+  transition: none !important;
+}
+
+/* === SCROLLBAR — WEBKIT (WASHI AESTHETIC) === */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-surface);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: var(--radius-pill);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
+
+/* === SELECTION COLOUR === */
+::selection {
+  background: var(--accent-subtle);
+  color: var(--accent);
+}
+
+/* === BODY BASE === */
+body {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* ============================================================
+   UTILITY CLASSES
+   ============================================================ */
+
+/* === SURFACE UTILITIES === */
+.surface-base     { background-color: var(--bg-base); }
+.surface-card     { background-color: var(--bg-surface); }
+.surface-elevated { background-color: var(--bg-elevated); }
+.surface-subtle   { background-color: var(--bg-subtle); }
+
+/* === TEXT UTILITIES === */
+.text-primary   { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-tertiary  { color: var(--text-tertiary); }
+.text-accent    { color: var(--accent); }
+.text-success   { color: var(--success); }
+.text-warning   { color: var(--warning); }
+.text-danger    { color: var(--danger); }
+
+/* === BORDER UTILITIES === */
+.border-default { border: 1px solid var(--border-default); }
+.border-strong  { border: 1px solid var(--border-strong); }
+.border-accent  { border: 1px solid var(--accent-border); }
+
+/* === WARMTHSCORE HEAT COLOUR UTILITIES === */
+.heat-clean    { color: var(--heat-0); }  /* score 0–40   */
+.heat-warming  { color: var(--heat-1); }  /* score 40–60  */
+.heat-hot      { color: var(--heat-2); }  /* score 60–75  */
+.heat-critical { color: var(--heat-3); }  /* score 75–85  */
+.heat-imminent { color: var(--heat-4); }  /* score 85–100 */
+
+/* === CARD HOVER LIFT === */
+/* Used on every interactive card in the system */
+.card-hover {
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* === ACCENT LEFT BORDER === */
+/* Used on IMMINENT alert rows and engine cards */
+.accent-border-left {
+  border-left: 3px solid var(--accent);
+}
+
+/* === UPPERCASE LABEL === */
+/* Used for table headers and all field labels */
+.label-upper {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+/* ============================================================
+   PAPER GRAIN FILTER APPLICATION
+   Applied to body — NOT to html (applying to html breaks fixed positioning).
+   Light mode: #paper-grain      (feTurbulence slope 0.025)
+   Dark mode:  #paper-grain-dark (feTurbulence slope 0.04)
+   PaperGrain.jsx must be mounted in App.jsx for these IDs to exist.
+   ============================================================ */
+
+body {
+  filter: url(#paper-grain);
+}
+
+[data-theme="dark"] body {
+  filter: url(#paper-grain-dark);
+}
+
+/*
+  Elements that must NOT inherit the grain filter.
+  - Modals/dialogs: would double-grain (already on body).
+  - SVG internals: filter creates rendering artifacts.
+  - Video elements: noise must never overlay video content.
+*/
+.no-grain,
+dialog,
+[role="dialog"],
+video {
+  filter: none !important;
+}
+
+/* ─────────────────────────────────────────────────────────
+   RESPONSIVE — NAV LINKS
+   Center nav links hidden on small screens. Logo + CTA remain.
+   ───────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .nav-links { display: none !important; }
+  .problem-gap-grid { grid-template-columns: 1fr !important; }
+}

@@ -1,0 +1,427 @@
+/* ============================================================
+   PRISM — TYPOGRAPHY SYSTEM
+   Three-font philosophy: Fraunces · DM Sans · IBM Plex Mono
+   Depends on: tokens.css (must be imported before this file)
+   Team ARGUS · iDEA 2.0 · Union Bank of India
+   ============================================================ */
+
+/* ============================================================
+   BLOCK 1 — CSS FONT FAMILY VARIABLES
+   Added to :root as additive tokens — tokens.css is not modified.
+   Fallback rationale:
+   - Georgia: closest warm serif, prevents layout shift on Fraunces miss
+   - -apple-system: system UI renders same weight as DM Sans before load
+   - Courier New: universal monospace fallback, available on all OS
+   ============================================================ */
+
+:root {
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-ui:      'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono:    'IBM Plex Mono', 'Courier New', monospace;
+}
+
+/* ============================================================
+   BLOCK 2 — BASE ELEMENT BINDINGS
+   ============================================================ */
+
+/* Base body font */
+body {
+  font-family: var(--font-ui);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.75;
+  font-optical-sizing: auto;
+}
+
+/* Display elements auto-get Fraunces */
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  line-height: 1.1;
+}
+
+/* Data elements auto-get IBM Plex Mono */
+code, pre, kbd, samp {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+}
+
+/* Tabular numerals on ALL numeric displays — non-negotiable.
+   Without this, numbers jump width as values change — breaks animations. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* ============================================================
+   BLOCK 3 — COMPLETE TYPOGRAPHY SCALE
+   ============================================================ */
+
+/* === DISPLAY SCALE (Fraunces) === */
+
+.type-display-xl {
+  font-family: var(--font-display);
+  font-size: clamp(52px, 7vw, 80px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  font-optical-sizing: auto;
+  /* Used: Landing page hero H1 only */
+}
+
+.type-display-lg {
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-optical-sizing: auto;
+  /* Used: Landing section titles */
+}
+
+.type-display-md {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  font-optical-sizing: auto;
+  /* Used: Dashboard score display */
+}
+
+.type-display-sm {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  font-optical-sizing: auto;
+  /* Used: Card score numbers */
+}
+
+/* === HEADING SCALE (DM Sans) === */
+
+.type-heading-lg {
+  font-family: var(--font-ui);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  /* Used: Page titles in dashboard */
+}
+
+.type-heading-md {
+  font-family: var(--font-ui);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0;
+  /* Used: Section headers, card titles */
+}
+
+/* === BODY SCALE (DM Sans) === */
+
+.type-body-lg {
+  font-family: var(--font-ui);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.75;
+  letter-spacing: 0;
+  /* Used: Landing page body copy */
+}
+
+.type-body-md {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.6;
+  letter-spacing: 0;
+  /* Used: Dashboard secondary text, alert names */
+}
+
+/* === LABEL SCALE (DM Sans — UPPERCASE) === */
+/* These are the workhorses of the dashboard */
+
+.type-label-md {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  /* Used: Table column headers, sidebar section labels */
+}
+
+.type-label-sm {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  /* Used: Field labels, badge text, KPI card labels */
+}
+
+/* === MONO SCALE (IBM Plex Mono) === */
+
+.type-mono-lg {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  /* Used: Large amounts, prominent data values */
+}
+
+.type-mono-md {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  /* Used: Transaction amounts in table */
+}
+
+.type-mono-sm {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  /* Used: Account IDs, signal scores, SHAP values */
+}
+
+.type-mono-xs {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1.6;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+  /* Used: Timestamps, SHA hashes, XML preview */
+}
+
+/* === SPECIAL: SCORE DISPLAY === */
+/* The 64px WarmthScore number in Account Timeline.
+   This is the most important typographic moment in the dashboard. */
+
+.type-score-hero {
+  font-family: var(--font-display);
+  font-size: 64px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-optical-sizing: auto;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+  /* Used: WarmthScore hero display — Account Timeline view only */
+}
+
+/* === SPECIAL: KPI NUMBER === */
+/* The 48px numbers in the Alert Queue KPI bar */
+
+.type-kpi {
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-optical-sizing: auto;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+  /* Used: Alert Queue KPI cards — 3 stat numbers */
+}
+
+/* === SPECIAL: TICKER === */
+/* The crisis ticker — continuous scroll */
+
+.type-ticker {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  /* Used: Landing page crisis ticker only */
+}
+
+/* ============================================================
+   BLOCK 4 — FRAUNCES OPTICAL SIZING + WONK AXIS RULES
+   ============================================================ */
+
+/* ⚠️  WONK AXIS — HERO HEADLINE ONLY ⚠️
+   ═══════════════════════════════════════════════════════════
+   The WONK axis gives Fraunces intentional letterform
+   irregularities at display sizes — like hot metal type.
+
+   ONLY use on the hero H1. NEVER on scores, KPIs, or UI text.
+   Misapplying WONK on data values or body copy is a design bug.
+   ═══════════════════════════════════════════════════════════ */
+
+.type-hero-wonk {
+  font-family: var(--font-display);
+  font-variation-settings: 'opsz' 144, 'WONK' 1;
+  font-weight: 800;
+  font-size: clamp(42px, 7vw, 80px);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  /* Used: Landing page H1 ONLY. Do not use anywhere else. */
+}
+
+/* Score display — optical size tuned for 64px render */
+.type-score-opsz {
+  font-variation-settings: 'opsz' 72, 'WONK' 0;
+  /* Apply alongside .type-score-hero */
+}
+
+/* Section headlines — optical size tuned for 48px render */
+.type-display-opsz {
+  font-variation-settings: 'opsz' 48, 'WONK' 0;
+  /* Apply alongside .type-display-lg */
+}
+
+/* ============================================================
+   BLOCK 5 — TEXT-* CLASS ALIASES (Phase 2C naming convention)
+   These mirror the .type-* scale with explicit font-variation-settings.
+   Components in Phase 3+ use .text-* prefix for new code.
+   Existing Phase 2A/2B components continue using .type-* prefix.
+   Both sets are valid and produce identical computed styles.
+   ============================================================ */
+
+/* === DISPLAY SCALE — with font-variation-settings (Fraunces) === */
+
+/* ⚠️ WONK=1 active here — ONLY for hero H1 on landing page */
+.text-display-xl {
+  font-family: var(--font-display);
+  font-size: clamp(52px, 7vw, 80px);
+  font-weight: 800;
+  font-variation-settings: 'opsz' 144, 'WONK' 1;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+.text-display-lg {
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 700;
+  font-variation-settings: 'opsz' 72, 'WONK' 0;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.text-display-md {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 700;
+  font-variation-settings: 'opsz' 48, 'WONK' 0;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.text-display-sm {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 600;
+  font-variation-settings: 'opsz' 32, 'WONK' 0;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+/* === HEADING SCALE (DM Sans) === */
+
+.text-heading-lg {
+  font-family: var(--font-ui);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.text-heading-md {
+  font-family: var(--font-ui);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0;
+}
+
+/* === BODY SCALE (DM Sans) === */
+
+.text-body-lg {
+  font-family: var(--font-ui);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.75;
+  letter-spacing: 0;
+}
+
+.text-body-md {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.6;
+  letter-spacing: 0;
+}
+
+/* === LABEL SCALE (DM Sans — UPPERCASE) === */
+
+.text-label-md {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.text-label-sm {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+}
+
+/* === MONO SCALE (IBM Plex Mono) === */
+
+.text-mono-md {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  line-height: 1.5;
+}
+
+.text-mono-sm {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  line-height: 1.5;
+}
+
+.text-mono-xs {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  line-height: 1.6;
+}
+
+/* === SEMANTIC DISPLAY HELPERS === */
+
+/* Score and amount containers — tabular nums mandatory */
+.score-display,
+.amount,
+.stat-number {
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}

@@ -1,0 +1,137 @@
+/* ============================================================
+   PRISM — GLOBAL THEME TRANSITIONS + KEYFRAME ANIMATIONS
+   Depends on: tokens.css (must be imported before this file)
+   Team ARGUS · iDEA 2.0 · Union Bank of India
+
+   CRITICAL: transform and opacity are EXCLUDED from the global
+   transition. Including them would intercept every Framer Motion
+   animation and create jitter, delay, and incorrect easing.
+   Only colour-bearing properties are transitioned globally.
+   ============================================================ */
+
+/* === GLOBAL THEME TRANSITION === */
+/*
+  Applied to every element. When [data-theme] switches, all
+  colour-bearing properties fade in 250ms simultaneously.
+  This is what makes light→dark feel like a paper lamp being
+  switched — warm, single, unified moment.
+*/
+*,
+*::before,
+*::after {
+  transition:
+    background-color   0.25s ease,
+    background         0.25s ease,
+    border-color       0.25s ease,
+    color              0.25s ease,
+    fill               0.25s ease,
+    stroke             0.25s ease,
+    box-shadow         0.25s ease,
+    outline-color      0.25s ease;
+}
+
+/*
+  .motion-element — escape hatch for Framer Motion animated elements.
+  Spread this className onto any motion.div / motion.span that
+  is being animated by Framer Motion.
+
+  Without this, the global 250ms transition intercepts Framer
+  Motion's frame-by-frame updates and creates sluggish, eased
+  versions of what should be spring-physics animations.
+
+  Components that use this: AlertRow, ScoreGauge, ThresholdStamp,
+  any component using whileHover / layout / AnimatePresence.
+*/
+.motion-element,
+.motion-element * {
+  transition: none !important;
+}
+
+/* === CARD HOVER LIFT === */
+/*
+  Universal hover lift for all card-type surfaces.
+  translateY(-2px) with box-shadow upgrade.
+  Note: the transition here overrides the global transition
+  for transform specifically, using a shorter 0.18s duration.
+  This does NOT break Framer Motion — .motion-element still wins.
+*/
+.card-hover {
+  transition:
+    transform           0.18s ease,
+    box-shadow          0.18s ease,
+    background-color    0.25s ease,
+    border-color        0.25s ease;
+}
+
+.card-hover:hover {
+  transform:  translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* === PAPER GRAIN FILTER APPLICATION === */
+/*
+  Applied to body via filter: url(). The SVG filter is mounted
+  by GrainFilter.jsx / PaperGrain.jsx as the first App child.
+
+  We do NOT apply this here — it's applied in globals.css so
+  there is one canonical place for body filter binding.
+  This comment exists to document why it's not here.
+*/
+
+/* ─────────────────────────────────────────────────────────
+   CRISIS TICKER — landing page continuous horizontal scroll
+   Applied to: .ticker-track
+   Content is duplicated in HTML so the loop is seamless.
+   60s per full cycle. The crisis never pauses.
+   ───────────────────────────────────────────────────────── */
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.ticker-track {
+  animation: ticker-scroll 60s linear infinite;
+  will-change: transform;
+}
+
+/* ─────────────────────────────────────────────────────────
+   RECHARTS LINE DRAW-IN — WarmthScore timeline chart
+   Applied to: .recharts-line-curve
+   Draws the line left-to-right like ink flowing onto paper.
+   ───────────────────────────────────────────────────────── */
+@keyframes draw-line {
+  from { stroke-dashoffset: 2000; }
+  to   { stroke-dashoffset: 0; }
+}
+
+.recharts-line-curve {
+  stroke-dasharray:  2000;
+  stroke-dashoffset: 2000;
+  animation: draw-line 1.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* ─────────────────────────────────────────────────────────
+   HERO SCROLL INDICATOR — bouncing chevron at Hero bottom
+   Applied to: .scroll-indicator in Hero.jsx
+   translateX(-50%) preserves the left:50% centering during Y bounce.
+   Fades via React inline opacity (useScrolled → opacity: 0).
+   ───────────────────────────────────────────────────────── */
+@keyframes bounce-caret {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50%       { transform: translateX(-50%) translateY(6px); }
+}
+
+/* ─────────────────────────────────────────────────────────
+   AUTOSTR ADDITIONS — Phase 5E
+   blink-cursor: terminal cursor in GenerationLog
+   spin:         spinner in AutoSTRPanel + PackageCard
+   ───────────────────────────────────────────────────────── */
+@keyframes blink-cursor {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}

@@ -1,0 +1,164 @@
+/* ============================================================
+   PRISM — WASHI DESIGN TOKENS
+   Single source of truth for all design values.
+   Team ARGUS · iDEA 2.0 · Union Bank of India
+   ============================================================ */
+
+/* === LIGHT MODE (DEFAULT) === */
+:root {
+
+  /* === SURFACES === */
+  --bg-base:        #FAF8F4;   /* warm cream page background    */
+  --bg-surface:     #F4F0E8;   /* card / panel surface          */
+  --bg-elevated:    #FFFFFF;   /* tooltip, dropdown, popover    */
+  --bg-subtle:      #EDE8DE;   /* zebra rows, input fills       */
+
+  /* === BORDERS === */
+  --border-default: #E0D8CC;   /* standard dividers and outlines */
+  --border-strong:  #C8BFB0;   /* emphasis borders               */
+  --border-focus:   #CF3421;   /* focus ring — vermilion         */
+
+  /* === TEXT === */
+  --text-primary:   #1A1410;   /* headings and body copy        */
+  --text-secondary: #6B5E50;   /* supporting / meta text        */
+  --text-tertiary:  #9C8E80;   /* placeholders, captions        */
+  --text-disabled:  #C4B8A8;   /* disabled states               */
+  --text-inverse:   #FAF8F4;   /* text on dark/accent surfaces  */
+
+  /* === ACCENT — VERMILION === */
+  --accent:         #CF3421;   /* primary interactive accent    */
+  --accent-hover:   #B02A19;   /* hover / pressed state         */
+  --accent-subtle:  #F7EAE8;   /* tinted background wash        */
+  --accent-border:  #E8B4AC;   /* soft accent border            */
+
+  /* === SEMANTIC — SUCCESS === */
+  --success:        #2D6A4F;   /* success text and icons        */
+  --success-bg:     #ECFAEF;   /* success tinted background     */
+
+  /* === SEMANTIC — WARNING === */
+  --warning:        #92400E;   /* warning text and icons        */
+  --warning-bg:     #FEF3C7;   /* warning tinted background     */
+
+  /* === SEMANTIC — DANGER === */
+  --danger:         #CF3421;   /* danger text and icons         */
+  --danger-bg:      #F7EAE8;   /* danger tinted background      */
+
+  /* === SEMANTIC — INFO === */
+  --info:           #1E3A5F;   /* info text and icons           */
+  --info-bg:        #EBF2FA;   /* info tinted background        */
+
+  /* === WARMTHSCORE HEAT RAMP === */
+  /* 5 stops matching score thresholds exactly */
+  --heat-0:         #2D6A4F;   /* CLEAN     — score 0–40   */
+  --heat-1:         #92400E;   /* WARMING   — score 40–60  */
+  --heat-2:         #B45309;   /* HOT       — score 60–75  */
+  --heat-3:         #C2410C;   /* CRITICAL  — score 75–85  */
+  --heat-4:         #CF3421;   /* IMMINENT  — score 85–100 */
+
+  /* === SPACING SCALE (base unit: 4px) === */
+  --space-1:   4px;
+  --space-2:   8px;
+  --space-3:   12px;
+  --space-4:   16px;
+  --space-6:   24px;
+  --space-8:   32px;
+  --space-12:  48px;
+  --space-16:  64px;
+  --space-24:  96px;
+
+  /* === BORDER RADIUS === */
+  --radius-sm:   4px;    /* badges, tags, chips        */
+  --radius-md:   8px;    /* buttons, inputs, sm cards  */
+  --radius-lg:   12px;   /* standard cards, tables     */
+  --radius-xl:   16px;   /* large cards, panels        */
+  --radius-2xl:  24px;   /* modals, sheets             */
+  --radius-pill: 999px;  /* pill badges                */
+
+  /* === SHADOWS === */
+  --shadow-sm:   0 2px 8px rgba(26, 20, 16, 0.06);
+  --shadow-md:   0 4px 16px rgba(26, 20, 16, 0.08);
+  --shadow-lg:   0 8px 24px rgba(26, 20, 16, 0.10);
+  --shadow-xl:   0 16px 48px rgba(26, 20, 16, 0.12);
+
+  /* === PAPER GRAIN === */
+  --grain-opacity: 0.025;  /* noise texture overlay opacity */
+
+  /* === LAYOUT === */
+  --sidebar-width:       220px;
+  --navbar-height:       56px;
+  --content-max-width:   1400px;
+  --landing-max-width:   1200px;
+  --content-padding:     32px;
+  --landing-padding:     48px;
+
+  /* === TRANSITIONS === */
+  --transition-fast:   0.15s ease;
+  --transition-base:   0.25s ease;
+  --transition-slow:   0.35s ease;
+
+  /* === FONT FAMILIES === */
+  --font-display: 'Fraunces', 'Fraunces-fallback', Georgia, serif;
+  --font-ui:      'DM Sans', 'DM-Sans-fallback', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono:    'IBM Plex Mono', 'Courier New', monospace;
+
+}
+/* === DARK MODE === */
+[data-theme="dark"] {
+
+  /* === SURFACES === */
+  --bg-base:        #100E0C;   /* deepest background layer      */
+  --bg-surface:     #181410;   /* card / panel surface          */
+  --bg-elevated:    #221E1A;   /* tooltip, dropdown, popover    */
+  --bg-subtle:      #2C2520;   /* zebra rows, input fills       */
+
+  /* === BORDERS === */
+  --border-default: #2C2520;   /* standard dividers and outlines */
+  --border-strong:  #3E3530;   /* emphasis borders               */
+  --border-focus:   #E8622A;   /* focus ring — ember             */
+
+  /* === TEXT === */
+  --text-primary:   #F0EDE8;   /* headings and body copy        */
+  --text-secondary: #8A7A6E;   /* supporting / meta text        */
+  --text-tertiary:  #5A4E45;   /* placeholders, captions        */
+  --text-disabled:  #3E3530;   /* disabled states               */
+  --text-inverse:   #100E0C;   /* text on light/accent surfaces */
+
+  /* === ACCENT — EMBER (warmer vermilion for dark) === */
+  --accent:         #E8622A;   /* primary interactive accent    */
+  --accent-hover:   #F07040;   /* hover / pressed state         */
+  --accent-subtle:  #2A1A10;   /* tinted background wash        */
+  --accent-border:  #5A2810;   /* soft accent border            */
+
+  /* === SEMANTIC — SUCCESS === */
+  --success:        #4ADE80;   /* success text and icons        */
+  --success-bg:     #052A14;   /* success tinted background     */
+
+  /* === SEMANTIC — WARNING === */
+  --warning:        #FCD34D;   /* warning text and icons        */
+  --warning-bg:     #2A1F08;   /* warning tinted background     */
+
+  /* === SEMANTIC — DANGER === */
+  --danger:         #E8622A;   /* danger text and icons         */
+  --danger-bg:      #2A1A10;   /* danger tinted background      */
+
+  /* === SEMANTIC — INFO === */
+  --info:           #7DD3FC;   /* info text and icons           */
+  --info-bg:        #0C1E2E;   /* info tinted background        */
+
+  /* === WARMTHSCORE HEAT RAMP — dark mode === */
+  --heat-0:         #4ADE80;   /* CLEAN     — score 0–40   */
+  --heat-1:         #FCD34D;   /* WARMING   — score 40–60  */
+  --heat-2:         #FB923C;   /* HOT       — score 60–75  */
+  --heat-3:         #F97316;   /* CRITICAL  — score 75–85  */
+  --heat-4:         #E8622A;   /* IMMINENT  — score 85–100 */
+
+  /* === SHADOWS === */
+  --shadow-sm:   0 2px 8px rgba(0, 0, 0, 0.20);
+  --shadow-md:   0 4px 16px rgba(0, 0, 0, 0.28);
+  --shadow-lg:   0 8px 24px rgba(0, 0, 0, 0.36);
+  --shadow-xl:   0 16px 48px rgba(0, 0, 0, 0.40);
+
+  /* === PAPER GRAIN — slightly stronger on dark === */
+  --grain-opacity: 0.04;  /* noise texture overlay opacity */
+
+}

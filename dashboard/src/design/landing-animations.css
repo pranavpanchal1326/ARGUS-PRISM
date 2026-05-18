@@ -1,0 +1,423 @@
+/* ============================================================
+   PRISM — LANDING PAGE PREMIUM ANIMATION LAYER
+   Phase 6 Enhancement Pass
+   All animations additive — zero breakage of existing styles
+   ============================================================ */
+
+/* ─── Hero ambient grid ─────────────────────────────────────
+   Subtle dot grid that drifts upward imperceptibly slow.
+   Masked at edges with radial-gradient so it's cosmetic only.
+   ─────────────────────────────────────────────────────────── */
+.hero-grid-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle, color-mix(in srgb, var(--text-primary) 8%, transparent) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, black 20%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, black 20%, transparent 80%);
+  animation: grid-drift 20s linear infinite;
+  will-change: transform;
+}
+
+@keyframes grid-drift {
+  from { transform: translateY(0);   }
+  to   { transform: translateY(-32px); }
+}
+
+/* ─── Eyebrow badge pulse ───────────────────────────────────
+   The ● dot pulses slowly to communicate live status.
+   ─────────────────────────────────────────────────────────── */
+.eyebrow-dot {
+  display: inline-block;
+  animation: eyebrow-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes eyebrow-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.85); }
+}
+
+/* ─── Hero gradient shimmer ─────────────────────────────────
+   Accent-tinted glow behind the headline — warms the page.
+   Position absolute, pointer-events none.
+   ─────────────────────────────────────────────────────────── */
+.hero-glow {
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 700px;
+  height: 500px;
+  pointer-events: none;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center,
+    color-mix(in srgb, var(--accent) 7%, transparent) 0%,
+    transparent 70%
+  );
+  animation: glow-breathe 6s ease-in-out infinite;
+  will-change: opacity, transform;
+}
+
+@keyframes glow-breathe {
+  0%, 100% { opacity: 0.6; transform: translateX(-50%) scale(1); }
+  50%       { opacity: 1.0; transform: translateX(-50%) scale(1.08); }
+}
+
+/* ─── Stat item entrance ────────────────────────────────────
+   Scale from 0.96, float up — triggered by .stat-visible class.
+   JS adds the class when IntersectionObserver fires.
+   ─────────────────────────────────────────────────────────── */
+.stat-item {
+  opacity: 0;
+  transform: translateY(12px) scale(0.97);
+  transition:
+    opacity   0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stat-item.stat-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* ─── Section reveal ────────────────────────────────────────
+   Generic reveal for section headings — use with data-reveal.
+   Applied by useSectionReveal hook (see below).
+   ─────────────────────────────────────────────────────────── */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity   0.6s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-reveal].revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger siblings via CSS custom property */
+[data-reveal-delay="1"] { transition-delay: 0.10s; }
+[data-reveal-delay="2"] { transition-delay: 0.20s; }
+[data-reveal-delay="3"] { transition-delay: 0.30s; }
+[data-reveal-delay="4"] { transition-delay: 0.45s; }
+[data-reveal-delay="5"] { transition-delay: 0.60s; }
+
+/* ─── Magnetic card ─────────────────────────────────────────
+   Cards tilt on hover via CSS perspective + JS mouse tracking.
+   Applied to .magnetic-card.
+   JS updates --rx and --ry custom props on mousemove.
+   ─────────────────────────────────────────────────────────── */
+.magnetic-card {
+  transform-style: preserve-3d;
+  transition:
+    transform  0.4s cubic-bezier(0.23, 1, 0.32, 1),
+    box-shadow 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  will-change: transform;
+}
+
+.magnetic-card:hover {
+  transform:
+    perspective(800px)
+    rotateX(calc(var(--rx, 0deg)))
+    rotateY(calc(var(--ry, 0deg)))
+    translateZ(8px);
+  box-shadow: var(--shadow-xl);
+}
+
+/* ─── Nav glass entrance ────────────────────────────────────
+   Nav appears from top with a glass-morph reveal.
+   Applied to nav.prism-nav.
+   ─────────────────────────────────────────────────────────── */
+.prism-nav {
+  animation: nav-enter 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
+}
+
+@keyframes nav-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+    backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─── Nav link underline ────────────────────────────────────
+   Sliding underline grows from left on hover.
+   ─────────────────────────────────────────────────────────── */
+.nav-link {
+  position: relative;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 12px;
+  right: 12px;
+  height: 1px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-link:hover::after { transform: scaleX(1); }
+
+/* ─── CTA button glow ───────────────────────────────────────
+   Primary button radiates a soft accent halo on hover.
+   Applied to .cta-primary-btn.
+   ─────────────────────────────────────────────────────────── */
+.cta-primary-btn {
+  position: relative;
+  overflow: visible;
+  transition:
+    transform   0.2s cubic-bezier(0.23, 1, 0.32, 1),
+    box-shadow  0.2s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.cta-primary-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+.cta-primary-btn:active { transform: translateY(0); }
+
+/* ─── Crisis ticker shimmer ─────────────────────────────────
+   The ticker item numbers get a gentle shimmer to feel live.
+   ─────────────────────────────────────────────────────────── */
+.ticker-number {
+  display: inline-block;
+  animation: ticker-number-flash 4s ease-in-out infinite;
+  animation-delay: var(--ticker-delay, 0s);
+}
+
+@keyframes ticker-number-flash {
+  0%, 85%, 100% { color: var(--accent); }
+  90%            { color: color-mix(in srgb, var(--accent) 60%, var(--text-primary)); }
+}
+
+/* ─── Problem gap card accent border ────────────────────────
+   PRISM card left accent animates on scroll entry.
+   ─────────────────────────────────────────────────────────── */
+.prism-accent-bar {
+  transform-origin: top;
+  transform: scaleY(0);
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.3s;
+}
+
+.prism-card-visible .prism-accent-bar {
+  transform: scaleY(1);
+}
+
+/* ─── Five Engines cards ────────────────────────────────────
+   Stagger left-border draw-in on scroll entry.
+   ─────────────────────────────────────────────────────────── */
+.engine-card {
+  border-left: 3px solid transparent;
+  transition:
+    border-color 0.3s ease,
+    transform    0.3s ease,
+    box-shadow   0.3s ease;
+}
+
+.engine-card:hover {
+  border-left-color: var(--accent);
+  transform: translateX(4px);
+  box-shadow: var(--shadow-md);
+}
+
+/* ─── Legal architecture table row ─────────────────────────
+   Row enters with a left-to-right slide on scroll.
+   ─────────────────────────────────────────────────────────── */
+.legal-row {
+  opacity: 0;
+  transform: translateX(-16px);
+  transition:
+    opacity   0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.legal-row.legal-row-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ─── Demo CTA section ──────────────────────────────────────
+   Background animated with a slow gradient shift.
+   ─────────────────────────────────────────────────────────── */
+.demo-cta-bg {
+  background: var(--accent);
+  background: linear-gradient(
+    135deg,
+    var(--accent) 0%,
+    color-mix(in srgb, var(--accent) 85%, #000) 100%
+  );
+  background-size: 200% 200%;
+  animation: cta-gradient-shift 8s ease-in-out infinite alternate;
+}
+
+@keyframes cta-gradient-shift {
+  from { background-position: 0% 50%; }
+  to   { background-position: 100% 50%; }
+}
+
+/* ─── View Live Demo button ─────────────────────────────────
+   Shimmer sweep on the primary CTA button inside vermilion bg.
+   ─────────────────────────────────────────────────────────── */
+.demo-btn-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.demo-btn-shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -75%;
+  width: 50%; height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,255,255,0.25),
+    transparent
+  );
+  animation: btn-shimmer-sweep 3s ease-in-out 2s infinite;
+}
+
+@keyframes btn-shimmer-sweep {
+  0%   { left: -75%; }
+  40%  { left: 125%; }
+  100% { left: 125%; }
+}
+
+/* ─── Footer fade-up ────────────────────────────────────────
+   Footer items fade in with subtle upward drift.
+   ─────────────────────────────────────────────────────────── */
+.footer-col {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity   0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.footer-col.footer-col-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ─── Score bar fill ────────────────────────────────────────
+   WarmthScore bars fill left-to-right on reveal.
+   ─────────────────────────────────────────────────────────── */
+.warmth-bar-fill {
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.warmth-bar-fill.fill-visible {
+  transform: scaleX(1);
+}
+
+/* ─── Word split reveal helper ──────────────────────────────
+   For non-Framer headline reveals using CSS only.
+   ─────────────────────────────────────────────────────────── */
+.word-clip {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+}
+
+.word-inner {
+  display: inline-block;
+  transform: translateY(100%);
+  animation: word-rise 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes word-rise {
+  to { transform: translateY(0); }
+}
+
+/* ─── Stat number hover pulse ───────────────────────────────
+   When hovering a stat item the number glows accent.
+   ─────────────────────────────────────────────────────────── */
+.stat-num-hover {
+  transition: color 0.2s ease, text-shadow 0.2s ease;
+}
+
+.stat-num-hover:hover {
+  color: var(--accent) !important;
+  text-shadow: 0 0 24px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+/* ─── Section divider gradient line ─────────────────────────
+   Reusable gradient rule for horizontal section dividers.
+   ─────────────────────────────────────────────────────────── */
+.gradient-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-default), transparent);
+}
+
+/* ─── Floating badge / pill ─────────────────────────────────
+   For the eyebrow labels above section headings.
+   ─────────────────────────────────────────────────────────── */
+.section-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, transparent);
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+/* ─── Glass card ────────────────────────────────────────────
+   Surface for floating cards with blur backdrop.
+   ─────────────────────────────────────────────────────────── */
+.glass-card {
+  background: color-mix(in srgb, var(--bg-surface) 70%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+}
+
+/* ─── Pulse dot ─────────────────────────────────────────────
+   Generic status dot, used in eyebrow badges.
+   ─────────────────────────────────────────────────────────── */
+.pulse-dot {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulse-dot-anim 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot-anim {
+  0%, 100% { opacity: 1;   transform: scale(1);    box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 40%, transparent); }
+  50%       { opacity: 0.7; transform: scale(0.85); box-shadow: 0 0 0 4px transparent; }
+}
+
+/* ─── Highlight text ────────────────────────────────────────
+   For inline accent emphasis in body copy.
+   ─────────────────────────────────────────────────────────── */
+.text-accent-highlight {
+  color: var(--accent);
+  font-weight: 600;
+  font-style: normal;
+}
+
