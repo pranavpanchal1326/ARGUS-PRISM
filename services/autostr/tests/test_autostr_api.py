@@ -18,6 +18,10 @@ async def override_get_db():
 
 app.dependency_overrides[get_db] = override_get_db
 client = TestClient(app)
+client.headers.update({
+    "X-PRISM-User": "test-user",
+    "X-PRISM-Role": "MLRO"
+})
 
 @pytest.fixture
 def valid_payload():
@@ -101,7 +105,7 @@ def test_audit_log_written(valid_payload):
     params = args[1]
     assert "INSERT INTO audit_log" in query
     assert params["action"] == "STR_GENERATED"
-    assert params["target"] == "UBI-API-TEST-001"
+    assert params["target_id"] == "UBI-API-TEST-001"
 
 def test_generation_time_under_60_seconds(valid_payload):
     # Add more transactions to payload

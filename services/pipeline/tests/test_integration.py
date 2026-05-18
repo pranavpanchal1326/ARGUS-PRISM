@@ -98,6 +98,7 @@ class TestPipelineConsumer:
 
         # 2. Run pipeline consumer for up to 30s to drain the topic
         pipeline = PRISMPipeline()
+        pipeline._trigger_auto_score = lambda account_id: None
         stats = pipeline.run(timeout_seconds=30, poll_timeout=1.0)
 
         # 3. Verify Neo4j count
@@ -118,6 +119,7 @@ class TestPipelineConsumer:
 
         # 2. Run pipeline
         pipeline = PRISMPipeline()
+        pipeline._trigger_auto_score = lambda account_id: None
         stats = pipeline.run(timeout_seconds=30, poll_timeout=1.0)
 
         # 3. Verify transaction edges
