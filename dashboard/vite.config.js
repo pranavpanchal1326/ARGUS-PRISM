@@ -23,11 +23,16 @@ export default defineConfig({
   server: {
     port: 3000,
     hmr: { overlay: false },
+    /* Required for React Router BrowserRouter:
+       Without this, refreshing on /dashboard/* returns a 404
+       because Vite doesn't know to serve index.html for those paths. */
+    historyApiFallback: true,
     proxy: {
-      '/api': { target: 'http://localhost:8000', changeOrigin: true, secure: false },
+      '/api':    { target: 'http://localhost:8000', changeOrigin: true, secure: false },
       '/health': { target: 'http://localhost:8000', changeOrigin: true, secure: false },
     },
   },
+
 
   build: {
     target:               ['es2020', 'chrome89', 'firefox89', 'safari14'],
