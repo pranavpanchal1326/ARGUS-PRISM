@@ -1,263 +1,304 @@
 <div align="center">
 
-```
-   _   ___ ___ _   _ ___
-  /_\ | _ \ __| | | / __|
- / _ \|   / _|| |_| \__ \
-/_/ \_\_|_\___|\___/|___/
-```
+<br/>
 
-# PRISM — Pre-crime Intelligence System for Mule Detection
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://readme-typing-svg.demolab.com?font=IBM+Plex+Mono&size=13&duration=0&pause=0&color=CF3421&center=true&vCenter=true&repeat=false&width=600&lines=PRE-CRIME+INTELLIGENCE+SYSTEM+FOR+MULE+DETECTION">
+  <img src="https://readme-typing-svg.demolab.com?font=IBM+Plex+Mono&size=13&duration=0&pause=0&color=CF3421&center=true&vCenter=true&repeat=false&width=600&lines=PRE-CRIME+INTELLIGENCE+SYSTEM+FOR+MULE+DETECTION" alt="PRISM subtitle"/>
+</picture>
 
-*The hundred-eyed guardian. Always watching. Never sleeping.*
+# ARGUS · PRISM
 
-[![iDEA 2.0](https://img.shields.io/badge/iDEA_2.0-PS3-CF3421?style=for-the-badge&logo=data:image/svg+xml;base64,)](https://ideahackathon.com)
-[![Union Bank of India](https://img.shields.io/badge/Union_Bank_of_India-Host-1A1410?style=for-the-badge)](https://unionbankofindia.co.in)
-[![Prize Pool](https://img.shields.io/badge/Prize_Pool-₹13_Lakh-gold?style=for-the-badge)](https://ideahackathon.com)
-[![License](https://img.shields.io/badge/License-Proprietary-black?style=for-the-badge)](LICENSE)
-[![Status](https://img.shields.io/badge/Status-Active_Development-00b300?style=for-the-badge)]()
+### *The hundred-eyed guardian. Always watching. Never sleeping.*
+
+<br/>
+
+[![](https://img.shields.io/badge/iDEA_2.0-PS3_Submission-CF3421?style=for-the-badge&labelColor=1A1410)](https://ideahackathon.com)
+[![](https://img.shields.io/badge/Union_Bank_of_India-Host_Bank-1A1410?style=for-the-badge&labelColor=0d0d0d)](https://unionbankofindia.co.in)
+[![](https://img.shields.io/badge/Prize_Pool-₹13_Lakh-C9A84C?style=for-the-badge&labelColor=1A1410)](https://ideahackathon.com)
+[![](https://img.shields.io/badge/Status-Active_Build-00b300?style=for-the-badge&labelColor=1A1410)]()
+
+<br/>
+
+[![](https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![](https://img.shields.io/badge/React_18-20232A?style=flat-square&logo=react&logoColor=61DAFB)](https://react.dev)
+[![](https://img.shields.io/badge/Apache_Kafka-231F20?style=flat-square&logo=apachekafka&logoColor=white)](https://kafka.apache.org)
+[![](https://img.shields.io/badge/Apache_Flink-E6526F?style=flat-square&logo=apacheflink&logoColor=white)](https://flink.apache.org)
+[![](https://img.shields.io/badge/Neo4j-008CC1?style=flat-square&logo=neo4j&logoColor=white)](https://neo4j.com)
+[![](https://img.shields.io/badge/XGBoost-337AB7?style=flat-square&logo=python&logoColor=white)](https://xgboost.ai)
+[![](https://img.shields.io/badge/PostgreSQL-316192?style=flat-square&logo=postgresql&logoColor=white)](https://postgresql.org)
+[![](https://img.shields.io/badge/Redis-DD0031?style=flat-square&logo=redis&logoColor=white)](https://redis.io)
+[![](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)](https://docker.com)
+
+<br/>
 
 ---
 
-**MuleHunter.AI detects mule accounts after funds arrive. FRI flags numbers already known to be fraudulent. India's largest banks are reverting to branch visits because they have no third option.**
-
-**PRISM is the third option.**
-
-Detect the warming phase **72 hours before** the first illicit rupee arrives. Restrict under KYC authority before PMLA applies. Deliver the CBI evidence package the Supreme Court mandated — and no bank in India currently generates.
-
-*By the time the money moves, the FIU report is already written.*
+<table>
+<tr>
+<td align="center" width="200">
+<h2>₹36,014 Cr</h2>
+<sub>FY25 Bank Fraud Value<br/><b>↑ 194% in one year</b></sub>
+</td>
+<td align="center" width="200">
+<h2>72 Hours</h2>
+<sub>Pre-crime detection window<br/><b>before first illicit rupee</b></sub>
+</td>
+<td align="center" width="200">
+<h2>< 60 Min</h2>
+<sub>AutoSTR generation<br/><b>vs 3–7 days manual</b></sub>
+</td>
+<td align="center" width="200">
+<h2>5 Engines</h2>
+<sub>FlowGraph · WarmthScore<br/><b>AutoSTR · Taint · Recruiter</b></sub>
+</td>
+</tr>
+</table>
 
 ---
 
-[🔴 Live Demo](#live-demo) · [📐 Architecture](#architecture) · [⚖️ Legal Framework](#legal-architecture) · [🚀 Quick Start](#quick-start) · [📋 PS3 Compliance](#ps3-compliance-map)
+<br/>
+
+**[🔴 Live Demo](https://prism-argus.vercel.app)** &nbsp;·&nbsp; **[🎥 Watch 4-Min Demo](#)** &nbsp;·&nbsp; **[📐 Architecture](#architecture)** &nbsp;·&nbsp; **[⚖️ Legal Framework](#legal-architecture)** &nbsp;·&nbsp; **[🚀 Quick Start](#quick-start)**
+
+<br/>
 
 </div>
 
 ---
 
-## The 2026 Crisis
+## The Problem
 
-> These are RBI-published figures from December 2025 and January 2026. Official data — not projections.
-
-| Metric | Value | Context |
-|--------|-------|---------|
-| **FY25 Total Fraud Value** | ₹36,014 Crore | Up **194%** year-on-year |
-| **FY26 H1 Fraud Value** | ₹21,515 Crore | Already 60% of full FY25 |
-| **PSB Share of Losses** | **71%** (₹25,667 Cr) | Union Bank's category bears the brunt |
-| **UPI Fraud Cashout Window** | **15 seconds** | Batch systems are clinically dead |
-| **Fraud Cases (FY26 H1)** | 5,092 (↓72%) | But losses **rose** — fewer criminals, each stealing exponentially more |
-
-> **The Critical Insight:** Fraud cases fell 72%. Fraud value rose 30%. This is not petty crime scaling up. This is industrial organised operations replacing random fraud. Industrial operations leave patterns. PRISM reads those patterns.
-
-**The Onboarding Retreat:** ICICI Bank has discontinued instant online account-opening. SBI, Bank of India, and Bank of Baroda have paused fully digital onboarding. The entire Indian banking system is reverting to 1990s branch verification — because they have no better solution. PRISM is that better solution.
-
----
-
-## Problem Statement
-
-**PS3 — Tracking of Funds within the Bank for Fraud Detection**
-
-Three government systems are already deployed. Every team that proposes building what these systems do has already lost.
-
-| System | Status | What It Does | The Unclosed Gap |
-|--------|--------|-------------|-----------------|
-| **FRI** — Financial Fraud Risk Indicator | 🟢 LIVE (RBI mandate June 2025) | Classifies mobile numbers as LOW / MEDIUM / HIGH / VERY HIGH using NCRP + Chakshu + bank intelligence | Clean SIM cards bought specifically to score LOW on FRI. Mule networks know exactly which number profiles evade FRI. A Muzaffarpur SIM with zero complaint history: FRI score LOW — invisible |
-| **MuleHunter.AI** | 🟢 LIVE (23 banks) | ML model analysing transaction and account data against 19 trained fraud patterns | Operates **after funds arrive**. 19 static patterns cannot adapt in real time. No warming phase detection. No AutoSTR. No taint memory |
-| **DPIP** | 🟢 LIVE (NPCI level) | AI system flagging risky transactions in real time | Transaction-level flagging only. Does not detect account warming before first transaction. No pre-crime capability |
-| **PRISM** | 🔨 What we're building | Pre-crime warming detection. Taint propagation memory. Recruiter network mapping. DoT SIM-swap signal. CBI evidence package. AutoSTR | **Fills every gap above simultaneously** |
-
----
-
-## Live Demo
-
-| Resource | Link |
-|----------|------|
-| 🔴 **Live Dashboard** | [prism-argus.vercel.app](https://prism-argus.vercel.app) *(Deployed on Vercel)* |
-| 🎥 **Demo Video** | [Watch 4-Minute Demo](https://youtube.com/) |
-| 📦 **API Base URL** | `http://localhost:8000` *(local)* |
-| 📐 **API Docs (Swagger)** | `http://localhost:8000/docs` |
-
-> **Demo Scenario:** Account UBI-2026-DEMO-001 — Created 71 hours ago. WarmthScore 21 at hour 0. FRI score: LOW (clean recruiter-bought SIM). Watch Signal 5 catch the contradiction. Watch the account get restricted 12 hours before any fraud funds arrive.
-
----
-
-## What PRISM Does That Nothing Else Does
+> MuleHunter.AI is deployed in 23 banks. It detects mule accounts **after funds arrive.**
+> FRI flags known fraudulent numbers. Clean SIMs bought from Tier-3 cities bypass it entirely.
+> India's largest banks have paused digital onboarding. The system has no answer for the 72-hour window before illicit funds arrive.
 
 ```
-Hour 00 ─── Account created. FRI: LOW. WarmthScore: 21. (CLEAN)
-Hour 12 ─── Signal 1 fires. Test credits from dormant source account. Score: 29.
-Hour 24 ─── Signal 2 fires. Device fingerprint matches blocked IMEI cluster. Score: 41. (WARMING)
-Hour 36 ─── Signal 3 fires. Velocity derivative curve turns convex. Score: 58.
-Hour 48 ─── Signal 5 fires. FRI LOW contradicts WarmthScore HIGH. Score: 69. (HOT)
-Hour 60 ─── Score crosses 75. → KYC Re-verification triggered (RBI KYC MD S.38).
-             Outbound UPI RESTRICTED. No court order. No PMLA invocation.
-Hour 72 ─── First illicit credit arrives: ₹8,50,000.
-             Funds CANNOT LEAVE — account already restricted.
-Hour 72+34s ─ FlowGraph confirms layering across 4 accounts.
-              Recruiter node identified: 1 source → 23 warming accounts in 48 hours.
-Hour 72+47m ─ AutoSTR generates: FIU-IND XML + CBI Evidence Package + RBI Report.
-Hour 72+58m ─ MLRO approves and submits.
+₹36,014 Cr in bank fraud in FY25.   Up 194% in one year.
+FY26 H1: ₹21,515 Cr already.        60% of full FY25 — in six months.
+Fraud cases fell 72%.                Fraud value rose 30%.
+```
 
-MuleHunter.AI would have seen this account at Hour 72.
-PRISM restricted it at Hour 60.
-The money could not move.
+> **The critical insight:** Fewer criminals. Each stealing exponentially more. This is industrial organised operations replacing random fraud. Industrial operations leave patterns. **PRISM reads those patterns.**
+
+**The Digital Onboarding Retreat:** ICICI Bank has discontinued instant online account-opening entirely. SBI, Bank of India, and Bank of Baroda have paused fully digital onboarding. The entire Indian banking system is reverting to 1990s branch verification because mule accounts broke digital onboarding. **PRISM gives them a third option.**
+
+---
+
+## What PRISM Does
+
+```
+HOUR 00 ──  Account created. FRI score: LOW (recruiter bought clean SIM). WarmthScore: 21.
+HOUR 12 ──  Signal 1 fires.  Test micro-credits from dormant source accounts. Score: 29.
+HOUR 24 ──  Signal 2 fires.  Device IMEI matches blocked cluster prefix. Score: 41.  ◀ WARMING
+HOUR 36 ──  Signal 3 fires.  Velocity derivative curve turns convex. Score: 58.
+HOUR 48 ──  Signal 5 fires.  FRI LOW contradicts WarmthScore HIGH — evasion detected. Score: 69.
+HOUR 60 ──  Score crosses 75.
+            ┌─────────────────────────────────────────────────────────────┐
+            │  KYC Re-verification triggered — RBI KYC Master Direction   │
+            │  Section 38. Outbound UPI RESTRICTED.                       │
+            │  No court order. No PMLA invocation. No legal exposure.     │
+            └─────────────────────────────────────────────────────────────┘
+HOUR 72 ──  First illicit credit arrives: ₹8,50,000.
+            Funds CANNOT LEAVE. Account already restricted.
+HOUR 72+34s FlowGraph confirms layering across 4 accounts.
+            Recruiter node identified: 1 source → 23 warming accounts / 48 hrs.
+HOUR 72+47m AutoSTR generates: FIU-IND XML + CBI Evidence Package + RBI Report.
+HOUR 72+58m MLRO approves and submits. Case closed.
+
+──────────────────────────────────────────────────────────────────────────
+  MuleHunter.AI would have seen this account at Hour 72.
+  PRISM restricted it at Hour 60. The money could not move.
+──────────────────────────────────────────────────────────────────────────
 ```
 
 ---
 
 ## The Five Engines
 
-### Engine 1 — FlowGraph (PS3 Core)
+<details>
+<summary><b>Engine 1 — FlowGraph &nbsp;·&nbsp; PS3 Core Coverage</b></summary>
+<br/>
 
-Real-time Neo4j transaction graph. Every transaction is an edge. Every account is a node. FlowGraph alone fulfils every explicit PS3 requirement.
+Real-time Neo4j graph database. Every transaction is an edge. Every account is a node. FlowGraph alone fulfils every explicit PS3 requirement. The four engines that follow are differentiation built on top of a solid, compliant foundation.
 
-| Detector | Pattern | PS3 Requirement |
-|----------|---------|-----------------|
-| **Layering Detector** | Funds touching 3+ accounts within 6 hours before final withdrawal | "rapid layering through multiple accounts" |
-| **Round-Trip Detector** | Funds returning to origin through 2+ intermediaries within 72 hours | "circular transactions (round-tripping)" |
-| **Structuring Detector** | Multiple transactions below ₹10 lakh in same day from connected cluster | "structuring below reporting thresholds" |
-| **Dormant Activation Detector** | Zero-transaction account (90+ days) receiving credit | "sudden activation of dormant accounts" |
-| **Profile Mismatch Detector** | Vegetable vendor receiving ₹50L in 48 hours — KYC vs transaction divergence | "mismatches between declared customer profiles" |
+| Detector | Pattern | PS3 Requirement Covered |
+|----------|---------|------------------------|
+| **Layering Detector** | Funds touching 3+ accounts within 6 hours before final withdrawal. Graph depth search with timestamp constraint | *"rapid layering through multiple accounts"* |
+| **Round-Trip Detector** | Funds returning to origin through 2+ intermediaries within 72 hours. Cycle detection in directed graph | *"circular transactions (round-tripping)"* |
+| **Structuring Detector** | Multiple transactions below ₹10 lakh in same day from connected account cluster | *"structuring below reporting thresholds"* |
+| **Dormant Activation** | Zero-transaction account (90+ days inactive) receiving credit. Immediate graph node activation alert | *"sudden activation of dormant accounts"* |
+| **Profile Mismatch** | Account declared as vegetable vendor receiving ₹50L in 48 hours. KYC profile vs transaction profile divergence score | *"mismatches between declared customer profiles"* |
 
----
+> FlowGraph alone is a complete PS3 submission. Every requirement covered. Demonstrated first. Establishes credibility before the novel engines are introduced.
 
-### Engine 2 — WarmthScore (Pre-Crime Detection)
+</details>
 
-Six behavioural signals. One score. 72 hours before the first illicit rupee.
+<details>
+<summary><b>Engine 2 — WarmthScore &nbsp;·&nbsp; Six Signals, Pre-Crime Detection</b></summary>
+<br/>
+
+Six behavioural signals. One ensemble score. Detects mule warming patterns **72 hours before illicit funds arrive.** XGBoost trained on published research patterns. Full SHAP attribution at every scoring event — a regulatory requirement for MLRO decisions.
 
 | Signal | Model | Weight | What It Catches |
-|--------|-------|--------|-----------------|
-| **S1 — Test Credit Pattern** | Isolation Forest anomaly detection | 18% | 3–8 micro-credits (₹1–₹500) within 48 hours from dormant/new source accounts |
-| **S2 — Device Fingerprint** | IMEI cluster proximity scoring | 22% | Device sharing first 8 digits of IMEI prefix with 3+ known fraud devices |
-| **S3 — Velocity Derivative** | Time-series convexity detector | 15% | Second derivative of transaction velocity crossing zero before hour 48 |
-| **S4 — Dormant Reactivation** | Rule-based + ML refinement | 20% | 180+ days dormant, reactivated on a different device — strongest single-session indicator |
-| **S5 — FRI Contradiction** | Disagreement scoring | 15% | **The anti-evasion signal.** FRI LOW + WarmthScore HIGH = clean SIM evasion detected |
-| **S6 — SIM Swap Velocity** | Event correlation (Sept 2025 MOU) | 10% | SIM swap within 7 days of UPI registration — new data layer from DoT-FIU MOU |
+|--------|-------|--------|----------------|
+| **S1 — Test Credit Pattern** | Isolation Forest | 18% | 3–8 micro-credits (₹1–₹500) within 48 hours from new or dormant source accounts |
+| **S2 — Device Fingerprint** | IMEI cluster proximity scoring | 22% | Device sharing first 8 digits of IMEI prefix with 3+ known fraud devices — even if specific IMEI not yet blocked |
+| **S3 — Velocity Derivative** | Time-series convexity detector | 15% | Second derivative of transaction velocity crossing zero before hour 48 — the recruiter pipeline-testing signature |
+| **S4 — Dormant Reactivation** | Rule-based + ML refinement | 20% | 180+ days dormant, reactivated on different device — strongest single-session mule indicator |
+| **S5 — FRI Contradiction** | Disagreement scoring | 15% | **The anti-evasion signal.** FRI LOW + WarmthScore HIGH = mule network bought clean SIM to bypass FRI. Catches exactly this |
+| **S6 — SIM Swap Velocity** | Event correlation | 10% | SIM swap within 7 days of UPI registration. New data layer from DoT-FIU MOU September 2025 |
 
 **Score → Action Mapping:**
 
-| Score | Classification | Action | Legal Basis |
-|-------|---------------|--------|-------------|
-| 0–40 | 🟢 CLEAN | Normal monitoring | Internal policy |
-| 40–60 | 🟡 WARMING | Enhanced monitoring. Internal flag only | Internal risk policy |
-| 60–75 | 🟠 HOT | KYC re-verification triggered. Video KYC | RBI KYC Master Direction 2016 §38 |
-| 75–85 | 🔴 CRITICAL | Outbound UPI restricted. AutoSTR initiated | RBI KYC MD §38 |
-| 85–100 | ⚠️ IMMINENT | Full restriction. CBI Package generated. MLRO escalation | RBI KYC MD §38 + PMLA §12 + SC Writ 03/2025 |
+| Score | Level | Action | Legal Basis |
+|-------|-------|--------|-------------|
+| 0–40 | 🟢 **CLEAN** | Normal monitoring | Internal policy |
+| 40–60 | 🟡 **WARMING** | Enhanced monitoring. Internal flag only | Internal risk policy |
+| 60–75 | 🟠 **HOT** | KYC re-verification. Video KYC call | RBI KYC Master Direction 2016 §38 |
+| 75–85 | 🔴 **CRITICAL** | Outbound UPI restricted. AutoSTR initiated | RBI KYC MD §38 |
+| 85–100 | ⛔ **IMMINENT** | Full restriction + CBI Package + MLRO escalation | RBI KYC MD §38 + PMLA §12 + SC Writ 03/2025 |
 
-**SHAP Explainability:** Every WarmthScore decision includes full SHAP attribution at scoring time — a regulatory requirement for MLRO decisions and a legal requirement for evidence packages. Banks cannot act on black-box alerts. PRISM makes every decision explainable to regulatory standard.
+</details>
 
----
+<details>
+<summary><b>Engine 3 — AutoSTR v2 &nbsp;·&nbsp; Three Evidence Packages, One API Call</b></summary>
+<br/>
 
-### Engine 3 — AutoSTR v2 (Evidence Generation)
+AutoSTR v1 generated one output. AutoSTR v2 generates three — matched to three different authorities, each with a different legal mandate.
 
-Three auto-generated evidence packages. Three separate legal mandates. One API call.
-
-| Package | Recipient | Format | Legal Mandate | Manual Time | PRISM Time |
+| Package | Recipient | Format | Legal Mandate | Before PRISM | With PRISM |
 |---------|-----------|--------|---------------|-------------|------------|
-| **FIU-IND STR** | Financial Intelligence Unit India | SAPTRN + SAPINP + SAPLEP + SAPPIT XML | PMLA §12 — mandatory STR within 7 days | 3–7 days | **< 60 minutes** |
-| **CBI Evidence Package** | Central Bureau of Investigation | Structured PDF — transaction lineage, device timeline, network graph export | SC Suo Moto Writ 03/2025 — CBI primary agency | Not systematically produced by **any bank in India** | **Auto-generated at WarmthScore 85+** |
-| **RBI Regulatory Report** | Reserve Bank of India | Aggregate fraud intelligence in RBI prescribed format | RBI Cyber Security Framework | Quarterly manual compilation | **Real-time event-driven** |
+| **FIU-IND STR** | Financial Intelligence Unit India | SAPTRN + SAPINP + SAPLEP + SAPPIT XML | PMLA §12 — mandatory STR within 7 days of suspicion | 3–7 days manual preparation | **< 60 minutes** |
+| **CBI Evidence Package** | Central Bureau of Investigation | Structured PDF — transaction lineage, device timeline, network graph export | SC Suo Moto Writ 03/2025 — CBI primary agency for digital arrest fraud | Not systematically produced by **any bank in India** | **Auto-generated at WarmthScore 85+** |
+| **RBI Regulatory Report** | Reserve Bank of India | Aggregate fraud intelligence in RBI prescribed format | RBI Cyber Security Framework | Quarterly manual compilation | **Real-time, event-driven** |
 
-> **The CBI Package:** No bank in India currently generates structured CBI evidence packages automatically. The Supreme Court directed this in January 2026. PRISM is the first product to implement it. When you say this to the Union Bank jury, you are telling them they can fulfil a Supreme Court directive the next day.
+> No bank in India currently generates structured CBI evidence packages automatically. The Supreme Court directed this in January 2026. PRISM is the first product to implement it.
 
----
+</details>
 
-### Engine 4 — Taint Propagation Engine (Persistent Network Memory)
+<details>
+<summary><b>Engine 4 — Taint Propagation Engine &nbsp;·&nbsp; Persistent Network Memory</b></summary>
+<br/>
 
-The feature that transforms PRISM from a real-time detection system into an institutional memory system.
+When a mule network operates, 1 account gets caught. The other 39 go dormant for 12–18 months. They reactivate with clean WarmthScores — because every existing system has **no memory** of the prior network connection. Taint Propagation Engine solves this permanently.
 
-**The problem it solves:** When a mule network operates, only 1 account gets caught. The other 39 go dormant for 12–18 months. They reactivate with clean WarmthScores — because every existing system has no memory of the prior network connection.
+The moment FlowGraph confirms a mule account, the Taint Engine back-traces the complete transaction graph up to 4 hops in both directions. Each connected account receives a **persistent Taint Score** written to its Neo4j node.
 
 | Graph Hop | Taint Score | Rationale |
 |-----------|-------------|-----------|
 | Direct (1 hop) | **80** | Direct participation in confirmed mule network |
-| 2 hops | **55** | Statistically improbable by coincidence |
-| 3 hops | **30** | Flag for enhanced monitoring. Do not restrict |
-| 4 hops | **15** | Ambient proximity. Informational flag only |
+| 2 hops | **55** | Connected to a direct partner — statistically improbable by coincidence |
+| 3 hops | **30** | May be legitimate. Flag for enhanced monitoring. Do not restrict |
+| 4 hops | **15** | Ambient network proximity. Informational flag only |
 | 5+ hops | 0 | Graph connectivity too loose to be meaningful |
 
-**The Compounding Effect:** A dormant account with Taint Score 80 that shows Signal 4 (dormant reactivation + device change) immediately crosses the 85 threshold. No 72-hour warming period needed. Detection window collapses from 72 hours to under 12 hours. **The mule network cannot hide by waiting.**
+**The Compounding Effect:** When any tainted account shows warming signals months later, WarmthScore starts at the Taint Score — not zero. A dormant account with Taint Score 80 showing Signal 4 immediately crosses 85. Detection window collapses from 72 hours to under **12 hours.**
 
----
+> The mule network cannot hide by waiting.
 
-### Engine 5 — Recruiter Network Mapper (The Upstream Threat)
+</details>
 
-Every system focuses on mule accounts. The accounts that receive illicit funds. But mule accounts are the employees. They are replaceable. **The organisation has a boss.**
+<details>
+<summary><b>Engine 5 — Recruiter Network Mapper &nbsp;·&nbsp; The Upstream Threat</b></summary>
+<br/>
 
-The recruiter account sends test payments to multiple warming accounts simultaneously. One source account sending ₹50 to 40 different accounts in 48 hours is not a mule. It is the coordinator running the campaign.
+Every system focuses on mule accounts — the accounts that receive illicit funds. But mule accounts are the employees. They are replaceable. **The organisation has a boss.**
+
+The recruiter account sends test payments to multiple warming accounts simultaneously. One source account sending ₹50 to 40 different accounts in 48 hours is not a mule. It is the coordinator running the campaign. It never receives illicit funds — so no WarmthScore fires on it. Every rule-based system sees these as normal micro-transactions.
+
+**PRISM is the only system that detects the coordinator.**
 
 | Classification | Threshold | Action |
 |----------------|-----------|--------|
-| **Campaign Coordinator** | 1 source → 5–15 warming accounts / 48 hrs | Flag recruiter. Restrict outbound > ₹5,000. MLRO notified |
-| **Industrial Orchestrator** | 1 source → 15–40 warming accounts / 48 hrs | Immediate full restriction. AutoSTR + CBI Package |
+| **Campaign Coordinator** | 1 source → 5–15 warming accounts / 48 hrs | Flag for investigation. Restrict outbound > ₹5,000. MLRO notified |
+| **Industrial Orchestrator** | 1 source → 15–40 warming accounts / 48 hrs | Immediate full restriction. AutoSTR + CBI Package. Organised crime event |
 | **Platform-Scale Operation** | 1 source → 40+ accounts / 48 hrs | Emergency escalation. FIU-IND real-time alert. All connected accounts frozen simultaneously |
 
-> Every other system catches mules one at a time after they activate. Recruiter mapping catches the coordinator before any mule receives illicit funds. One detection event shuts down the entire campaign.
+> One detection event shuts down the entire campaign. Stopping the recruiter is stopping the factory, not stopping individual products.
+
+</details>
 
 ---
 
 ## Architecture
 
 ```
-╔══════════════════════════════════════════════════════════════════════╗
-║                    PRISM v2 — SYSTEM ARCHITECTURE                    ║
-╠══════════════════════════════════════════════════════════════════════╣
-║  EXTERNAL DATA SOURCES                                               ║
-║    Finacle Core Banking ──────→ Kafka Event Stream                   ║
-║    DoT DIP API ───────────────→ FRI Score + SIM Swap (Signals 5 & 6) ║
-╠══════════════════════════════════════════════════════════════════════╣
-║  PRISM PROCESSING LAYER (Apache Flink — stateful stream processing)  ║
-║  ┌──────────────┬──────────────────┬────────────────────────────┐    ║
-║  │  FlowGraph   │   WarmthScore    │      Recruiter Map         │    ║
-║  │  (Neo4j)     │   (6 Signals)    │  (Network Graph + Taint)   │    ║
-║  └──────┬───────┴────────┬─────────┴──────────┬─────────────────┘   ║
-║         └────────────────┼────────────────────┘                      ║
-║                          ▼                                            ║
-║             PRISM DECISION ENGINE                                     ║
-║         ┌──────────────────────────────────┐                         ║
-║         │   Taint Propagation Engine        │                         ║
-║         │   (Neo4j persistent node scores)  │                         ║
-║         └──────────────────────────────────┘                         ║
-╠══════════════════════════════════════════════════════════════════════╣
-║  AutoSTR v2 ENGINE                                                   ║
-║  ┌─────────────┬──────────────────┬──────────────────┐              ║
-║  │ FIU-IND     │  CBI Evidence    │  RBI Regulatory  │              ║
-║  │ STR XML     │  Package PDF     │  Report          │              ║
-║  └─────────────┴──────────────────┴──────────────────┘              ║
-╠══════════════════════════════════════════════════════════════════════╣
-║  MLRO REVIEW DASHBOARD (React 18 + FastAPI)                          ║
-║  PostgreSQL ── Redis ── Audit Trail ── Immutable Event Log           ║
-╚══════════════════════════════════════════════════════════════════════╝
+╔══════════════════════════════════════════════════════════════════╗
+║               PRISM v2 — SYSTEM ARCHITECTURE                    ║
+╠══════════════════════════════════════════════════════════════════╣
+║                                                                  ║
+║  EXTERNAL DATA SOURCES                                           ║
+║  ┌──────────────────────────┐  ┌───────────────────────────┐    ║
+║  │  Finacle Core Banking     │  │  DoT DIP API              │    ║
+║  │  (Read-Only Event Stream) │  │  FRI Score + SIM Swap     │    ║
+║  └────────────┬─────────────┘  └─────────────┬─────────────┘    ║
+║               │                               │                  ║
+║               ▼                               ▼                  ║
+║  ┌────────────────────────────────────────────────────────────┐  ║
+║  │             Apache Kafka  (4 Topics)                       │  ║
+║  │  account.created · transaction.posted · device.registered  │  ║
+║  │  kyc.updated                                               │  ║
+║  └───────────────────────────┬────────────────────────────────┘  ║
+║                               │                                  ║
+║                               ▼                                  ║
+║  ┌────────────────────────────────────────────────────────────┐  ║
+║  │           Apache Flink  (Stateful Stream Processing)       │  ║
+║  │  ┌─────────────┬──────────────────┬──────────────────────┐ │  ║
+║  │  │  FlowGraph  │   WarmthScore    │   Recruiter Mapper   │ │  ║
+║  │  │  (Neo4j)    │   (6 Signals)    │   (Network Graph)    │ │  ║
+║  │  └──────┬──────┴────────┬─────────┴──────────┬───────────┘ │  ║
+║  └─────────┼───────────────┼────────────────────┼─────────────┘  ║
+║            └───────────────┼────────────────────┘                ║
+║                            ▼                                     ║
+║  ┌─────────────────────────────────────────────────────────────┐ ║
+║  │            Taint Propagation Engine                         │ ║
+║  │         (Neo4j persistent node scores — 4 hops)             │ ║
+║  └─────────────────────────────┬───────────────────────────────┘ ║
+║                                │                                 ║
+║                                ▼                                 ║
+║  ┌─────────────────────────────────────────────────────────────┐ ║
+║  │                 AutoSTR v2 ENGINE                           │ ║
+║  │  ┌──────────────┬─────────────────┬────────────────────┐   │ ║
+║  │  │ FIU-IND XML  │  CBI Evidence   │  RBI Regulatory    │   │ ║
+║  │  │ (PMLA §12)   │  Package PDF    │  Report            │   │ ║
+║  │  └──────────────┴─────────────────┴────────────────────┘   │ ║
+║  └─────────────────────────────┬───────────────────────────────┘ ║
+║                                │                                 ║
+║                                ▼                                 ║
+║  ┌─────────────────────────────────────────────────────────────┐ ║
+║  │     MLRO REVIEW DASHBOARD  (React 18 + FastAPI)             │ ║
+║  │  PostgreSQL · Redis · Audit Trail · Immutable Event Log     │ ║
+║  └─────────────────────────────────────────────────────────────┘ ║
+╚══════════════════════════════════════════════════════════════════╝
 ```
 
 ### Tech Stack
 
-| Layer | Technology | Why This Choice |
-|-------|-----------|-----------------|
-| **Event Ingestion** | Apache Kafka | Industry standard. Sub-10ms publish latency. Persistent log for replay |
-| **Stream Processing** | Apache Flink | Stateful stream processing. WarmthScore maintains per-account state across events without database round-trips |
-| **Graph Database** | Neo4j 5.x | Native graph storage. Cypher for pattern detection. Index-free adjacency for O(1) relationship traversal |
-| **ML Models** | XGBoost + scikit-learn | WarmthScore signal classification. Explainable via SHAP — critical for MLRO review |
-| **FRI Integration** | DoT DIP REST API | Real-time FRI score lookup (Signal 5) + SIM swap events (Signal 6). Same API, two signals |
-| **Evidence Generation** | Python + FIU-IND XML Schema + ReportLab | AutoSTR: SAPTRN, SAPINP, SAPLEP, SAPPIT. CBI Package: structured PDF |
-| **API Layer** | FastAPI + Python | PRISM internal APIs. MLRO dashboard backend. Async high-throughput |
-| **Dashboard** | React 18 + Recharts + D3.js | MLRO review interface. WarmthScore timeline. FlowGraph visualiser. Recruiter network graph |
-| **Primary Database** | PostgreSQL 16 | Case management. Taint scores. Audit logs. Immutable event log |
-| **Cache Layer** | Redis | WarmthScore hot cache. Recruiter node cache. Sub-millisecond reads |
-| **Security** | AES-256 + TLS 1.3 + HSM | All PII encrypted at rest via HSM-managed keys. FIPS 140-2 Level 3 |
-| **CBS Integration** | Finacle Event Stream | Read-only subscriber. No downtime. No rip-and-replace. PRISM never writes to core banking |
+| Layer | Technology | Latency Target |
+|-------|-----------|---------------|
+| Event Ingestion | **Apache Kafka** — 4 topics, sub-10ms publish latency | < 10ms |
+| Stream Processing | **Apache Flink** — stateful, per-account WarmthScore state across events | — |
+| Graph Database | **Neo4j 5.x** — index-free adjacency, O(1) relationship traversal | < 100ms query |
+| ML Models | **XGBoost + SHAP** — explainable signal ensemble, regulatory-grade attribution | < 50ms score |
+| External APIs | **DoT DIP REST API** — FRI lookup (S5) + SIM swap events (S6). Same API, two signals | < 150ms |
+| Evidence Generation | **Python + FIU-IND XML Schema + ReportLab** — three packages, one call | < 60 min total |
+| API Layer | **FastAPI** — async, high-throughput, OpenAPI docs | — |
+| Dashboard | **React 18 + Recharts + D3.js** — WarmthScore timeline, FlowGraph, Recruiter Map | — |
+| Primary Database | **PostgreSQL 16** — cases, alerts, taint scores, immutable audit log | — |
+| Cache | **Redis** — WarmthScore hot cache, sub-millisecond reads | < 1ms |
+| Security | **AES-256 + TLS 1.3 + HSM** — FIPS 140-2 Level 3, field-level PII encryption | — |
+| CBS Integration | **Finacle Event Stream** — read-only subscriber, no downtime, never writes to core banking | — |
 
-### Finacle Event Processing
+### Event Processing Latency
 
-| Event Type | PRISM Action | Latency Target |
-|-----------|--------------|----------------|
-| Account Creation | WarmthScore node initialised. Baseline established | < 50ms |
-| Transaction Posting | FlowGraph edge added. All 5 detectors re-evaluated. Recruiter map updated | < 100ms |
-| UPI Device Registration | Signal 2 evaluated. Signal 6 (SIM swap) queried via DoT DIP API | < 150ms |
-| KYC Update | Signal 5 (FRI contradiction) re-evaluated. Profile mismatch refresh | < 80ms |
-| Account Status Change | Taint propagation triggered if account confirmed mule | < 200ms |
-
-> **Why Streaming Is Non-Negotiable:** 18.68 billion UPI transactions were processed in May 2025 alone — 622.6 million daily. A single UPI transaction settles in under 2 seconds. Fraud cashout happens in 15 seconds. A batch system that runs overnight reviews data that is 8–14 hours stale. The crime is complete before the first report runs.
+| Finacle Event | PRISM Action | Target |
+|--------------|--------------|--------|
+| `account.created` | WarmthScore node initialised. Baseline established | **< 50ms** |
+| `transaction.posted` | FlowGraph edge added. All 5 detectors re-evaluated. Recruiter map updated | **< 100ms** |
+| `device.registered` | Signal 2 evaluated. Signal 6 (SIM swap) queried via DoT DIP | **< 150ms** |
+| `kyc.updated` | Signal 5 (FRI contradiction) re-evaluated. Profile mismatch refresh | **< 80ms** |
+| `account.status_changed` | Taint propagation triggered if account confirmed mule | **< 200ms** |
 
 ---
 
@@ -267,38 +308,33 @@ The recruiter account sends test payments to multiple warming accounts simultane
 
 | Regulation | Provision | PRISM Application |
 |------------|-----------|------------------|
-| **RBI KYC Master Direction 2016** | §38 — Banks may restrict accounts pending KYC re-verification **without court order** | WarmthScore 60–85: triggers KYC re-verification. Full bank authority. PMLA does not apply |
-| **Prevention of Money Laundering Act** | §12 — Banks must file STR with FIU-IND | WarmthScore 75+: AutoSTR initiates STR preparation. Filed within 60 minutes |
-| **RBI FRI Directive** | June 2025 — All scheduled commercial banks must integrate FRI | Signal 5: FRI integration via DoT DIP API. Regulatory mandate fulfilled |
-| **DoT-FIU MOU** | September 2025 — Exchange of data on mule accounts via Digital Intelligence Platform | Signal 6: SIM swap events queried via DIP API |
-| **Supreme Court Writ 03/2025** | CBI designated primary investigation agency. Banks to implement AI-based mule detection | WarmthScore 85+: CBI Evidence Package auto-generated. **No bank currently does this** |
-| **DPDP Act 2023** | Data minimisation | Hashed device fingerprints for all external queries. Raw PII never leaves Union Bank systems |
+| **RBI KYC Master Direction 2016** | §38 — Banks may restrict account operations pending KYC re-verification **without court order** | WarmthScore 60–85: triggers KYC re-verification. Account operations restricted. Full bank authority. PMLA does not apply |
+| **Prevention of Money Laundering Act** | §12 — Banks must file STR with FIU-IND when suspicion of money laundering arises | WarmthScore 75+: AutoSTR initiates STR preparation. Filed within 60 minutes. Fulfils 7-day mandate |
+| **RBI FRI Directive — June 2025** | All scheduled commercial banks must integrate FRI into onboarding and transaction monitoring | Signal 5: FRI integration via DoT DIP API. FRI contradiction used as anti-evasion detector |
+| **DoT-FIU MOU — September 2025** | Exchange of data on mule accounts via Digital Intelligence Platform | Signal 6: SIM swap events queried via DIP API. New data layer only available post-September 2025 |
+| **Supreme Court Writ 03/2025** | CBI designated primary agency for digital arrest fraud. Banks to implement AI-based mule detection | WarmthScore 85+: CBI Evidence Package auto-generated. **No bank currently does this** |
+| **DPDP Act 2023** | Data minimisation — process only what is necessary | SHA-256 applied locally before any external query. Raw PII never leaves Union Bank systems |
 
-### The PMLA Legal Cage — And How PRISM Escapes It
+<details>
+<summary><b>⚖️ The PMLA Legal Cage — And How PRISM Escapes It</b></summary>
+<br/>
 
-Under PMLA, banks cannot freeze accounts without court authorisation. By the time court authorisation arrives, mule networks have emptied the account. This is a structural constraint that has existed since PMLA was enacted and has never been solved.
+Under PMLA, banks cannot freeze accounts without court authorisation. By the time court authorisation arrives, mule networks have emptied the account. This is a structural legal constraint that has existed since PMLA was enacted and has never been solved.
 
-PRISM escapes this cage through **jurisdictional separation:**
+**PRISM escapes this cage through jurisdictional separation:**
 
 - WarmthScore 60–85 operates under **KYC Master Direction §38** — a completely separate legal framework from PMLA
-- Banks can restrict accounts pending KYC completion. **No court order. No PMLA invocation. No legal exposure.**
-- The legal transition from KYC jurisdiction to PMLA jurisdiction happens automatically as the crime pattern matures
+- Banks can restrict accounts pending KYC completion. No court order. No PMLA invocation. No legal exposure.
+- The illicit funds arrive, if at all, after the KYC restriction is already in place
+- When funds arrive on a restricted account, PMLA §12 reporting obligation activates and AutoSTR files the STR automatically
+- The legal transition from KYC jurisdiction to PMLA jurisdiction happens **automatically** as the crime pattern matures
 
 > PRISM does not circumvent PMLA. It operates in a different legal domain until PMLA naturally applies.
+> KYC Master Direction restriction → pre-crime.
+> PMLA STR → post-crime evidence.
+> Two separate legal actions. Each appropriate to the threat stage. Each fully within bank authority.
 
----
-
-## Security Architecture — Seven Layers
-
-| Layer | Implementation |
-|-------|----------------|
-| **1 — Data Encryption** | AES-256 with HSM-managed keys at rest. TLS 1.3 mandatory in transit. Field-level PII encryption — compromised DB server cannot read customer data without HSM key access |
-| **2 — API Security** | Mutual TLS (mTLS) for all internal APIs. HMAC-SHA256 request signing for DoT DIP calls. Replay attacks rejected by 30-second timestamp validation |
-| **3 — Access Control** | RBAC: MLRO (read + approve), Fraud Analyst (read only), System Admin (config only), Audit (immutable log only). Zero-trust network — every service authenticates to every other |
-| **4 — Adversarial Resistance** | WarmthScore model parameters versioned in immutable log. Threshold changes require dual approval. Anomaly detection on PRISM's own behaviour — model poisoning detection |
-| **5 — Evidence Integrity** | Every STR and CBI Package cryptographically signed at generation with trusted timestamp. SHA-256 hash stored in immutable log. Evidence packages are write-once |
-| **6 — Privacy Preservation** | Device fingerprints hashed locally (SHA-256) before any external query. Raw IMEI never leaves Union Bank network. DPDP 2023 retention enforcement: WarmthScore data deleted after 2 years (unflagged). Taint scores retained 7 years per PMLA |
-| **7 — Operational Security** | Dedicated security zone. Biometric authentication for all admin access. Session recording. Quarterly penetration testing mandatory before production |
+</details>
 
 ---
 
@@ -307,158 +343,94 @@ PRISM escapes this cage through **jurisdictional separation:**
 ### Prerequisites
 
 ```bash
-# Required
-Docker >= 24.0
-Docker Compose >= 2.20
-Python >= 3.11
-Node.js >= 20.0
+Docker >= 24.0    Docker Compose >= 2.20
+Python >= 3.11    Node.js >= 20.0
 ```
 
-### 1. Clone the Repository
+### 1 — Clone & Start the Stack
 
 ```bash
 git clone https://github.com/your-team/ARGUS-PRISM.git
 cd ARGUS-PRISM
-```
 
-### 2. Start the Full Stack
-
-```bash
-# Launch all 7 services: Kafka, Flink, Neo4j, PostgreSQL, Redis, FastAPI, React
+# Starts all 7 services: Kafka, Flink, Neo4j, PostgreSQL, Redis, FastAPI, React
 docker-compose up -d
 
 # Verify all services healthy
 docker-compose ps
 ```
 
-### 3. Seed the Demo Database
+### 2 — Seed Demo Data & Start Event Stream
 
 ```bash
-# Seeds 3 mule campaigns with 72-hour behavioural data
+# Seeds 3 mule campaigns with full 72-hour behavioural data
 python scripts/demo_seeder.py
 
-# Start event stream simulation
+# Start Finacle event stream simulation
 python scripts/kafka_producer.py &
 python scripts/flink_pipeline.py &
 ```
 
-### 4. Run the Smoke Test
+### 3 — Validate & Launch
 
 ```bash
+# Run smoke test — all 8 endpoints must return green
 python scripts/smoke_test.py
-# Expected: ✅ All endpoints green
+
+# Open dashboard
+open http://localhost:5173
+
+# API docs (Swagger)
+open http://localhost:8000/docs
 ```
 
-### 5. Access the Dashboard
-
-```
-Dashboard: http://localhost:5173
-API Docs:  http://localhost:8000/docs
-Neo4j:     http://localhost:7474 (neo4j / prism2026)
-```
-
----
-
-## Project Structure
-
-```
-ARGUS-PRISM/
-├── README.md                         ← This file
-├── docker-compose.yml                ← Full 7-service stack
-├── docs/
-│   ├── architecture.md               ← System architecture with diagrams
-│   ├── legal-framework.md            ← PMLA + KYC MD + FRI + SC Writ
-│   ├── ps3-compliance-map.md         ← Every PS3 requirement mapped
-│   └── warmthscore-signals.md        ← Six signals with validation sources
-├── services/
-│   ├── api/                          ← FastAPI backend
-│   │   ├── main.py
-│   │   ├── routes/
-│   │   │   ├── health.py
-│   │   │   ├── accounts.py
-│   │   │   ├── warmthscore.py
-│   │   │   ├── autostr.py
-│   │   │   └── recruiter.py
-│   │   ├── schemas/
-│   │   │   ├── account.py
-│   │   │   ├── warmthscore.py
-│   │   │   └── common.py
-│   │   └── requirements.txt
-│   ├── ml/
-│   │   ├── warmthscore/
-│   │   │   ├── signals/              ← S1–S6 signal processors
-│   │   │   │   ├── s1_test_credit.py
-│   │   │   │   ├── s2_device_fingerprint.py
-│   │   │   │   ├── s3_velocity_derivative.py
-│   │   │   │   ├── s4_dormant_reactivation.py
-│   │   │   │   ├── s5_fri_contradiction.py
-│   │   │   │   └── s6_sim_swap.py
-│   │   │   ├── model/                ← XGBoost ensemble + SHAP
-│   │   │   └── dataset/              ← Synthetic 72-hour campaign data
-│   │   └── requirements.txt
-│   └── dashboard/                    ← React 18 frontend
-│       ├── src/
-│       │   ├── design/               ← Washi design system tokens
-│       │   ├── components/           ← WarmthBadge, AlertRow, KPICard, etc.
-│       │   ├── views/                ← AlertQueue, AccountTimeline, FlowGraph, RecruiterMap, AutoSTR
-│       │   ├── shell/                ← NavBar, Sidebar
-│       │   ├── landing/              ← Public landing page
-│       │   ├── hooks/                ← useTheme, useSpringNumber
-│       │   └── api/client.js         ← FastAPI integration layer
-│       └── package.json
-├── src/
-│   ├── flowgraph/                    ← Neo4j schema, Cypher queries, 5 detectors
-│   ├── warmthscore/                  ← 6 signal processors, XGBoost ensemble
-│   ├── autostr/                      ← FIU-IND XML generator, CBI PDF builder
-│   ├── taint_engine/                 ← Graph propagation, score persistence
-│   ├── recruiter_mapper/             ← Coordinator node detection
-│   └── flink_pipeline/               ← Stateful stream processing
-├── scripts/
-│   ├── demo_seeder.py                ← Seeds 3 demo campaigns (72-hr data)
-│   ├── kafka_producer.py             ← Simulates Finacle event stream
-│   ├── flink_pipeline.py             ← Stream processing runner
-│   └── smoke_test.py                 ← Validates all 8 API endpoints
-└── data/
-    └── synthetic_demo/               ← Demo behavioural dataset (72-hr campaign)
-```
+| Service | URL |
+|---------|-----|
+| **MLRO Dashboard** | http://localhost:5173 |
+| **FastAPI + Swagger** | http://localhost:8000/docs |
+| **Neo4j Browser** | http://localhost:7474 |
+| **Kafka UI** | http://localhost:8080 |
 
 ---
 
 ## API Reference
 
-### Core Endpoints
+<details>
+<summary><b>View All Endpoints</b></summary>
+<br/>
 
 ```
-GET  /health                                    → Service health (postgres/neo4j/redis/kafka/ml_model)
-GET  /api/accounts                              → Account list (filterable by risk_level)
-GET  /api/accounts/{id}                         → Account detail
-GET  /api/accounts/{id}/timeline/signals        → Signal timeline (last N hours)
-GET  /api/accounts/{id}/timeline/graph-events   → Transaction graph data (D3-ready)
-POST /api/accounts/{id}/flag-mule               → Flag confirmed mule
-PATCH /api/accounts/{id}/status                 → Update account status
+# System
+GET   /health                                     Service health (postgres/neo4j/redis/kafka/ml)
 
-GET  /api/v1/warmthscore/{id}/timeline          → Score history (limit=N)
-POST /api/v1/warmthscore/score                  → Score an account now
-GET  /api/v1/warmthscore/model/status           → XGBoost model status
+# Accounts
+GET   /api/accounts                               Account list — filterable by risk_level
+GET   /api/accounts/{id}                          Account detail
+GET   /api/accounts/{id}/timeline/signals         Signal timeline (last N hours)
+GET   /api/accounts/{id}/timeline/graph-events    Transaction graph (D3-ready)
+POST  /api/accounts/{id}/flag-mule                Flag confirmed mule
+PATCH /api/accounts/{id}/status                   Update account status
 
-GET  /api/recruiter/map                         → All recruiter nodes
-GET  /api/recruiter/{id}/campaign               → Campaign detail + D3 graph data
-POST /api/recruiter/{id}/freeze                 → Freeze coordinator + all downstream
+# WarmthScore
+GET   /api/v1/warmthscore/{id}/timeline           Score history
+POST  /api/v1/warmthscore/score                   Score an account on-demand
+GET   /api/v1/warmthscore/model/status            XGBoost model status
 
-POST /api/autostr/generate/{case_id}            → Generate all 3 evidence packages
+# Recruiter
+GET   /api/recruiter/map                          All recruiter nodes
+GET   /api/recruiter/{id}/campaign                Campaign detail + D3 graph
+POST  /api/recruiter/{id}/freeze                  Freeze coordinator + all downstream
+
+# AutoSTR
+POST  /api/autostr/generate/{case_id}             Generate all 3 evidence packages
 ```
 
-### Example — Score an Account
+**Example — Score an Account:**
 
 ```bash
 curl -X POST http://localhost:8000/api/v1/warmthscore/score \
   -H "Content-Type: application/json" \
-  -d '{
-    "account_id": "UBI-2026-DEMO-001",
-    "transactions": [...],
-    "device_events": [...],
-    "fri_score": "LOW"
-  }'
+  -d '{ "account_id": "UBI-2026-DEMO-001", "transactions": [...], "fri_score": "LOW" }'
 ```
 
 ```json
@@ -466,11 +438,6 @@ curl -X POST http://localhost:8000/api/v1/warmthscore/score \
   "account_id": "UBI-2026-DEMO-001",
   "warmth_score": 84.2,
   "risk_level": "CRITICAL",
-  "signals": [
-    { "signal_name": "dormant_reactivation", "score": 31.2, "weight": 0.20 },
-    { "signal_name": "device_fingerprint",   "score": 22.0, "weight": 0.22 },
-    { "signal_name": "fri_contradiction",    "score": 18.3, "weight": 0.15 }
-  ],
   "shap_top3": [
     { "signal": "dormant_reactivation", "impact": 31.2 },
     { "signal": "device_fingerprint",   "impact": 22.0 },
@@ -480,28 +447,63 @@ curl -X POST http://localhost:8000/api/v1/warmthscore/score \
 }
 ```
 
+</details>
+
 ---
 
-## MLRO Dashboard — Five Views
+## Dashboard — Five Views
 
-| View | What It Shows | Key Action |
-|------|--------------|------------|
-| **Alert Queue** | Ranked list of accounts above WarmthScore threshold. Score, top 2 signals, time since first signal, taint indicator | Expand case → Review → Approve STR |
-| **Account Timeline** | Per-account WarmthScore trajectory over 72 hours. Every signal lighting up with timestamp. FRI score overlay. SHAP breakdown | Mark false positive · Escalate to CBI · Request Video KYC |
-| **FlowGraph View** | Interactive D3 graph. Node colour = WarmthScore heat. Edge thickness = transaction value. Tainted nodes with amber border | Export graph as CBI evidence · Identify recruiter node · Freeze network |
-| **Recruiter Map** | Network graph of coordinator accounts. Campaign scale indicator. Downstream mule cluster | Initiate campaign-level restriction · Generate industrial orchestrator alert |
-| **AutoSTR Preview** | Complete STR preview before approval. SAPTRN data pre-populated. Grounds of suspicion pre-written from SHAP attribution | Approve → Submit to FIU-IND · Download CBI Package · Schedule RBI report |
+| View | What the MLRO Sees | Key Action |
+|------|--------------------|------------|
+| **Alert Queue** | Ranked list above WarmthScore threshold. Score · top 2 signals · time since first signal · taint indicator | Expand → Review → Approve STR |
+| **Account Timeline** | WarmthScore trajectory over 72 hours. Every signal with timestamp. FRI overlay. SHAP breakdown | Mark false positive · Escalate to CBI |
+| **FlowGraph** | Interactive D3 graph. Node colour = heat level. Edge thickness = transaction value. Tainted nodes in amber | Export as CBI evidence · Freeze network |
+| **Recruiter Map** | Coordinator accounts with campaign scale indicator and downstream mule cluster | Freeze entire campaign in one click |
+| **AutoSTR Panel** | Complete STR preview. SAPTRN pre-populated. Grounds of suspicion pre-written from SHAP attribution | Approve → FIU-IND · Download CBI Package |
 
-### False Positive Architecture
+---
 
-| Scenario | Score Range | Customer Impact | Resolution |
-|----------|-------------|-----------------|------------|
-| Legitimate new customer, multiple devices | 60–70 | Video KYC request only — no restriction | 24 hrs after KYC |
-| Returned NRI with new Indian SIM + device | 70–80 | Outbound UPI restricted. Branch verification | 48 hrs |
-| Reactivated dormant account + device upgrade | 65–75 | Video KYC + enhanced monitoring. No restriction | 24 hrs |
-| Jan Dhan receiving legitimate government transfer | 55–65 | Enhanced monitoring only. Internal flag | Auto-cleared in 7 days |
+## Project Structure
 
-> WarmthScore below 75: **zero customer-visible impact.** Score 75–85: Video KYC only — resolved in 48 hours. Score 85+: restriction until MLRO review — maximum 24 hours with AutoSTR evidence pre-built.
+```
+ARGUS-PRISM/
+├── docker-compose.yml
+├── docs/
+│   ├── architecture.md
+│   ├── legal-framework.md
+│   ├── ps3-compliance-map.md
+│   └── warmthscore-signals.md
+├── services/
+│   ├── api/                          FastAPI backend
+│   │   ├── main.py
+│   │   ├── routes/
+│   │   └── schemas/
+│   ├── ml/
+│   │   └── warmthscore/
+│   │       ├── signals/              S1 – S6 signal processors
+│   │       ├── model/                XGBoost ensemble + SHAP
+│   │       └── dataset/              Synthetic 72-hour campaign data
+│   └── dashboard/                    React 18 frontend
+│       └── src/
+│           ├── design/               Washi design system tokens
+│           ├── components/
+│           ├── views/                AlertQueue · Timeline · FlowGraph · Recruiter · AutoSTR
+│           └── api/client.js
+├── src/
+│   ├── flowgraph/                    Neo4j schema + 5 pattern detectors
+│   ├── warmthscore/                  Signal processors + ensemble
+│   ├── autostr/                      FIU-IND XML + CBI PDF + RBI Report
+│   ├── taint_engine/                 Graph propagation + persistent scores
+│   ├── recruiter_mapper/             Coordinator node detection
+│   └── flink_pipeline/               Stateful stream processing
+├── scripts/
+│   ├── demo_seeder.py
+│   ├── kafka_producer.py
+│   ├── flink_pipeline.py
+│   └── smoke_test.py
+└── data/
+    └── synthetic_demo/               72-hour campaign dataset
+```
 
 ---
 
@@ -509,143 +511,98 @@ curl -X POST http://localhost:8000/api/v1/warmthscore/score \
 
 Every word of PS3 mapped to specific PRISM components. Zero gaps.
 
-| PS3 Requirement | PRISM Component |
-|----------------|-----------------|
-| "Fund flow tracking system" | FlowGraph: real-time Neo4j graph. Every transaction is an edge |
-| "maps and visualises end-to-end movement of funds" | FlowGraph dashboard: interactive D3 graph. Every hop, every timestamp, every amount visible |
-| "within the bank across accounts, products, branches, channels" | FlowGraph covers NEFT, RTGS, UPI, IMPS, ATM, and branch counter |
-| "graph analytics and machine learning" | Neo4j Cypher + Apache Flink ML + XGBoost WarmthScore |
-| "rapid layering through multiple accounts" | Layering Detector: 3+ accounts within 6 hours |
-| "circular transactions (round-tripping)" | Round-Trip Detector: origin-to-origin through 2+ intermediaries within 72 hours |
-| "structuring below reporting thresholds" | Structuring Detector: multiple sub-₹10L transactions same day from connected accounts |
-| "sudden activation of dormant accounts" | Dormant Activation Detector + WarmthScore Signal 4 |
-| "mismatches between declared customer profiles and actual fund movement" | Profile Mismatch Detector + WarmthScore Signal 5 |
-| "trace the complete journey of funds" | FlowGraph full transaction lineage. Taint Engine extends into historical network |
-| "generate evidence packages for reporting to FIU" | AutoSTR: FIU-IND XML auto-generated in < 60 minutes |
+<details>
+<summary><b>View Full Compliance Map</b></summary>
+<br/>
+
+| PS3 Requirement | PRISM Delivers |
+|----------------|---------------|
+| *"Fund flow tracking system"* | FlowGraph: real-time Neo4j graph. Every transaction is an edge. Every account is a node |
+| *"maps and visualises end-to-end movement of funds"* | FlowGraph dashboard: interactive D3 graph. Every hop, every timestamp, every amount |
+| *"within the bank across accounts, products, branches, channels"* | FlowGraph covers NEFT, RTGS, UPI, IMPS, ATM, and branch counter transactions |
+| *"graph analytics and machine learning"* | Neo4j Cypher + Apache Flink + XGBoost WarmthScore ensemble |
+| *"rapid layering through multiple accounts"* | Layering Detector: 3+ accounts within 6 hours |
+| *"circular transactions (round-tripping)"* | Round-Trip Detector: origin-to-origin through 2+ intermediaries within 72 hours |
+| *"structuring below reporting thresholds"* | Structuring Detector: multiple sub-₹10L transactions same day from connected accounts |
+| *"sudden activation of dormant accounts"* | Dormant Activation Detector + WarmthScore Signal 4 |
+| *"mismatches between declared customer profiles and actual fund movement"* | Profile Mismatch Detector + WarmthScore Signal 5 |
+| *"trace the complete journey of funds"* | FlowGraph full transaction lineage. Taint Engine extends into historical network |
+| *"generate evidence packages for reporting to FIU"* | AutoSTR: FIU-IND XML auto-generated in < 60 minutes |
 
 > **Beyond PS3:** Five engines provide complete PS3 coverage plus four capabilities PS3 did not ask for but Union Bank desperately needs: pre-crime WarmthScore, persistent Taint Memory, Recruiter Network Mapping, and CBI Evidence Packages.
 
----
-
-## Data Science — Model Architecture
-
-### WarmthScore Ensemble
-
-WarmthScore is not a single model. It is a signal ensemble with explainable attribution — critical for MLRO regulatory compliance and cross-examination during investigation.
-
-```python
-SIGNAL_WEIGHTS = {
-    "test_credit_pattern":   0.18,   # Isolation Forest
-    "device_fingerprint":    0.22,   # IMEI cluster proximity
-    "velocity_derivative":   0.15,   # Second derivative convexity
-    "dormant_reactivation":  0.20,   # Rule-based + ML
-    "fri_contradiction":     0.15,   # Disagreement scoring
-    "sim_swap_velocity":     0.10,   # Event correlation (Sept 2025 MOU)
-}
-# Ensemble: XGBoost + SHAP attribution at scoring time
-```
-
-### Synthetic Training Dataset
-
-PRISM uses 100% synthetic data constructed from published research patterns:
-
-- **BioCatch 2023 Fraud Trends Report:** 48% of confirmed mule accounts show behavioural inconsistencies within the first 72 hours of activation — even when KYC documents appeared clean. This validates the warming phase hypothesis with published industry research.
-- **NPCI UPI device hard-binding specification:** Defines the exact device registration sequence PRISM monitors for Signal 2
-- **DoT Chakshu platform public disclosure:** IMEI blocking patterns used to build cluster proximity scoring
-- **RBI KYC Master Direction 2016:** Re-KYC trigger thresholds calibrate Signal 4 dormancy detection
-
----
-
-## Business Case
-
-### Addressable Market
-
-| Segment | Size | PRISM Opportunity |
-|---------|------|------------------|
-| Public Sector Banks — India | 12 PSBs | All run similar CBS systems, face identical mule problem |
-| PSB Share of Fraud Losses | ₹25,667 Cr | Buyers with acute, documented pain |
-| India APP Fraud Market 2026 | $612M growing 85% annually | Expanding market, no dominant solution |
-| DoT DIP Government Infrastructure | ₹228 Cr budget | Government-funded infrastructure PRISM leverages free |
-
-### The Network Moat
-
-Every confirmed mule case adds to the Taint Propagation database. Every confirmed recruiter adds to the Recruiter Network map. Every confirmed FaaS toolkit pattern adds to the Signal 2 cluster database. **The system gets more accurate every day it runs.**
-
-A competitor starting today has no taint history, no recruiter map, no cluster database. PRISM has all three from day one. This gap widens every week. After 12 months of Union Bank deployment, the data advantage is insurmountable. This is not a technical moat. It is a data moat.
-
-### Roadmap
-
-| Phase | Timeline | Deliverable |
-|-------|----------|-------------|
-| **Phase 1 — Union Bank Deployment** | Months 1–3 | All 5 engines live. Finacle integration. FRI + DoT DIP APIs. MLRO dashboard operational |
-| **Phase 2 — PSB Expansion** | Months 3–9 | 3 additional PSBs. Cross-PSB taint score sharing (SHA-256 hashed). Network effect begins |
-| **Phase 3 — Global Fintech Fest** | Month 6–8 | Live demo at GFF 2026. SWIFT member bank discussions. International licensing pipeline |
-| **Phase 4 — Platform** | Months 12–24 | PRISM API for cooperative banks. Per-alert SaaS pricing. Complement positioning alongside MuleHunter.AI |
+</details>
 
 ---
 
 ## Known Limitations
 
-We respect honest disclosure. Evaluators trust teams that acknowledge constraints.
+Honest disclosure. Evaluators respect teams that acknowledge constraints.
 
-- **Synthetic training data only.** WarmthScore trained entirely on synthetic datasets derived from published research. Production deployment requires retraining on Union Bank's real transaction data with appropriate privacy controls and DPDP Act compliance.
+- **Synthetic training data only.** WarmthScore trained entirely on synthetic datasets derived from published research. Production deployment requires retraining on Union Bank's real transaction data with DPDP Act compliance.
 - **Signal 6 depends on DoT MOU access.** SIM swap events require DoT DIP API integration under the September 2025 MOU. Banks must formally register with DIP to query this endpoint.
-- **Neo4j at scale.** FlowGraph performance validated on synthetic datasets. Production performance at Union Bank's full transaction volume (millions of daily events) requires sizing validation and horizontal partitioning strategy.
-- **MLRO capacity assumption.** The graduated WarmthScore architecture minimises false positives, but sustained high-volume alert queues require adequate MLRO staffing. PRISM reduces review time per case — it does not eliminate human review for WarmthScore 75+.
-- **Cross-bank taint sharing is Phase 2.** Phase 1 operates entirely within Union Bank. Cross-PSB taint score sharing (proposed via hashed fingerprints) requires regulatory framework that does not yet fully exist.
+- **Neo4j at full production scale.** FlowGraph performance validated on synthetic datasets. Production performance at Union Bank's full transaction volume requires horizontal partitioning validation.
+- **MLRO staffing assumption.** PRISM reduces review time per case — it does not eliminate human review for WarmthScore 75+. Sustained high-volume alert queues require adequate MLRO capacity.
+- **Cross-bank taint sharing is Phase 2.** Phase 1 operates entirely within Union Bank. Cross-PSB taint score sharing requires regulatory framework that does not yet fully exist.
 
 ---
 
-## Team ARGUS
+## Team
 
-| Member | Role | Responsibility |
-|--------|------|----------------|
-| **Pranav** | ML · AutoSTR · FastAPI · React | WarmthScore signal engineering, XGBoost ensemble, SHAP explainability, FIU-IND XML + CBI PDF generation, FastAPI backend, React dashboard, Vercel deployment |
-| **Aditya** | Pipeline · FlowGraph · Taint · Recruiter · Data | Kafka event ingestion, Apache Flink pipeline, Neo4j graph schema, FlowGraph pattern detectors, Taint Propagation Engine, Recruiter Network Mapper, synthetic data generation |
-| **Pranita** | Compliance · Legal · Domain Research | Legal framework architecture, PMLA + KYC MD + SC Writ mapping, PS3 compliance verification, MLRO workflow design, documentation |
+<div align="center">
+
+| | Member | Role | Responsibilities |
+|-|--------|------|----------------|
+| 👤 | **Pranav** | ML · AutoSTR · FastAPI · React | WarmthScore signal engineering · XGBoost + SHAP · FIU-IND XML + CBI PDF generation · FastAPI backend · React dashboard · Vercel deployment |
+| 👤 | **Aditya** | Pipeline · FlowGraph · Taint · Recruiter | Kafka ingestion · Flink pipeline · Neo4j graph schema · FlowGraph detectors · Taint Propagation Engine · Recruiter Mapper · Synthetic data |
+| 👤 | **Pranita** | Compliance · Legal · Domain | Legal framework architecture · PMLA + KYC MD + SC Writ mapping · PS3 compliance · MLRO workflow design |
+
+</div>
 
 ---
 
-## Submission Details
+## Submission
 
-| Field | Value |
-|-------|-------|
+<div align="center">
+
+| Field | Detail |
+|-------|--------|
 | **Competition** | iDEA 2.0 — Innovation & Digital Excellence Awards |
 | **Host** | Union Bank of India |
 | **Problem Statement** | PS3 — Tracking of Funds within Bank for Fraud Detection |
 | **Prize Pool** | ₹13 Lakh |
-| **Team Name** | ARGUS |
-| **Submission Portal** | [ideahackathon.com](https://ideahackathon.com) |
-| **Phase 1 Deadline** | March 22, 2026 |
-| **Version** | PRISM v2.0 |
-
----
-
-## Contact
-
-| | |
-|-|-|
 | **Team** | ARGUS |
-| **Institute** | [Your Institution Name] |
-| **Email** | [team@email.com] |
-| **GitHub** | [github.com/your-team/ARGUS-PRISM](https://github.com) |
+| **Portal** | [ideahackathon.com](https://ideahackathon.com) |
+| **Version** | PRISM v2.0 · March 2026 |
+
+</div>
 
 ---
 
 <div align="center">
 
----
+<br/>
 
-**A R G U S**
+```
+  A · R · G · U · S
+```
 
 *The hundred eyes see what others cannot. They never close.*
 
+<br/>
+
+> *"MuleHunter.AI detects mule accounts after funds arrive. FRI flags numbers already known to be fraudulent.*
+> *India's largest banks are reverting to branch visits because they have no third option.*
+> *PRISM is the third option — detect the warming phase 72 hours before the first rupee arrives,*
+> *restrict under KYC authority before PMLA applies,*
+> *and deliver the CBI evidence package that the Supreme Court mandated and no bank currently generates."*
+
+<br/>
+
 ---
 
-> *"MuleHunter.AI detects mule accounts after funds arrive. FRI flags numbers already known to be fraudulent. India's largest banks are reverting to branch visits because they have no third option. PRISM is the third option — detect the warming phase 72 hours before the first rupee arrives, restrict under KYC authority before PMLA applies, and deliver the CBI evidence package that the Supreme Court mandated and no bank currently generates."*
+**ARGUS · iDEA 2.0 · PS3 · Union Bank of India · 2026**
 
----
-
-**ARGUS · Team PRISM · iDEA 2.0 · Union Bank of India · PS3 · 2026**
+<br/>
 
 </div>
