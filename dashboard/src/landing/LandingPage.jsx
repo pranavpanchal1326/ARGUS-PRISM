@@ -25,7 +25,6 @@ function LandingPage() {
       style={{
         background: 'var(--bg-base)',
         minHeight:  '100vh',
-        filter:     'url(#paper-grain)',
       }}
     >
       <Nav />

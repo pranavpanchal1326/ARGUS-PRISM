@@ -66,8 +66,11 @@ class PRISMPipeline:
         self._score_debounce = set()  # accounts scored this batch
 
         # Graceful shutdown on SIGINT / SIGTERM
-        signal.signal(signal.SIGINT, self._shutdown)
-        signal.signal(signal.SIGTERM, self._shutdown)
+        try:
+            signal.signal(signal.SIGINT, self._shutdown)
+            signal.signal(signal.SIGTERM, self._shutdown)
+        except ValueError:
+            log.warning("Could not set signal handlers (not running in the main thread). Skipping.")
 
         log.info("PRISM Pipeline initialized")
         log.info("  Consumer group : %s", self.CONSUMER_GROUP)

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import useAutoSTR from './useAutoSTR';
 import PackageCard from './PackageCard';
 import GenerationLog from './GenerationLog';
-import { generateAutoSTR as apiGenerate, downloadPackage as apiDownload } from '../../api/client';
+import { useCases } from '../../api/hooks';
 
 const LEGAL = [
   { authority:'FIU-IND', mandate:'PMLA Section 12',
@@ -31,6 +31,7 @@ function elapsedStr(startedAt) {
 export default function AutoSTRPanel() {
   const { state, generate, reset } = useAutoSTR();
   const { globalStatus } = state;
+  const { data: cases, loading: casesLoading } = useCases();
 
   const [selectedCase, setSelectedCase] = useState('');
   const [elapsed, setElapsed] = useState('00:00');
@@ -48,11 +49,14 @@ export default function AutoSTRPanel() {
 
   function handleGenerate(){
     if(!selectedCase) return;
+    const caseObj = (cases || []).find(c => c.case_id === selectedCase);
+    if (!caseObj) return;
+
     if(globalStatus==='COMPLETE'||globalStatus==='ERROR'){
       reset();
-      setTimeout(()=>generate(selectedCase),100);
+      setTimeout(()=>generate(caseObj.account_id, caseObj.case_id),100);
     } else {
-      generate(selectedCase);
+      generate(caseObj.account_id, caseObj.case_id);
     }
   }
 
@@ -83,11 +87,17 @@ export default function AutoSTRPanel() {
               style={{fontFamily:'var(--font-mono)',fontSize:'13px',color:'var(--text-primary)',
                 background:'var(--bg-surface)',border:'1px solid var(--border-default)',
                 borderRadius:'8px',padding:'8px 36px 8px 14px',cursor:'pointer',
-                appearance:'none',outline:'none',minWidth:'280px'}}>
+                appearance:'none',outline:'none',minWidth:'320px'}}>
               <option value="">Select a case...</option>
-              <option value="CASE-9912">CASE-9912 — UBI-2026-DEMO-001 (Score: 92)</option>
-              <option value="CASE-9913">CASE-9913 — UBI-2026-DEMO-002 (Score: 84)</option>
-              <option value="CASE-9914">CASE-9914 — UBI-2026-DEMO-003 (Score: 78)</option>
+              {casesLoading && <option value="" disabled>Loading cases...</option>}
+              {!casesLoading && (!cases || cases.length === 0) && (
+                <option value="" disabled>No critical cases found</option>
+              )}
+              {cases && cases.map(c => (
+                <option key={c.case_id} value={c.case_id}>
+                  {c.case_id} — {c.account_id} (Score: {c.risk_score})
+                </option>
+              ))}
             </select>
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
               stroke="var(--text-tertiary)" strokeWidth="1.5" strokeLinecap="round"
@@ -137,7 +147,7 @@ export default function AutoSTRPanel() {
               </div>
             </div>
             <div style={{fontFamily:'var(--font-mono)',fontSize:'18px',fontWeight:500,color:'var(--accent)',
-              fontVariantNumeric:'tabular-nums',minWidth:'52px',textAlign:'right'}}>
+               fontVariantNumeric:'tabular-nums',minWidth:'52px',textAlign:'right'}}>
               {elapsed}
             </div>
           </motion.div>

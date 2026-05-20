@@ -91,26 +91,6 @@ function Hero() {
       {/* ── Parallax accent glow ─────────────────────────── */}
       <motion.div className="hero-glow" style={{ y: glowY }} aria-hidden="true" />
 
-      {/* ── 1. Eyebrow badge ─────────────────────────────── */}
-      <motion.div
-        initial={{ opacity: 0, y: -16, scale: 0.96 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ ...springSmooth, delay: 0.2 }}
-        style={{ marginBottom: 'var(--space-6)', position: 'relative', zIndex: 1 }}
-      >
-        <span style={{
-          display: 'inline-flex', alignItems: 'center', gap: '8px',
-          padding: '6px 16px', borderRadius: 'var(--radius-pill)',
-          background: 'var(--bg-surface)', border: '1px solid var(--border-default)',
-          fontFamily: 'var(--font-ui)', fontSize: '12px', fontWeight: 500,
-          color: 'var(--text-secondary)',
-          boxShadow: '0 2px 8px color-mix(in srgb, var(--text-primary) 6%, transparent)',
-        }}>
-          <span className="eyebrow-dot" style={{ color: 'var(--accent)', fontSize: '10px' }}>●</span>
-          iDEA 2.0 · PS3 · Union Bank of India · ₹13 Lakh Prize Pool
-        </span>
-      </motion.div>
-
       {/* ── 2. H1 — word-by-word clip reveal ─────────────── */}
       <h1 style={{
         fontFamily: 'var(--font-display)', fontSize: 'clamp(42px, 6vw, 76px)',
@@ -119,7 +99,13 @@ function Hero() {
         maxWidth: '860px', marginBottom: 'var(--space-6)', position: 'relative', zIndex: 1,
       }}>
         {HEADLINE_WORDS.map((word, i) => (
-          <span key={i} style={{ display: 'inline-block' }}>
+          <span
+            key={i}
+            style={{
+              display: 'inline-block',
+              marginRight: i < HEADLINE_WORDS.length - 1 ? '0.3em' : 0,
+            }}
+          >
             <span style={{ display: 'inline-block', overflow: 'hidden', lineHeight: 1.2, verticalAlign: 'bottom' }}>
               <motion.span
                 style={{
@@ -136,7 +122,6 @@ function Hero() {
                 {word.text}
               </motion.span>
             </span>
-            {i < HEADLINE_WORDS.length - 1 ? ' ' : ''}
           </span>
         ))}
       </h1>

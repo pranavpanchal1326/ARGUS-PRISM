@@ -13,37 +13,40 @@ import { useState, useEffect } from 'react';
  *   - Persists preference to localStorage on every change
  *   - Tracks live system preference changes when no preference saved
  */
-export function useTheme() {
-  const [theme, setTheme] = useState(() => {
-    const saved = localStorage.getItem('prism-theme');
-    if (saved === 'light' || saved === 'dark') return saved;
+let globalTheme = (() => {
+  const saved = localStorage.getItem('prism-theme');
+  if (saved === 'light' || saved === 'dark') return saved;
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  return prefersDark ? 'dark' : 'light';
+})();
 
-    const prefersDark = window.matchMedia(
-      '(prefers-color-scheme: dark)'
-    ).matches;
-    return prefersDark ? 'dark' : 'light';
-  });
+const listeners = new Set();
+
+function setGlobalTheme(newTheme) {
+  globalTheme = newTheme;
+  localStorage.setItem('prism-theme', newTheme);
+  document.documentElement.setAttribute('data-theme', newTheme);
+  listeners.forEach(l => l(newTheme));
+}
+
+export function useTheme() {
+  const [theme, setTheme] = useState(globalTheme);
 
   useEffect(() => {
-    const current = document.documentElement.getAttribute('data-theme');
-    if (current !== theme) {
-      document.documentElement.setAttribute('data-theme', theme);
-    }
-    localStorage.setItem('prism-theme', theme);
-  }, [theme]);
+    listeners.add(setTheme);
+    return () => {
+      listeners.delete(setTheme);
+    };
+  }, []);
 
-  /*
-    Listen for system preference changes.
-    If user has no saved preference, follow the system.
-    If user has a saved preference, ignore system changes.
-  */
+  // Sync with system preferences if no saved preference exists
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
     const handleChange = (e) => {
       const saved = localStorage.getItem('prism-theme');
       if (!saved) {
-        setTheme(e.matches ? 'dark' : 'light');
+        setGlobalTheme(e.matches ? 'dark' : 'light');
       }
     };
 
@@ -51,9 +54,9 @@ export function useTheme() {
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
 
-  const toggle   = () => setTheme(t => t === 'light' ? 'dark' : 'light');
-  const setLight = () => setTheme('light');
-  const setDark  = () => setTheme('dark');
+  const toggle   = () => setGlobalTheme(globalTheme === 'light' ? 'dark' : 'light');
+  const setLight = () => setGlobalTheme('light');
+  const setDark  = () => setGlobalTheme('dark');
 
   return { theme, toggle, setLight, setDark, isDark: theme === 'dark' };
 }

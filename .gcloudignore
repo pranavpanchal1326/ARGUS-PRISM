@@ -1,0 +1,15 @@
+.git
+.github
+node_modules
+dashboard/node_modules
+dashboard/.next
+__pycache__
+*.pyc
+*.pyo
+.env
+.env.*
+!.env.example
+*.joblib
+# data/synthetic_demo/
+*.csv
+!services/ml/warmthscore/model/artifacts/

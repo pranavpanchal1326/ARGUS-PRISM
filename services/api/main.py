@@ -48,9 +48,13 @@ app = FastAPI(
 # Middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"] if settings.environment == "development" else ["https://prism.unionbankofindia.co.in"],
+    allow_origins=["*"] if settings.environment == "development" else [
+        "https://prism.unionbankofindia.co.in",
+        "https://argus-prism.vercel.app",
+        "https://dist-neon-six-82.vercel.app"
+    ],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PATCH"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 app.add_middleware(RequestLoggingMiddleware)

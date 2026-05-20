@@ -1,16 +1,37 @@
 import React, { useState, useEffect } from 'react';
+import { api } from '../api/client';
 
 const InstrumentNav = ({ 
   activeView, 
   setActiveView, 
   alertCount, 
-  systemStatus = 'OPERATIONAL' 
+  systemStatus: initialSystemStatus = 'OPERATIONAL' 
 }) => {
   const [time, setTime] = useState(new Date());
+  const [systemStatus, setSystemStatus] = useState(initialSystemStatus);
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    async function pollHealth() {
+      try {
+        const data = await api.getHealth();
+        if (!mounted) return;
+        const services = data?.services ?? {};
+        const isHealthy = (data?.status === 'healthy' || data?.status === 'operational')
+          && Object.values(services).every((value) => value === 'ok' || value === true);
+        setSystemStatus(isHealthy ? 'OPERATIONAL' : 'DEGRADED');
+      } catch {
+        if (mounted) setSystemStatus('DEGRADED');
+      }
+    }
+    pollHealth();
+    const id = setInterval(pollHealth, 15000);
+    return () => { mounted = false; clearInterval(id); };
   }, []);
 
   const formatTime = (date) => {

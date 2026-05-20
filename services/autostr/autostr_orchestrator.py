@@ -80,8 +80,10 @@ def generate_all_packages(report_input: FIUReportInput) -> AutoSTRResult:
         raise AutoSTRGenerationError("FIU-IND", str(e))
 
     # STEP 2: Write XML to temp
-    xml_path = f"D:/Projects/IDEA 2.0/ARGUS-PRISM/services/autostr/temp/prism_str_{case_id}_{ts}.xml"
-    os.makedirs(os.path.dirname(xml_path), exist_ok=True)
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    temp_dir = os.path.join(base_dir, "temp")
+    os.makedirs(temp_dir, exist_ok=True)
+    xml_path = os.path.join(temp_dir, f"prism_str_{case_id}_{ts}.xml")
     with open(xml_path, "w", encoding="utf-8") as f:
         f.write(xml_string)
 
@@ -91,7 +93,7 @@ def generate_all_packages(report_input: FIUReportInput) -> AutoSTRResult:
     cbi_gen_ms = 0.0
     try:
         start_cbi = time.perf_counter()
-        cbi_pdf_path = f"D:/Projects/IDEA 2.0/ARGUS-PRISM/services/autostr/temp/prism_cbi_{case_id}_{ts}.pdf"
+        cbi_pdf_path = os.path.join(temp_dir, f"prism_cbi_{case_id}_{ts}.pdf")
         generate_cbi_pdf(report_input, cbi_pdf_path, fiu_xml_hash)
         
         # Compute PDF hash

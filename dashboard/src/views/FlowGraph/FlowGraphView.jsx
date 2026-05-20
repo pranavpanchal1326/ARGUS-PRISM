@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useCallback, useState, useMemo } from 'react'
 import * as d3 from 'd3';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WarmthBadge, Button } from '../../components';
+import { useFlowGraph } from '../../api/hooks';
 
 /* ── Stubs for motion variants (Phase 1C exports) ────────── */
 const fadeIn = { initial: { opacity: 0 }, animate: { opacity: 1 } };
@@ -57,7 +58,7 @@ function fitToContent(svg, group, zoom, width, height) {
 }
 
 /* ── Mock data ───────────────────────────────────────────── */
-const MOCK_GRAPH_DATA = {
+const FALLBACK_GRAPH_DATA = {
   nodes: [
     { id: 'UBI-2026-DEMO-001', name: 'Rajesh Kumar',         score: 84, isRecruiter: false, isFocus: true,  taintScore: 0,   primarySignal: 'Signal 4 — Dormant Reactivation',          isConfirmed: false },
     { id: 'UBI-RECV-002',      name: 'Priya Sharma',         score: 67, isRecruiter: false, isFocus: false, taintScore: 80,  primarySignal: 'Signal 1 — Test Credit',                    isConfirmed: false },
@@ -189,7 +190,7 @@ function GraphLegend() {
 }
 
 /* ── FlowGraphView ───────────────────────────────────────── */
-export function FlowGraphView({ nodes = MOCK_GRAPH_DATA.nodes, links = MOCK_GRAPH_DATA.links, onNodeSelect, className = '' }) {
+export function FlowGraphView({ accountId = 'UBI-2026-DEMO-001', nodes, links, onNodeSelect, className = '' }) {
   const svgRef       = useRef(null);
   const zoomRef      = useRef(null);
   const simRef       = useRef(null);
@@ -199,12 +200,15 @@ export function FlowGraphView({ nodes = MOCK_GRAPH_DATA.nodes, links = MOCK_GRAP
   const [tooltip,    setTooltip]    = useState({ node: null, position: { x: 0, y: 0 }, visible: false });
   const [selectedId, setSelectedId] = useState(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
+  const { data: apiGraph } = useFlowGraph(accountId);
+  const activeNodes = nodes ?? apiGraph?.nodes ?? FALLBACK_GRAPH_DATA.nodes;
+  const activeLinks = links ?? apiGraph?.links ?? FALLBACK_GRAPH_DATA.links;
 
   /* Deep clone — D3 mutates nodes/links in-place */
   const graphData = useMemo(() => ({
-    nodes: JSON.parse(JSON.stringify(nodes)),
-    links: JSON.parse(JSON.stringify(links)),
-  }), [nodes, links]);
+    nodes: JSON.parse(JSON.stringify(activeNodes)),
+    links: JSON.parse(JSON.stringify(activeLinks)),
+  }), [activeNodes, activeLinks]);
 
   /* Track container size */
   useEffect(() => {

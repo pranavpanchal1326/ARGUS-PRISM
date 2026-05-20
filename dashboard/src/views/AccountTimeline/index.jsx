@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useSpring, animated } from '@react-spring/web';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ReferenceLine, ResponsiveContainer } from 'recharts';
-import { useWarmthScore, useWarmthTimeline } from '../../api/hooks';
+import { useAccount, useWarmthScore, useWarmthTimeline } from '../../api/hooks';
 import { SkeletonScore, SkeletonText } from '../../components/Skeleton';
 import { useWindowSize } from '../../hooks/useWindowSize';
 
 /* ── Data ─────────────────────────────────────────────── */
-const DEMO_ACCOUNT = {
+const FALLBACK_ACCOUNT = {
   account_id: 'UBI-2026-DEMO-001', name: 'Rajesh Kumar',
   ifsc: 'UBIN0123456', branch: 'Andheri East, Mumbai',
   kyc_status: 'PENDING_REVERIFICATION', fri_score: 'LOW',
@@ -223,16 +223,27 @@ function ActionButton({ children, variant = 'default', onClick }) {
 /* ── Main export ──────────────────────────────────────── */
 export default function AccountTimeline({
   accountId           = 'UBI-2026-DEMO-001',
-  account             = DEMO_ACCOUNT,
+  account             = FALLBACK_ACCOUNT,
   legalActions        = LEGAL_ACTIONS,
   onGenerateEvidence  = () => {},
   onMarkFalsePositive = () => {},
   onRequestKYC        = () => {},
 }) {
+  const { data: accountData } = useAccount(accountId);
   const { data: scoreData,    loading: scoreLoading }    = useWarmthScore(accountId);
   const { data: timelineData, loading: timelineLoading } = useWarmthTimeline(accountId);
   const { width } = useWindowSize();
   const isMobile = width < 768;
+  account = accountData ? {
+    ...account,
+    account_id: accountData.account_id ?? account.account_id,
+    name: accountData.account_holder_name ?? accountData.name ?? account.name,
+    ifsc: accountData.ifsc_code ?? accountData.ifsc ?? account.ifsc,
+    branch: accountData.branch_code ?? accountData.branch ?? account.branch,
+    kyc_status: accountData.kyc_status ?? account.kyc_status,
+    current_warmth_score: accountData.current_warmth_score ?? account.current_warmth_score,
+    risk_level: accountData.warmth_risk_level ?? accountData.risk_level ?? account.risk_level,
+  } : account;
 
   const score    = scoreData?.warmth_score    ?? account.current_warmth_score;
   const shap     = scoreData?.shap_top3

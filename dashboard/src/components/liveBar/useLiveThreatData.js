@@ -1,5 +1,25 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { MOCK_LIVE_DATA, SCORE_BANDS } from './liveThreatConfig';
+import { api } from '../../api/client';
+
+const EMPTY_LIVE_DATA = {
+  bandCounts: {
+    CLEAN: 0,
+    WARMING: 0,
+    HOT: 0,
+    CRITICAL: 0,
+    IMMINENT: 0
+  },
+  highestScore: 0,
+  highestScoreAccountId: 'NONE',
+  pendingReview: 0,
+  systemHealth: {
+    FINACLE_FEED: 'LIVE',
+    FRI_API: 'LIVE',
+    DOT_DIP: 'LIVE',
+    AUTOSTR_ENGINE: 'READY'
+  },
+  upiVelocity: 622000000
+};
 
 /**
  * Maps UPI transaction velocity to CSS animation duration.
@@ -18,7 +38,7 @@ export function useLiveThreatData({
   onImminentAccount,
   onSystemDegraded 
 }) {
-  const [data, setData] = useState(MOCK_LIVE_DATA);
+  const [data, setData] = useState(EMPTY_LIVE_DATA);
   const [lastUpdated, setLastUpdated] = useState(new Date().toISOString());
   const [scanningFlags, setScanningFlags] = useState({});
   const intervalsRef = useRef({});
@@ -29,64 +49,67 @@ export function useLiveThreatData({
     return 'DEFAULT';
   }, [data.highestScore]);
 
-  const mutateData = useCallback(() => {
-    setData(prev => {
-      const next = { ...prev };
-      
-      // Randomly mutate one band count
-      const bands = Object.keys(prev.bandCounts);
-      const targetBand = bands[Math.floor(Math.random() * bands.length)];
-      if (targetBand !== 'IMMINENT') {
-        const delta = Math.random() > 0.5 ? 1 : -1;
-        next.bandCounts[targetBand] = Math.max(0, prev.bandCounts[targetBand] + delta);
-        setScanningFlags(sf => ({ ...sf, [targetBand]: true }));
-        setTimeout(() => setScanningFlags(sf => ({ ...sf, [targetBand]: false })), 200);
-      }
+  const loadData = useCallback(async () => {
+    const [accountsResponse, healthResponse] = await Promise.all([
+      api.getAccounts({ risk_level: 'CRITICAL', page_size: 10 }),
+      api.getHealth(),
+    ]);
+    const accounts = accountsResponse?.data?.accounts ?? [];
+    const bandCounts = { CLEAN: 0, WARMING: 0, HOT: 0, CRITICAL: 0, IMMINENT: 0 };
+    let highestScore = 0;
+    let highestScoreAccountId = 'NONE';
 
-      // Randomly change highest score
-      if (Math.random() > 0.7) {
-        const scoreDelta = (Math.random() * 2 - 1).toFixed(1);
-        next.highestScore = Math.min(100, Math.max(80, parseFloat(prev.highestScore) + parseFloat(scoreDelta)));
+    accounts.forEach(account => {
+      const score = Number(account.current_warmth_score ?? 0);
+      if (score >= 85) bandCounts.IMMINENT += 1;
+      else if (score >= 75) bandCounts.CRITICAL += 1;
+      else if (score >= 60) bandCounts.HOT += 1;
+      else if (score >= 40) bandCounts.WARMING += 1;
+      else bandCounts.CLEAN += 1;
+      if (score >= highestScore) {
+        highestScore = score;
+        highestScoreAccountId = account.account_id;
       }
-
-      setLastUpdated(new Date().toISOString());
-      return next;
     });
-  }, []);
 
-  const simulateImminent = useCallback(() => {
-    setData(prev => {
-      const next = { ...prev };
-      next.bandCounts.IMMINENT += 1;
-      next.pendingReview += 1;
-      
-      if (onImminentAccount) {
-        onImminentAccount('UBI-' + Date.now().toString().slice(-4), 88.2);
-      }
-      
-      return next;
+    const services = healthResponse?.services ?? (
+      healthResponse?.status === 'healthy' || healthResponse?.status === 'operational'
+        ? { redis: 'ok', kafka: 'ok', ml_model: true }
+        : {}
+    );
+    setData({
+      bandCounts,
+      highestScore,
+      highestScoreAccountId,
+      pendingReview: accounts.length,
+      systemHealth: {
+        FINACLE_FEED: healthResponse?.status === 'healthy' || healthResponse?.status === 'operational' ? 'LIVE' : 'DEGRADED',
+        FRI_API: services.redis === 'ok' || services.redis === true ? 'LIVE' : 'DEGRADED',
+        DOT_DIP: services.kafka === 'ok' || services.kafka === true ? 'LIVE' : 'DEGRADED',
+        AUTOSTR_ENGINE: services.ml_model === 'ok' || services.ml_model === true ? 'READY' : 'DEGRADED',
+      },
+      upiVelocity: 622000000
     });
+    setLastUpdated(new Date().toISOString());
+    if (highestScore >= 85 && onImminentAccount) onImminentAccount(highestScoreAccountId, highestScore);
   }, [onImminentAccount]);
 
   useEffect(() => {
-    if (mockMode) {
-      intervalsRef.current.mutation = setInterval(mutateData, 8000);
-      intervalsRef.current.imminent = setInterval(simulateImminent, 30000);
-    } else {
-      // Real polling logic would go here
-      console.log('[PRISM] Threat data polling active');
-    }
+    loadData().catch(() => onSystemDegraded?.());
+    intervalsRef.current.poll = setInterval(() => {
+      loadData().catch(() => onSystemDegraded?.());
+    }, pollingInterval);
 
     return () => {
       Object.values(intervalsRef.current).forEach(clearInterval);
     };
-  }, [mockMode, mutateData, simulateImminent]);
+  }, [loadData, onSystemDegraded, pollingInterval]);
 
   return {
     ...data,
     lastUpdated,
     barState,
     scanningFlags,
-    connectionStatus: mockMode ? 'MOCK' : 'LIVE'
+    connectionStatus: 'LIVE'
   };
 }

@@ -189,7 +189,7 @@ export default function DemoCTA() {
             color: 'rgba(255,255,255,0.45)', letterSpacing: '0.06em',
           }}
         >
-          iDEA 2.0 · PS3 · Union Bank of India · ₹13 Lakh Prize Pool
+          iDEA 2.0 · PS3 · Union Bank of India
         </motion.div>
 
       </div>

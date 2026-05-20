@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { springSmooth } from '../design/motion';
+import { api } from '../api/client';
 
 /* ─── Nav item data ─────────────────────────────────────── */
 const SECTIONS = [
@@ -35,10 +36,15 @@ function useSidebarCounts() {
   useEffect(() => {
     async function poll() {
       try {
-        const res = await fetch('/api/alerts/counts');
-        if (!res.ok) return;
-        const data = await res.json();
-        setCounts(data);
+        const [accountsResponse, recruitersResponse] = await Promise.all([
+          api.getAccounts({ risk_level: 'CRITICAL', page_size: 20 }),
+          api.getRecruiterMap({ window_hours: 48 }),
+        ]);
+        setCounts({
+          alertCount: accountsResponse?.data?.total ?? accountsResponse?.data?.accounts?.length ?? 0,
+          recruiterCount: recruitersResponse?.total ?? recruitersResponse?.recruiters?.length ?? 0,
+          pendingStrCount: accountsResponse?.data?.accounts?.length ?? 0,
+        });
       } catch { /* retain last known */ }
     }
     poll();

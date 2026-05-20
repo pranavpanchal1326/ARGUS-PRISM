@@ -8,7 +8,7 @@ import { useWindowSize } from '../../hooks/useWindowSize';
 const SEV_COLOR = { CRITICAL:'var(--heat-4)', HIGH:'var(--heat-3)', MEDIUM:'var(--heat-2)', LOW:'var(--heat-0)' };
 const TYPE_LABEL = { WARMTH_THRESHOLD:'WarmthScore ↑', FLOWGRAPH_TRIGGER:'Flow Graph', TAINT_HIT:'Taint Hit', RECRUITER_DETECTED:'Recruiter' };
 
-function AlertRow({ alert, onAcknowledge, isRemoving }) {
+const AlertRow = React.forwardRef(function AlertRow({ alert, onAcknowledge, isRemoving }, ref) {
   const [ack, setAck] = useState(false);
   const { width } = useWindowSize();
   const isMobile = width < 768;
@@ -20,6 +20,7 @@ function AlertRow({ alert, onAcknowledge, isRemoving }) {
   const col = SEV_COLOR[alert.severity] || 'var(--text-tertiary)';
   return (
     <motion.div
+      ref={ref}
       layout
       initial={{ opacity:0, y:8 }} animate={{ opacity: isRemoving ? 0 : 1, y: isRemoving ? -8 : 0 }}
       exit={{ opacity:0, x:-20, height:0, marginBottom:0 }}
@@ -67,7 +68,7 @@ function AlertRow({ alert, onAcknowledge, isRemoving }) {
       </button>
     </motion.div>
   );
-}
+});
 
 function AlertQueueContent() {
   const { data: alerts, error, loading } = useAlerts({ acknowledged: false });

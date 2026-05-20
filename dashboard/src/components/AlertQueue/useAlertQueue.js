@@ -1,5 +1,24 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { DEMO_ALERTS, sortAlerts, resolveCardState } from './alertQueueConfig';
+import { api } from '../../api/client';
+import { sortAlerts, resolveCardState } from './alertQueueConfig';
+
+function accountToCardAlert(account, index) {
+  const warmthScore = Math.round(Number(account.current_warmth_score ?? account.warmth_score ?? 0));
+  const status = warmthScore >= 85 ? 'IMMINENT' : warmthScore >= 75 ? 'CRITICAL' : warmthScore >= 60 ? 'HOT' : 'WARMING';
+  return {
+    alertId: `ALT-${account.account_id ?? index}`,
+    accountId: account.account_id,
+    warmthScore,
+    firstSignalAt: account.updated_at || account.account_opened_at || new Date().toISOString(),
+    topSignals: [
+      { name: account.top_signal || account.warmth_risk_level || 'WARMTHSCORE', contribution: Math.max(1, Math.round(warmthScore / 4)) },
+      { name: 'LIVE BACKEND ACCOUNT', contribution: Math.max(1, Math.round(warmthScore / 8)) },
+    ],
+    taint: { score: Number(account.taint_score ?? 0), hopCount: Number(account.taint_score ?? 0) > 0 ? 1 : 0 },
+    status,
+    mlroRequired: warmthScore >= 85,
+  };
+}
 
 export function useAlertQueue({
   mockMode = true,
@@ -32,95 +51,32 @@ export function useAlertQueue({
     });
   }, [alerts]);
 
-  // Mock initial load
   useEffect(() => {
-    if (mockMode && !initialLoadRef.current) {
-      setAlerts(DEMO_ALERTS);
-      setIsLoading(false);
-      initialLoadRef.current = true;
-    }
-  }, [mockMode]);
-
-  // Mock simulation: score changes
-  useEffect(() => {
-    if (!mockMode) return;
-
-    const interval = setInterval(() => {
-      setAlerts(currentAlerts => {
-        const nextAlerts = [...currentAlerts];
-        // Pick a random non-IMMINENT alert
-        const candidates = nextAlerts.filter(a => a.warmthScore < 85);
-        if (candidates.length === 0) return currentAlerts;
-
-        const targetIndex = nextAlerts.indexOf(candidates[Math.floor(Math.random() * candidates.length)]);
-        const oldScore = nextAlerts[targetIndex].warmthScore;
-        const increment = Math.floor(Math.random() * 5) + 3; // 3-7 points
-        const newScore = Math.min(oldScore + increment, 100);
-        
-        nextAlerts[targetIndex] = {
-          ...nextAlerts[targetIndex],
-          warmthScore: newScore
-        };
-
-        // If score crossed a threshold, trigger scanning
-        const oldState = resolveCardState(oldScore);
-        const newState = resolveCardState(newScore);
-        
-        if (oldState.id !== newState.id) {
-          const alertId = nextAlerts[targetIndex].alertId;
-          setScanningFields(prev => {
-            const next = new Set(prev);
-            next.add(alertId);
-            return next;
-          });
-          
-          setTimeout(() => {
-            setScanningFields(prev => {
-              const next = new Set(prev);
-              next.delete(alertId);
-              return next;
-            });
-          }, 200);
-
-          if (newState.id === 'IMMINENT') {
-            onNewImminent(nextAlerts[targetIndex]);
-            document.body.classList.add('viewport-flash');
-            setTimeout(() => document.body.classList.remove('viewport-flash'), 50);
-          }
+    let mounted = true;
+    async function load() {
+      try {
+        const response = await api.getAccounts({ risk_level: 'CRITICAL', page_size: 20 });
+        const nextAlerts = (response?.data?.accounts ?? []).map(accountToCardAlert);
+        if (!mounted) return;
+        setAlerts(nextAlerts);
+        setLastRefreshed(new Date().toISOString());
+        setIsLoading(false);
+        if (!initialLoadRef.current) {
+          const imminent = nextAlerts.find(alert => resolveCardState(alert.warmthScore).id === 'IMMINENT');
+          if (imminent) onNewImminent(imminent);
+          initialLoadRef.current = true;
         }
-
-        return nextAlerts;
-      });
-    }, 25000);
-
-    return () => clearInterval(interval);
-  }, [mockMode, onNewImminent]);
-
-  // Mock simulation: new alerts
-  useEffect(() => {
-    if (!mockMode) return;
-
-    const interval = setInterval(() => {
-      const newAlert = {
-        alertId: `ALT-2026-${Math.floor(Math.random() * 9000) + 1000}`,
-        accountId: `UBI-2026-AUTO-${Math.floor(Math.random() * 900) + 100}`,
-        warmthScore: 40 + Math.floor(Math.random() * 15),
-        firstSignalAt: new Date().toISOString(),
-        topSignals: [
-          { name: 'VELOCITY DERIVATIVE', contribution: 12 },
-          { name: 'TEST CREDIT PATTERN', contribution: 8 }
-        ],
-        taint: { score: 0, hopCount: 0 },
-        status: 'WARMING',
-        mlroRequired: false
-      };
-
-      setAlerts(prev => [...prev, newAlert]);
-      setLastRefreshed(new Date().toISOString());
-    }, 45000);
-
-    return () => clearInterval(interval);
-  }, [mockMode]);
+      } catch {
+        if (mounted) setIsLoading(false);
+      }
+    }
+    load();
+    const interval = setInterval(load, pollingInterval);
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
+  }, [pollingInterval, onNewImminent]);
 
   const acknowledgeAlert = useCallback((alertId) => {
     setAlerts(prev => prev.filter(a => a.alertId !== alertId));

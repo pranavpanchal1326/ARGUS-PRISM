@@ -78,22 +78,3 @@ export const SYSTEM_SERVICES = [
   }
 ];
 
-export const MOCK_LIVE_DATA = {
-  bandCounts: {
-    CLEAN: 2847,
-    WARMING: 34,
-    HOT: 12,
-    CRITICAL: 3,
-    IMMINENT: 1
-  },
-  highestScore: 87.4,
-  highestScoreAccountId: 'UBI-9921-4432-8801',
-  pendingReview: 2,
-  systemHealth: {
-    FINACLE_FEED: 'LIVE',
-    FRI_API: 'LIVE',
-    DOT_DIP: 'LIVE',
-    AUTOSTR_ENGINE: 'READY'
-  },
-  upiVelocity: 622000000
-};

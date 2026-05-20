@@ -5,6 +5,7 @@ import { useTheme } from '../hooks/useTheme';
 import { ThemeToggle } from '../components';
 import { useView } from './ViewContext';
 import { useDemoContext } from '../demo/DemoContext';
+import { api } from '../api/client';
 
 const SERVICES = ['postgres', 'neo4j', 'redis', 'kafka', 'ml_model'];
 
@@ -17,10 +18,13 @@ function useServiceHealth() {
   useEffect(() => {
     async function ping() {
       try {
-        const res = await fetch('/health');
-        if (!res.ok) throw new Error('non-2xx');
-        const data = await res.json();
-        setHealth(data.services);
+        const data = await api.getHealth();
+        const services = data.services ?? (
+          data.status === 'healthy' || data.status === 'operational'
+            ? SERVICES.reduce((acc, svc) => ({ ...acc, [svc]: 'ok' }), {})
+            : {}
+        );
+        setHealth(services);
         setError(false);
       } catch {
         setError(true);
