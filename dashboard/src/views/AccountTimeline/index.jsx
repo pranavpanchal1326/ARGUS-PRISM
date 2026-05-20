@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useSpring, animated } from '@react-spring/web';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ReferenceLine, ResponsiveContainer } from 'recharts';
-import { useAccount, useWarmthScore, useWarmthTimeline } from '../../api/hooks';
+import { useAccount, useWarmthScore, useWarmthTimeline, useAccounts } from '../../api/hooks';
 import { SkeletonScore, SkeletonText } from '../../components/Skeleton';
 import { useWindowSize } from '../../hooks/useWindowSize';
+import { useDemoContext } from '../../demo/DemoContext';
 
 /* ── Data ─────────────────────────────────────────────── */
 const FALLBACK_ACCOUNT = {
@@ -229,18 +230,16 @@ export default function AccountTimeline({
   onMarkFalsePositive = () => {},
   onRequestKYC        = () => {},
 }) {
-  // Try to read focused account ID from demo context if not supplied as a prop
-  let focusedAccountId = propAccountId;
+  let demoCtx = null;
   try {
-    const demoCtx = React.useContext(require('../../demo/DemoContext').DemoContext);
-    if (!focusedAccountId && demoCtx?.focusedAccountId) {
-      focusedAccountId = demoCtx.focusedAccountId;
-    }
+    demoCtx = useDemoContext();
   } catch (e) {
-    // Context fallback
+    // Standalone fallback
   }
-  const accountId = focusedAccountId || 'UBI-2026-DEMO-001';
+  const accountId = propAccountId || demoCtx?.focusedAccountId || 'UBI-2026-DEMO-001';
+  const setAccountId = demoCtx?.setFocusedAccountId;
 
+  const { data: accountsList } = useAccounts();
   const { data: accountData } = useAccount(accountId);
   const { data: scoreData,    loading: scoreLoading }    = useWarmthScore(accountId);
   const { data: timelineData, loading: timelineLoading } = useWarmthTimeline(accountId);
@@ -285,6 +284,40 @@ export default function AccountTimeline({
 
           {/* Identity card */}
           <div style={CARD}>
+            {/* Account Selector Section */}
+            <div style={{ marginBottom: '16px' }}>
+              <div style={{ ...LABEL, marginBottom: '6px' }}>Select Account Profile</div>
+              <select
+                value={accountId}
+                onChange={(e) => setAccountId?.(e.target.value)}
+                style={{
+                  width: '100%',
+                  background: 'var(--bg-subtle)',
+                  border: '1px solid var(--border-default)',
+                  borderRadius: '8px',
+                  padding: '8px 12px',
+                  fontFamily: 'var(--font-ui)',
+                  fontSize: '13px',
+                  color: 'var(--text-primary)',
+                  outline: 'none',
+                  cursor: 'pointer',
+                  transition: 'border-color 0.15s ease'
+                }}
+                onFocus={(e) => e.target.style.borderColor = 'var(--accent)'}
+                onBlur={(e) => e.target.style.borderColor = 'var(--border-default)'}
+              >
+                <option value="UBI-2026-DEMO-001">John Doe IMMINENT (UBI-2026-DEMO-001)</option>
+                {accountsList && accountsList.map(acc => (
+                  acc.account_id !== 'UBI-2026-DEMO-001' && (
+                    <option key={acc.account_id} value={acc.account_id}>
+                      {acc.account_holder_name || acc.name || acc.account_id} ({acc.account_id}) - Score: {Math.round(acc.current_warmth_score ?? acc.warmth_score ?? 0)}
+                    </option>
+                  )
+                ))}
+              </select>
+            </div>
+            <div style={{ height: '1px', background: 'var(--border-default)', marginBottom: '16px' }} />
+
             <div style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 600,
               color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>{account.name}</div>
             <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-tertiary)', letterSpacing: '0.02em' }}>{account.account_id}</div>
