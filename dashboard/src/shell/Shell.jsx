@@ -39,39 +39,24 @@ const viewVariants = {
 };
 
 /* ── View renderer ───────────────────────────────────────── */
-function renderView(view) {
+function renderView(view, focusedAccountId) {
   switch (view) {
     case 'ALERT_QUEUE':      return <AlertQueueView />;
-    case 'ACCOUNT_TIMELINE': return <AccountTimelineView />;
-    case 'FLOW_GRAPH':       return <FlowGraphView />;
+    case 'ACCOUNT_TIMELINE': return <AccountTimelineView accountId={focusedAccountId} />;
+    case 'FLOW_GRAPH':       return <FlowGraphView accountId={focusedAccountId} />;
     case 'RECRUITER_MAP':    return <RecruiterMapView />;
-    case 'AUTOSTR':          return <AutoSTRView />;
+    case 'AUTOSTR':          return <AutoSTRView accountId={focusedAccountId} />;
     default:                 return <AlertQueueView />;
   }
 }
 
 /* ─────────────────────────────────────────────────────────
-   ShellContent — reads from ViewProvider via useView so
+   ShellContent — reads from ViewContext via useView so
    NavBar breadcrumb and ShellContent share one source of truth.
    ───────────────────────────────────────────────────────── */
 function ShellContent() {
-  const { setActiveView }                       = useView();
-  const [currentView, setCurrentView]           = useState('ALERT_QUEUE');
-  const directionRef                            = useRef(0);
-
-  /* Direction must update synchronously (useRef) before the
-     render triggered by setCurrentView so AnimatePresence
-     reads the correct custom value on the same frame.       */
-  const handleNavigate = useCallback((newView) => {
-    if (newView === currentView) return;
-    const ci = VIEW_ORDER.indexOf(currentView);
-    const ni = VIEW_ORDER.indexOf(newView);
-    directionRef.current = ni > ci ? 1 : -1;
-    setCurrentView(newView);
-    setActiveView(VIEW_LABELS[newView]); /* sync NavBar breadcrumb */
-  }, [currentView, setActiveView]);
-
-  const { isDemoMode } = useDemoContext();
+  const { currentView, direction, navigateToView } = useView();
+  const { isDemoMode, focusedAccountId } = useDemoContext();
   const bannerOffset = isDemoMode ? 36 : 0;
 
   return (
@@ -86,7 +71,7 @@ function ShellContent() {
       <NavBar />
 
       {/* AutoPlayController — renders null, drives view on auto-play step */}
-      <AutoPlayController onNavigate={handleNavigate} />
+      <AutoPlayController onNavigate={navigateToView} />
 
       {/* Body row — below nav (+ demo banner offset when active) */}
       <div style={{
@@ -98,7 +83,7 @@ function ShellContent() {
         {/* Fixed sidebar — receives nav state via props */}
         <Sidebar
           currentView={currentView}
-          onNavigate={handleNavigate}
+          onNavigate={navigateToView}
         />
 
         {/* Scrollable main area */}
@@ -110,18 +95,18 @@ function ShellContent() {
           background: 'var(--bg-base)',
         }}>
           <div className="view-transition-wrapper">
-            <AnimatePresence mode="popLayout" custom={directionRef.current}>
+            <AnimatePresence mode="popLayout" custom={direction}>
               <motion.div
                 key={currentView}
                 className="motion-view"
-                custom={directionRef.current}
+                custom={direction}
                 variants={viewVariants}
                 initial="enter"
                 animate="center"
                 exit="exit"
                 transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
               >
-                {renderView(currentView)}
+                {renderView(currentView, focusedAccountId)}
               </motion.div>
             </AnimatePresence>
           </div>

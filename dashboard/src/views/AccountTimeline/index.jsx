@@ -222,13 +222,25 @@ function ActionButton({ children, variant = 'default', onClick }) {
 
 /* ── Main export ──────────────────────────────────────── */
 export default function AccountTimeline({
-  accountId           = 'UBI-2026-DEMO-001',
+  accountId: propAccountId,
   account             = FALLBACK_ACCOUNT,
   legalActions        = LEGAL_ACTIONS,
   onGenerateEvidence  = () => {},
   onMarkFalsePositive = () => {},
   onRequestKYC        = () => {},
 }) {
+  // Try to read focused account ID from demo context if not supplied as a prop
+  let focusedAccountId = propAccountId;
+  try {
+    const demoCtx = React.useContext(require('../../demo/DemoContext').DemoContext);
+    if (!focusedAccountId && demoCtx?.focusedAccountId) {
+      focusedAccountId = demoCtx.focusedAccountId;
+    }
+  } catch (e) {
+    // Context fallback
+  }
+  const accountId = focusedAccountId || 'UBI-2026-DEMO-001';
+
   const { data: accountData } = useAccount(accountId);
   const { data: scoreData,    loading: scoreLoading }    = useWarmthScore(accountId);
   const { data: timelineData, loading: timelineLoading } = useWarmthTimeline(accountId);
@@ -249,7 +261,7 @@ export default function AccountTimeline({
   const shap     = scoreData?.shap_top3
     ? scoreData.shap_top3.map(s => ({ signal: s.signal, impact: s.impact }))
     : SHAP_DATA;
-  const timeline = timelineData ?? TIMELINE_DATA;
+  const timeline = (timelineData && timelineData.length > 0) ? timelineData : TIMELINE_DATA;
 
   useEffect(() => {
     const el = document.createElement('style');

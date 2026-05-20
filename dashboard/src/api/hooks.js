@@ -50,17 +50,35 @@ function accountToAlert(account, index = 0) {
 
 function normalizeTimeline(raw) {
   const rows = Array.isArray(raw) ? raw : [];
-  return rows.map((point, index) => ({
-    hour: point.hour ?? index,
-    timestamp: point.timestamp,
-    score: Number(point.score ?? point.warmth_score ?? 0),
-    risk_level: point.risk_level,
-    signals: point.signals ?? {},
-    top_signals: point.top_signals ?? [],
-    label: point.top_signals?.[0]?.signal ?? point.label ?? null,
-    signal: point.top_signals?.[0]?.signal ?? point.signal ?? null,
-    threshold_crossed: point.threshold_crossed,
-  }));
+  const points = rows.map((point, index) => {
+    const score = Number(point.score ?? point.warmth_score ?? 0);
+    return {
+      hour: point.hour ?? index,
+      timestamp: point.timestamp ?? point.computed_at,
+      score,
+      risk_level: point.risk_level,
+      signals: point.signals ?? {},
+      top_signals: point.top_signals ?? [],
+      label: point.top_signals?.[0]?.signal ?? point.label ?? point.primary_signal ?? null,
+      signal: point.top_signals?.[0]?.signal ?? point.signal ?? point.primary_signal ?? null,
+      threshold_crossed: point.threshold_crossed ?? (score >= 85 ? 85 : score >= 75 ? 75 : null),
+    };
+  });
+
+  // Sort chronologically (oldest to newest) for Recharts Area/Line chart
+  points.sort((a, b) => {
+    if (a.timestamp && b.timestamp) {
+      return new Date(a.timestamp) - new Date(b.timestamp);
+    }
+    return a.hour - b.hour;
+  });
+
+  // Re-map hour value based on sorted array index if we don't have explicit hours
+  points.forEach((point, index) => {
+    point.hour = point.hour ?? index;
+  });
+
+  return points;
 }
 
 function timelinePointToScore(point, accountId) {
@@ -212,7 +230,39 @@ export function useWarmthTimeline(accountId) {
   return useApiCall(async () => {
     if (!accountId) return ok([]);
     try {
-      return ok(normalizeTimeline(await api.getScoreTimeline(accountId, 50)));
+      // 1. For demo accounts, prioritize Neo4j timeline/signals endpoint
+      if (accountId.includes('DEMO') || !accountId.startsWith('LIVE-')) {
+        try {
+          const res = await api.getAccountSignalTimeline(accountId, 72);
+          if (res && Array.isArray(res.timeline) && res.timeline.length > 0) {
+            return ok(normalizeTimeline(res.timeline));
+          }
+        } catch (e) {
+          console.warn("Failed fetching Neo4j timeline/signals, trying PostgreSQL:", e);
+        }
+      }
+
+      // 2. Try PostgreSQL warmthscore v1 timeline endpoint
+      try {
+        const res = await api.getScoreTimeline(accountId, 50);
+        if (Array.isArray(res) && res.length > 0) {
+          return ok(normalizeTimeline(res));
+        }
+      } catch (e) {
+        console.warn("Failed fetching v1 warmthscore timeline, trying direct accounts timeline:", e);
+      }
+
+      // 3. Fallback to /api/accounts/{id}/timeline endpoint
+      try {
+        const res = await api.getAccountTimeline(accountId);
+        if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
+          return ok(normalizeTimeline(res.data));
+        }
+      } catch (e) {
+        console.warn("All timeline endpoints returned empty or failed:", e);
+      }
+
+      return ok([]);
     } catch (error) {
       return fail(error);
     }

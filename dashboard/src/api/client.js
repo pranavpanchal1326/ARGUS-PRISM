@@ -22,6 +22,7 @@ export const api = {
   },
   getAccount: (id) => apiCall('GET', `/api/accounts/${id}`),
   getAccountAlerts: (id) => apiCall('GET', `/api/accounts/${id}/alerts`),
+  getAccountTimeline: (id) => apiCall('GET', `/api/accounts/${id}/timeline`),
   getAccountSignalTimeline: (id, hours = 72) =>
     apiCall('GET', `/api/accounts/${id}/timeline/signals?hours=${hours}`),
   getAccountGraphEvents: (id) =>
