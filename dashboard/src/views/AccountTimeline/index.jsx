@@ -257,8 +257,10 @@ export default function AccountTimeline({
     risk_level: accountData.warmth_risk_level ?? accountData.risk_level ?? account.risk_level,
   } : account;
 
-  const score    = scoreData?.warmth_score    ?? account.current_warmth_score;
-  const shap     = scoreData?.shap_top3
+  const score    = (scoreData && typeof scoreData.warmth_score === 'number' && scoreData.warmth_score > 0)
+    ? scoreData.warmth_score
+    : (account.current_warmth_score ?? 0);
+  const shap     = (scoreData && Array.isArray(scoreData.shap_top3) && scoreData.shap_top3.length > 0)
     ? scoreData.shap_top3.map(s => ({ signal: s.signal, impact: s.impact }))
     : SHAP_DATA;
   const timeline = (timelineData && timelineData.length > 0) ? timelineData : TIMELINE_DATA;

@@ -219,6 +219,7 @@ export function useWarmthScore(accountId) {
     try {
       const timeline = await api.getScoreTimeline(accountId, 1);
       const latest = Array.isArray(timeline) ? (timeline[0] ?? timeline[timeline.length - 1]) : null;
+      if (!latest) return ok(null);
       return ok(timelinePointToScore(latest, accountId));
     } catch (error) {
       return fail(error);
