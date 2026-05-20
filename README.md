@@ -2,11 +2,6 @@
 
 <br/>
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://readme-typing-svg.demolab.com?font=IBM+Plex+Mono&size=13&duration=0&pause=0&color=CF3421&center=true&vCenter=true&repeat=false&width=600&lines=PRE-CRIME+INTELLIGENCE+SYSTEM+FOR+MULE+DETECTION">
-  <img src="https://readme-typing-svg.demolab.com?font=IBM+Plex+Mono&size=13&duration=0&pause=0&color=CF3421&center=true&vCenter=true&repeat=false&width=600&lines=PRE-CRIME+INTELLIGENCE+SYSTEM+FOR+MULE+DETECTION" alt="PRISM subtitle"/>
-</picture>
-
 # ARGUS · PRISM
 
 ### *The hundred-eyed guardian. Always watching. Never sleeping.*
