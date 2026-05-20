@@ -6,9 +6,9 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from .config import get_settings
+from .core.config import get_settings
 from .middleware.logging import RequestLoggingMiddleware
-from .routes import health, accounts, warmthscore, autostr, recruiter, timeline
+from .routers import health, accounts, warmthscore, autostr, recruiter, timeline
 
 logger = logging.getLogger("prism.main")
 settings = get_settings()

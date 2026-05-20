@@ -1,5 +1,0 @@
-steps:
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '-t', 'asia-south1-docker.pkg.dev/argus-prism/prism-repo/prism-pipeline:latest', '-f', 'pipeline/Dockerfile.pipeline', '.']
-images:
-- 'asia-south1-docker.pkg.dev/argus-prism/prism-repo/prism-pipeline:latest'

@@ -7,8 +7,8 @@ import pytest
 import time
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
-from services.autostr.fiu_xml_generator import generate_fiu_xml
-from services.autostr.schemas.fiu_schema import (
+from services.autostr.generators.fiu_xml_generator import generate_fiu_xml
+from services.autostr.templates.fiu_schema import (
     FIUReportInput, AccountRecord, TransactionRecord, SignalScore, SHAPAttribution
 )
 

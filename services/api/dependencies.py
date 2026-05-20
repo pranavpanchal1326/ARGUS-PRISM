@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sess
 import redis.asyncio as redis
 from fastapi import Request
 
-from .config import get_settings, Settings
+from .core.config import get_settings, Settings
 
 # Initialize singletons for connection pools
 settings = get_settings()
