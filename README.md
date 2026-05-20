@@ -54,7 +54,15 @@
 
 <br/>
 
-**[🔴 Live Demo](https://argus-prism.vercel.app)** &nbsp;·&nbsp; **[🎥 Watch Demo](https://youtu.be/MOCxElwevF4)** &nbsp;·&nbsp; **[📐 Architecture](#architecture)** &nbsp;·&nbsp; **[⚖️ Legal Framework](#legal-architecture)** &nbsp;·&nbsp; **[🚀 Quick Start](#quick-start)**
+<table>
+<tr>
+<td align="center"><a href="https://argus-prism.vercel.app"><b>Live Demo</b></a></td>
+<td align="center"><a href="https://youtu.be/MOCxElwevF4"><b>Watch Demo</b></a></td>
+<td align="center"><a href="#architecture"><b>Architecture</b></a></td>
+<td align="center"><a href="#legal-architecture"><b>Legal Framework</b></a></td>
+<td align="center"><a href="#quick-start"><b>Quick Start</b></a></td>
+</tr>
+</table>
 
 <br/>
 
