@@ -34,7 +34,7 @@ logger = logging.getLogger("prism.ml.synth_generator")
 # ─── Constants ────────────────────────────────────────────────────────────────
 
 SEED = 42
-TOTAL_RECORDS = 50_000
+TOTAL_RECORDS = 400_000
 MULE_RATIO = 0.15  # 15% mule, 85% legitimate
 MULE_COUNT = int(TOTAL_RECORDS * MULE_RATIO)  # 7,500
 LEGIT_COUNT = TOTAL_RECORDS - MULE_COUNT       # 42,500

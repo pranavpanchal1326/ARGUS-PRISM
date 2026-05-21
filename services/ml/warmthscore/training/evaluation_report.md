@@ -1,10 +1,10 @@
 # PRISM WarmthScore — Model Evaluation Report
 
 **Model Version:** 2.0.0
-**Trained At:** 2026-05-21T17:44:06.566144+00:00
-**Training Time:** 7.06s
-**Dataset:** 50,000 rows (7,500 mule, 42,500 legit)
-**Train/Test Split:** 40,000 / 10,000
+**Trained At:** 2026-05-21T17:59:23.452687+00:00
+**Training Time:** 50.72s
+**Dataset:** 400,000 rows (60,000 mule, 340,000 legit)
+**Train/Test Split:** 320,000 / 80,000
 
 ---
 
@@ -23,9 +23,9 @@
 | Metric | Value | Target | Status |
 |--------|-------|--------|--------|
 | AUC-ROC | 1.0000 | > 0.92 | PASS |
-| Precision (Mule) | 1.0000 | > 0.85 | PASS |
-| Recall (Mule) | 1.0000 | > 0.80 | PASS |
-| F1 Score | 1.0000 | — | — |
+| Precision (Mule) | 0.9998 | > 0.85 | PASS |
+| Recall (Mule) | 0.9999 | > 0.80 | PASS |
+| F1 Score | 0.9998 | — | — |
 | Accuracy | 1.0000 | — | — |
 | FPR | 0.0000 | < 0.05 | PASS |
 
@@ -37,8 +37,8 @@
 
 | | Predicted Legit | Predicted Mule |
 |---|---|---|
-| **Actual Legit** | TN = 8,500 | FP = 0 |
-| **Actual Mule** | FN = 0 | TP = 1,500 |
+| **Actual Legit** | TN = 67,997 | FP = 3 |
+| **Actual Mule** | FN = 1 | TP = 11,999 |
 
 ---
 
@@ -46,16 +46,16 @@
 
 | Rank | Feature | Importance |
 |------|---------|------------|
-| 1 | `s4_reactivation_amount_norm` | 0.322036 |
-| 2 | `s4_channel_switch_score` | 0.085605 |
-| 3 | `s4_pattern_confidence` | 0.078089 |
-| 4 | `s4_time_since_kyc_norm` | 0.073268 |
-| 5 | `s4_combined_signal_score` | 0.069124 |
-| 6 | `s4_device_delta_score` | 0.064193 |
-| 7 | `s4_dormancy_days_norm` | 0.043443 |
-| 8 | `s3_observation_age_norm` | 0.022393 |
-| 9 | `s3_zc_before_48` | 0.019843 |
-| 10 | `s3_acceleration_ratio_norm` | 0.019078 |
+| 1 | `s4_device_delta_score` | 0.201017 |
+| 2 | `s4_reactivation_amount_norm` | 0.157001 |
+| 3 | `s4_channel_switch_score` | 0.107001 |
+| 4 | `s4_time_since_kyc_norm` | 0.095134 |
+| 5 | `s4_dormancy_days_norm` | 0.063016 |
+| 6 | `s4_combined_signal_score` | 0.045807 |
+| 7 | `s4_pattern_confidence` | 0.035635 |
+| 8 | `s3_max_acceleration_norm` | 0.025690 |
+| 9 | `s3_acceleration_ratio_norm` | 0.023899 |
+| 10 | `s3_zc_before_48` | 0.022448 |
 
 ---
 
