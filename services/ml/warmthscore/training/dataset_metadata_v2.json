@@ -1,0 +1,174 @@
+{
+  "generated_at": "2026-05-21T17:43:34.889323+00:00",
+  "generator_version": "2.0.0",
+  "seed": 42,
+  "total_records": 50000,
+  "mule_count": 7500,
+  "legit_count": 42500,
+  "mule_ratio": 0.15,
+  "feature_count": 43,
+  "feature_names": [
+    "s1_micro_credit_count",
+    "s1_micro_credit_total",
+    "s1_source_account_age_days",
+    "s1_inter_credit_timing_var",
+    "s1_source_dormancy_score",
+    "s1_isolation_anomaly_score",
+    "s1_pattern_confidence",
+    "s2_imei_changed_24h",
+    "s2_hours_between_change_norm",
+    "s2_unique_imei_count_norm",
+    "s2_unique_sim_count_norm",
+    "s2_blocked_prefix_matches_norm",
+    "s2_max_proximity",
+    "s2_shared_device_flag",
+    "s2_device_velocity_norm",
+    "s2_layer1_score",
+    "s3_zc_before_48",
+    "s3_zc_hour_proximity",
+    "s3_curve_shape_score",
+    "s3_max_acceleration_norm",
+    "s3_acceleration_ratio_norm",
+    "s3_total_tx_norm",
+    "s3_observation_age_norm",
+    "s3_mean_velocity_norm",
+    "s4_dormancy_days_norm",
+    "s4_device_delta_score",
+    "s4_reactivation_amount_norm",
+    "s4_time_since_kyc_norm",
+    "s4_channel_switch_score",
+    "s4_combined_signal_score",
+    "s4_pattern_confidence",
+    "s5_fri_score_norm",
+    "s5_internal_partial_score_norm",
+    "s5_contradiction_magnitude",
+    "s5_sim_age_days_norm",
+    "s5_complaint_history_norm",
+    "s5_pattern_confidence",
+    "s6_days_to_upi_reg_norm",
+    "s6_swap_frequency_norm",
+    "s6_iccid_change_score",
+    "s6_post_swap_txn_velocity_norm",
+    "s6_swap_to_fraud_window_score",
+    "s6_pattern_confidence"
+  ],
+  "signal_lengths": {
+    "S1": 7,
+    "S2": 9,
+    "S3": 8,
+    "S4": 7,
+    "S5": 6,
+    "S6": 6
+  },
+  "mule_phase_distribution": {
+    "dormant": 740,
+    "reactivation": 881,
+    "test_credits": 1302,
+    "velocity": 1533,
+    "sim_swap": 1362,
+    "cashout": 1682
+  },
+  "signal_statistics": {
+    "S1": {
+      "feature_count": 7,
+      "features": [
+        "s1_micro_credit_count",
+        "s1_micro_credit_total",
+        "s1_source_account_age_days",
+        "s1_inter_credit_timing_var",
+        "s1_source_dormancy_score",
+        "s1_isolation_anomaly_score",
+        "s1_pattern_confidence"
+      ],
+      "mule_mean": 0.4826,
+      "mule_std": 0.2721,
+      "legit_mean": 0.1251,
+      "legit_std": 0.1116
+    },
+    "S2": {
+      "feature_count": 9,
+      "features": [
+        "s2_imei_changed_24h",
+        "s2_hours_between_change_norm",
+        "s2_unique_imei_count_norm",
+        "s2_unique_sim_count_norm",
+        "s2_blocked_prefix_matches_norm",
+        "s2_max_proximity",
+        "s2_shared_device_flag",
+        "s2_device_velocity_norm",
+        "s2_layer1_score"
+      ],
+      "mule_mean": 0.4693,
+      "mule_std": 0.2732,
+      "legit_mean": 0.1051,
+      "legit_std": 0.0863
+    },
+    "S3": {
+      "feature_count": 8,
+      "features": [
+        "s3_zc_before_48",
+        "s3_zc_hour_proximity",
+        "s3_curve_shape_score",
+        "s3_max_acceleration_norm",
+        "s3_acceleration_ratio_norm",
+        "s3_total_tx_norm",
+        "s3_observation_age_norm",
+        "s3_mean_velocity_norm"
+      ],
+      "mule_mean": 0.4746,
+      "mule_std": 0.2726,
+      "legit_mean": 0.1052,
+      "legit_std": 0.0867
+    },
+    "S4": {
+      "feature_count": 7,
+      "features": [
+        "s4_dormancy_days_norm",
+        "s4_device_delta_score",
+        "s4_reactivation_amount_norm",
+        "s4_time_since_kyc_norm",
+        "s4_channel_switch_score",
+        "s4_combined_signal_score",
+        "s4_pattern_confidence"
+      ],
+      "mule_mean": 0.5099,
+      "mule_std": 0.2697,
+      "legit_mean": 0.1051,
+      "legit_std": 0.0863
+    },
+    "S5": {
+      "feature_count": 6,
+      "features": [
+        "s5_fri_score_norm",
+        "s5_internal_partial_score_norm",
+        "s5_contradiction_magnitude",
+        "s5_sim_age_days_norm",
+        "s5_complaint_history_norm",
+        "s5_pattern_confidence"
+      ],
+      "mule_mean": 0.3894,
+      "mule_std": 0.2646,
+      "legit_mean": 0.105,
+      "legit_std": 0.0862
+    },
+    "S6": {
+      "feature_count": 6,
+      "features": [
+        "s6_days_to_upi_reg_norm",
+        "s6_swap_frequency_norm",
+        "s6_iccid_change_score",
+        "s6_post_swap_txn_velocity_norm",
+        "s6_swap_to_fraud_window_score",
+        "s6_pattern_confidence"
+      ],
+      "mule_mean": 0.412,
+      "mule_std": 0.2708,
+      "legit_mean": 0.105,
+      "legit_std": 0.0863
+    }
+  },
+  "files": {
+    "csv": "warmthscore_training_v2.csv",
+    "parquet": "warmthscore_training_v2.parquet"
+  }
+}

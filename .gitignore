@@ -23,6 +23,14 @@ ENV/
 
 # Generated synthetic data (large binary/JSON outputs)
 services/ml/warmthscore/dataset/data/
+services/ml/warmthscore/dataset/warmth_dataset.csv
+services/ml/warmthscore/training/warmthscore_training_v2.csv
+services/ml/warmthscore/training/warmthscore_training_v2.parquet
+
+# Model artifacts (binary, regenerated via training pipeline)
+services/ml/warmthscore/model/artifacts/warmthscore_xgb.joblib
+services/ml/warmthscore/model/artifacts/warmthscore_scaler.joblib
+services/ml/warmthscore/model/artifacts/shap_explainer.joblib
 
 # Runtime logs
 *.log
