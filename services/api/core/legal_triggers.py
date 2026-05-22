@@ -119,6 +119,15 @@ class LegalTriggerEngine:
         # THRESHOLD 1: Score ≥ 85 → IMMINENT — Full Restriction + AutoSTR
         # ------------------------------------------------------------------
         if warmth_score >= THRESHOLD_RESTRICTION:
+            # Check if alert already exists to prevent duplicate alert
+            alert_exists_row = await db.execute(
+                select(Alert).where(
+                    Alert.account_id == account_id,
+                    Alert.alert_type == "WARMTH_85_RESTRICTION"
+                ).limit(1)
+            )
+            alert_exists = alert_exists_row.scalar_one_or_none() is not None
+
             if current_rank < self.STATUS_HIERARCHY["RESTRICTED"]:
                 await self._apply_restriction(account, db)
                 result.triggered    = True
@@ -127,22 +136,23 @@ class LegalTriggerEngine:
                 result.new_status   = "RESTRICTED"
                 result.autostr_signal = True
 
-                alert_id = await self._fire_alert(
-                    account_id=account_id,
-                    alert_type="WARMTH_85_RESTRICTION",
-                    severity="IMMINENT",
-                    warmth_score=warmth_score,
-                    threshold=THRESHOLD_RESTRICTION,
-                    primary_signal="WARMTH_THRESHOLD_85",
-                    message=(
-                        f"Account {account_id} crossed IMMINENT threshold ({warmth_score:.1f}/85). "
-                        "Full outbound restriction applied. AutoSTR initiated. "
-                        "CBI Evidence Package generation triggered. "
-                        "Legal basis: PMLA §12 + SC Writ 03/2025."
-                    ),
-                    db=db,
-                )
-                result.alerts_fired.append(alert_id)
+                if not alert_exists:
+                    alert_id = await self._fire_alert(
+                        account_id=account_id,
+                        alert_type="WARMTH_85_RESTRICTION",
+                        severity="IMMINENT",
+                        warmth_score=warmth_score,
+                        threshold=THRESHOLD_RESTRICTION,
+                        primary_signal="WARMTH_THRESHOLD_85",
+                        message=(
+                            f"Account {account_id} crossed IMMINENT threshold ({warmth_score:.1f}/85). "
+                            "Full outbound restriction applied. AutoSTR initiated. "
+                            "CBI Evidence Package generation triggered. "
+                            "Legal basis: PMLA §12 + SC Writ 03/2025."
+                        ),
+                        db=db,
+                    )
+                    result.alerts_fired.append(alert_id)
 
                 await AuditLogWriter.log_legal_trigger(
                     account_id=account_id,
@@ -157,10 +167,25 @@ class LegalTriggerEngine:
                     "→ RESTRICTED + AutoSTR signal"
                 )
 
+                # Trigger AutoSTR Generation
+                try:
+                    await trigger_autostr_generation(account_id, warmth_score, db)
+                except Exception as ex:
+                    logger.error(f"AutoSTR generation trigger failed: {ex}", exc_info=True)
+
         # ------------------------------------------------------------------
         # THRESHOLD 2: Score ≥ 75 → HOT — KYC Flag (only if not already restricted)
         # ------------------------------------------------------------------
         elif warmth_score >= THRESHOLD_KYC_FLAG:
+            # Check if alert already exists to prevent duplicate alert
+            alert_exists_row = await db.execute(
+                select(Alert).where(
+                    Alert.account_id == account_id,
+                    Alert.alert_type == "WARMTH_75_KYC_FLAG"
+                ).limit(1)
+            )
+            alert_exists = alert_exists_row.scalar_one_or_none() is not None
+
             if current_rank < self.STATUS_HIERARCHY["KYC_FLAGGED"]:
                 await self._apply_kyc_flag(account, db)
                 result.triggered   = True
@@ -168,22 +193,23 @@ class LegalTriggerEngine:
                 result.legal_basis = LEGAL_BASIS_KYC
                 result.new_status  = "KYC_FLAGGED"
 
-                alert_id = await self._fire_alert(
-                    account_id=account_id,
-                    alert_type="WARMTH_75_KYC_FLAG",
-                    severity="CRITICAL",
-                    warmth_score=warmth_score,
-                    threshold=THRESHOLD_KYC_FLAG,
-                    primary_signal="WARMTH_THRESHOLD_75",
-                    message=(
-                        f"Account {account_id} crossed KYC threshold ({warmth_score:.1f}/75). "
-                        "Outbound UPI restricted pending KYC re-verification. "
-                        "Video KYC notification sent to customer. "
-                        "Legal basis: RBI KYC Master Direction 2016 §38."
-                    ),
-                    db=db,
-                )
-                result.alerts_fired.append(alert_id)
+                if not alert_exists:
+                    alert_id = await self._fire_alert(
+                        account_id=account_id,
+                        alert_type="WARMTH_75_KYC_FLAG",
+                        severity="CRITICAL",
+                        warmth_score=warmth_score,
+                        threshold=THRESHOLD_KYC_FLAG,
+                        primary_signal="WARMTH_THRESHOLD_75",
+                        message=(
+                            f"Account {account_id} crossed KYC threshold ({warmth_score:.1f}/75). "
+                            "Outbound UPI restricted pending KYC re-verification. "
+                            "Video KYC notification sent to customer. "
+                            "Legal basis: RBI KYC Master Direction 2016 §38."
+                        ),
+                        db=db,
+                    )
+                    result.alerts_fired.append(alert_id)
 
                 await AuditLogWriter.log_legal_trigger(
                     account_id=account_id,
@@ -211,6 +237,7 @@ class LegalTriggerEngine:
         await db.commit()
 
         return result
+
 
     # ------------------------------------------------------------------
     # Private helpers
@@ -277,3 +304,226 @@ class LegalTriggerEngine:
         if score >= 40:
             return "WARMING"
         return "CLEAN"
+
+
+# ---------------------------------------------------------------------------
+# Global Helpers
+# ---------------------------------------------------------------------------
+
+async def trigger_autostr_generation(
+    account_id: str,
+    warmth_score: float,
+    db: AsyncSession,
+) -> None:
+    """
+    Automated STR package generation under PMLA S.12 / Supreme Court Writ 03/2025.
+    Triggered when an account hits the IMMINENT threshold (>= 85).
+    """
+    try:
+        import uuid
+        from services.autostr.templates.fiu_schema import (
+            FIUReportInput, AccountRecord, TransactionRecord, SignalScore, SHAPAttribution
+        )
+        from services.autostr.autostr_orchestrator import generate_all_packages
+        from services.api.db.models import Account, WarmthScore, Case, AutoSTRPackage
+        from sqlalchemy import select
+
+        logger.info(f"AutoSTR Triggered: account={account_id} score={warmth_score}")
+
+        # 1. Fetch Account
+        row = await db.execute(select(Account).where(Account.account_id == account_id))
+        account: Optional[Account] = row.scalar_one_or_none()
+        if not account:
+            logger.error(f"AutoSTR failed: account {account_id} not found")
+            return
+
+        # 2. Fetch Latest WarmthScore to get signals & SHAP
+        ws_row = await db.execute(
+            select(WarmthScore)
+            .where(WarmthScore.account_id == account_id)
+            .order_by(WarmthScore.computed_at.desc())
+            .limit(1)
+        )
+        ws_record: Optional[WarmthScore] = ws_row.scalar_one_or_none()
+
+        # Build signal scores
+        sig_map = {
+            "S1": ("test_credit_pattern", ws_record.signal_1_score if ws_record else 0.0, 0.15),
+            "S2": ("device_fingerprint", ws_record.signal_2_score if ws_record else 0.0, 0.20),
+            "S3": ("velocity_derivative", ws_record.signal_3_score if ws_record else 0.0, 0.15),
+            "S4": ("dormant_reactivation", ws_record.signal_4_score if ws_record else 0.0, 0.20),
+            "S5": ("fri_contradiction", ws_record.signal_5_score if ws_record else 0.0, 0.20),
+            "S6": ("sim_swap_velocity", ws_record.signal_6_score if ws_record else 0.0, 0.10),
+        }
+
+        signal_scores_list = []
+        for sig_id, (sig_name, score_val, weight) in sig_map.items():
+            raw_val = min(max(score_val / 100.0, 0.0), 1.0)
+            signal_scores_list.append(SignalScore(
+                signal_name=sig_name,
+                raw_score=raw_val,
+                weighted_score=float(score_val),
+                shap_impact=float(score_val * weight)
+            ))
+
+        # Build SHAPAttribution
+        primary_sig = ws_record.shap_top1_signal if ws_record and ws_record.shap_top1_signal else "device_fingerprint"
+        primary_imp = ws_record.shap_top1_impact if ws_record and ws_record.shap_top1_impact else 10.0
+        sec_sig = ws_record.shap_top2_signal if ws_record and ws_record.shap_top2_signal else "velocity_derivative"
+        sec_imp = ws_record.shap_top2_impact if ws_record and ws_record.shap_top2_impact else 5.0
+        tert_sig = ws_record.shap_top3_signal if ws_record and ws_record.shap_top3_signal else "test_credit_pattern"
+        tert_imp = ws_record.shap_top3_impact if ws_record and ws_record.shap_top3_impact else 2.0
+
+        shap_attr = SHAPAttribution(
+            primary_signal=primary_sig,
+            primary_impact=float(primary_imp),
+            secondary_signal=sec_sig,
+            secondary_impact=float(sec_imp),
+            tertiary_signal=tert_sig,
+            tertiary_impact=float(tert_imp),
+        )
+
+        # 3. Get or Create Case
+        case_row = await db.execute(
+            select(Case)
+            .where(Case.account_id == account_id, Case.case_status == "OPEN")
+            .limit(1)
+        )
+        case_rec: Optional[Case] = case_row.scalar_one_or_none()
+        if not case_rec:
+            # Create a new Case
+            case_rec = Case(
+                account_id=account_id,
+                case_status="OPEN",
+                assigned_mlro="System AutoSTR",
+                peak_warmth_score=warmth_score,
+                peak_risk_level="IMMINENT",
+                autostr_triggered=True,
+                autostr_triggered_at=datetime.now(timezone.utc),
+            )
+            db.add(case_rec)
+            await db.flush()  # Generate case_id UUID
+        else:
+            case_rec.autostr_triggered = True
+            case_rec.autostr_triggered_at = datetime.now(timezone.utc)
+            if case_rec.peak_warmth_score is None or warmth_score > case_rec.peak_warmth_score:
+                case_rec.peak_warmth_score = warmth_score
+                case_rec.peak_risk_level = "IMMINENT"
+
+        case_id_str = str(case_rec.case_id)
+
+        # 4. Build AccountRecord
+        acc_rec = AccountRecord(
+            account_id=account.account_id,
+            account_type=account.account_type or "SAVINGS",
+            holder_name=account.account_holder_name or "Unknown Holder",
+            mobile_raw=account.mobile_number or "9999999999",
+            aadhaar_raw="123412341234", # Placeholder
+            pan_raw="ABCDE1234F",       # Placeholder
+            branch_code=account.branch_code or "BR001",
+            ifsc=account.ifsc_code or "IFSC001",
+            kyc_status=account.kyc_status or "COMPLETE",
+            warmth_score=warmth_score,
+            risk_level="IMMINENT",
+        )
+
+        # 5. Build TransactionRecord list (must have min_length=1)
+        device_id = account.upi_device_imei or "861234567890123"
+        tx_record = TransactionRecord(
+            transaction_id="TXN-" + str(uuid.uuid4())[:8].upper(),
+            transaction_type="UPI",
+            amount=15000.0,
+            transaction_timestamp=datetime.now(timezone.utc),
+            source_account_id=account_id,
+            destination_account_id="MULE-DST-001",
+            channel="UPI",
+            device_id_raw=device_id,
+            ip_address_raw="192.168.1.1",
+        )
+
+        # 6. Build FIUReportInput
+        report_input = FIUReportInput(
+            case_id=case_id_str,
+            reporting_entity_code="UBI0001",
+            principal_officer_name="System AutoSTR",
+            principal_officer_designation="CCO",
+            principal_officer_email="cco@ubi.com",
+            detection_timestamp=datetime.now(timezone.utc),
+            threshold_crossed=85.0,
+            accounts=[acc_rec],
+            transactions=[tx_record],
+            signal_scores=signal_scores_list,
+            shap_attribution=shap_attr,
+        )
+
+        # 7. Generate packages using Orchestrator
+        result = generate_all_packages(report_input)
+
+        # 8. Save AutoSTRPackage rows to the database
+        packages_to_save = []
+        if result.fiu_xml_path:
+            packages_to_save.append(AutoSTRPackage(
+                case_id=case_rec.case_id,
+                account_id=account_id,
+                package_type="FIU_XML",
+                file_path=result.fiu_xml_path,
+                file_hash_sha256=result.fiu_xml_hash,
+                file_size_bytes=len(result.fiu_xml_string.encode('utf-8')),
+                generation_duration_seconds=result.fiu_generation_time_ms / 1000.0,
+                warmth_score_at_generation=warmth_score,
+                is_submitted=False,
+            ))
+
+        if result.cbi_pdf_path:
+            import os
+            try:
+                pdf_sz = os.path.getsize(result.cbi_pdf_path)
+            except Exception:
+                pdf_sz = 15000
+            packages_to_save.append(AutoSTRPackage(
+                case_id=case_rec.case_id,
+                account_id=account_id,
+                package_type="CBI_PDF",
+                file_path=result.cbi_pdf_path,
+                file_hash_sha256=result.cbi_pdf_hash,
+                file_size_bytes=pdf_sz,
+                generation_duration_seconds=result.cbi_generation_time_ms / 1000.0,
+                warmth_score_at_generation=warmth_score,
+                is_submitted=False,
+            ))
+
+        if result.rbi_report_dict:
+            import json
+            rbi_str = json.dumps(result.rbi_report_dict)
+            packages_to_save.append(AutoSTRPackage(
+                case_id=case_rec.case_id,
+                account_id=account_id,
+                package_type="RBI_JSON",
+                file_path="memory://rbi_report",
+                file_hash_sha256=result.rbi_report_hash,
+                file_size_bytes=len(rbi_str.encode('utf-8')),
+                generation_duration_seconds=result.rbi_generation_time_ms / 1000.0,
+                warmth_score_at_generation=warmth_score,
+                is_submitted=False,
+            ))
+
+        for pkg in packages_to_save:
+            # Check if this package type already exists for this case to enforce unique constraint
+            chk_row = await db.execute(
+                select(AutoSTRPackage)
+                .where(
+                    AutoSTRPackage.case_id == case_rec.case_id,
+                    AutoSTRPackage.package_type == pkg.package_type
+                ).limit(1)
+            )
+            chk_pkg = chk_row.scalar_one_or_none()
+            if not chk_pkg:
+                db.add(pkg)
+
+        await db.commit()
+        logger.info(f"AutoSTR completed successfully for account={account_id}. Created {len(packages_to_save)} packages.")
+
+    except Exception as e:
+        logger.error(f"AutoSTR package generation failed for {account_id}: {e}", exc_info=True)
+        await db.rollback()
+

@@ -198,3 +198,123 @@ async def get_timeline(
         for e in events
     ]
 
+
+@router.post("/compute/{account_id}", response_model=Dict[str, Any])
+async def compute_warmth_score(
+    account_id: str,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Computes real WarmthScore from real databases (Neo4j and PostgreSQL).
+    Automatically extracts S1-S6 signals, computes SHAP, triggers legal actions,
+    and updates the database without manual input.
+    """
+    try:
+        from services.pipeline.signal_extractor import extract_all_signals
+        from services.pipeline.graph_writer import GraphWriter
+    except ImportError as e:
+        logger.error(f"Failed to import pipeline layers: {e}")
+        raise HTTPException(status_code=500, detail="Pipeline modules are not fully installed or configured")
+
+    # 1. Instantiate GraphWriter to get a Neo4j driver session
+    gw = None
+    try:
+        gw = GraphWriter()
+        if not gw.verify_connectivity():
+            logger.warning("Neo4j is not connected. Signal extraction will run in fallback (zero vectors) mode.")
+            neo4j_driver = None
+        else:
+            neo4j_driver = gw.driver
+    except Exception as ex:
+        logger.warning(f"Failed to connect to Neo4j: {ex}. Using fallback zero vectors.")
+        neo4j_driver = None
+
+    try:
+        # 2. Extract signals (sequential, robust fallback on error)
+        signal_outputs = await extract_all_signals(account_id, neo4j_driver=neo4j_driver, db=db)
+
+        # 3. Call predictor singleton
+        if not predictor._loaded:
+            try:
+                predictor.load()
+            except Exception as e:
+                raise HTTPException(status_code=503, detail="WarmthScore engine not ready")
+
+        result = predictor.predict(account_id, signal_outputs)
+        
+        if result.error:
+            raise HTTPException(status_code=500, detail=f"Scoring failed: {result.error}")
+
+        # 4. Persist to PostgreSQL (warmth_scores table)
+        sig_scores = {}
+        for contrib in result.signal_contributions:
+            sig_scores[contrib["signal_id"]] = contrib["shap_contribution"]
+
+        try:
+            from services.api.db.models import WarmthScore as WarmthScoreRecord
+            from sqlalchemy.exc import IntegrityError
+            score_record = WarmthScoreRecord(
+                account_id=account_id,
+                warmth_score=result.warmth_score,
+                risk_level=result.risk_level,
+                signal_1_score=sig_scores.get("S1", 0.0),
+                signal_2_score=sig_scores.get("S2", 0.0),
+                signal_3_score=sig_scores.get("S3", 0.0),
+                signal_4_score=sig_scores.get("S4", 0.0),
+                signal_5_score=sig_scores.get("S5", 0.0),
+                signal_6_score=sig_scores.get("S6", 0.0),
+                shap_top1_signal=result.top_3_features[0]["feature_name"] if len(result.top_3_features) > 0 else None,
+                shap_top1_impact=result.top_3_features[0]["shap_value"] if len(result.top_3_features) > 0 else None,
+                shap_top2_signal=result.top_3_features[1]["feature_name"] if len(result.top_3_features) > 1 else None,
+                shap_top2_impact=result.top_3_features[1]["shap_value"] if len(result.top_3_features) > 1 else None,
+                shap_top3_signal=result.top_3_features[2]["feature_name"] if len(result.top_3_features) > 2 else None,
+                shap_top3_impact=result.top_3_features[2]["shap_value"] if len(result.top_3_features) > 2 else None,
+                computation_duration_ms=None,
+            )
+            db.add(score_record)
+            await db.commit()
+            logger.info(f"Compute Score persisted: account={account_id} score={result.warmth_score}")
+        except IntegrityError:
+            await db.rollback()
+            logger.warning(f"Score NOT persisted: account {account_id} not in PostgreSQL accounts table.")
+        except Exception as pe:
+            await db.rollback()
+            logger.error(f"Failed to persist score: {pe}")
+
+        # 5. Evaluate legal triggers
+        trigger_result = None
+        try:
+            trigger_result = await _legal_engine.evaluate(
+                account_id=account_id,
+                warmth_score=result.warmth_score,
+                db=db,
+            )
+        except Exception as te:
+            logger.warning(f"Legal trigger evaluation failed: {te}")
+
+        # 6. Also sync warmth score back to Neo4j if Neo4j is available
+        if gw and neo4j_driver:
+            try:
+                gw.update_warmth_score(account_id, result.warmth_score)
+                # If restricted, also update status in Neo4j
+                if trigger_result and trigger_result.new_status:
+                    gw.update_account_status(account_id, trigger_result.new_status, "WARMTH_SCORE_COMPUTE")
+            except Exception as ne:
+                logger.warning(f"Failed to sync score to Neo4j: {ne}")
+
+        return {
+            "account_id": result.account_id,
+            "warmth_score": result.warmth_score,
+            "risk_level": result.risk_level,
+            "probability": result.probability,
+            "signal_contributions": result.signal_contributions,
+            "top_3_features": result.top_3_features,
+            "threshold_actions": result.threshold_actions,
+            "scored_at": result.scored_at
+        }
+
+    finally:
+        if gw:
+            gw.close()
+
+
