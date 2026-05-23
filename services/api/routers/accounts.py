@@ -107,9 +107,28 @@ async def create_account(
                 
         await cache_account_summary(req.account_id, account_dict)
         
+        # Broadcast via WebSockets
+        try:
+            from services.api.routers.ws import manager
+            await manager.broadcast({
+                "type": "account_created",
+                "data": {
+                    "account_id": req.account_id,
+                    "name": req.account_holder_name,
+                    "account_type": req.account_type,
+                    "account_status": "ACTIVE",
+                    "current_warmth_score": 0.0,
+                    "warmth_risk_level": "CLEAN",
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                }
+            })
+        except Exception as wse:
+            logger.warning(f"Failed to broadcast account creation via WebSocket: {wse}")
+        
         # FastAPI handles 201 via response_status, but here we can return JSONResponse or let FastAPI default.
         from fastapi.responses import JSONResponse
         return JSONResponse(status_code=201, content=success_response(account_dict, "Account created successfully"))
+
         
     except Exception as e:
         await db.rollback()
@@ -260,7 +279,23 @@ async def update_account_status(
         await db.commit()
         await invalidate_account_cache(account_id)
         
+        # Broadcast via WebSockets
+        try:
+            from services.api.routers.ws import manager
+            await manager.broadcast({
+                "type": "status_changed",
+                "data": {
+                    "account_id": account_id,
+                    "status": req.new_status,
+                    "reason": req.reason,
+                    "timestamp": datetime.now(timezone.utc).isoformat()
+                }
+            })
+        except Exception as wse:
+            logger.warning(f"Failed to broadcast status change via WebSocket: {wse}")
+        
         return success_response({"account_id": account_id, "status": req.new_status})
+
     except Exception as e:
         await db.rollback()
         logger.error(f"Error updating status for {account_id}: {e}", exc_info=True)

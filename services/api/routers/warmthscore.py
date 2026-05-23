@@ -292,7 +292,7 @@ async def compute_warmth_score(
         except Exception as te:
             logger.warning(f"Legal trigger evaluation failed: {te}")
 
-        # 6. Also sync warmth score back to Neo4j if Neo4j is available
+        # Sync warmth score back to Neo4j if Neo4j is available
         if gw and neo4j_driver:
             try:
                 gw.update_warmth_score(account_id, result.warmth_score)
@@ -302,7 +302,27 @@ async def compute_warmth_score(
             except Exception as ne:
                 logger.warning(f"Failed to sync score to Neo4j: {ne}")
 
+        # Broadcast via WebSocket manager
+        try:
+            from services.api.routers.ws import manager
+            await manager.broadcast({
+                "type": "score_updated",
+                "data": {
+                    "account_id": account_id,
+                    "warmth_score": result.warmth_score,
+                    "risk_level": result.risk_level,
+                    "top_signals": [
+                        {"signal": r["feature_name"], "impact": r["shap_value"]}
+                        for r in result.top_3_features
+                    ],
+                    "timestamp": datetime.now(timezone.utc).isoformat()
+                }
+            })
+        except Exception as wse:
+            logger.warning(f"Failed to broadcast warmth score update via WebSocket: {wse}")
+
         return {
+
             "account_id": result.account_id,
             "warmth_score": result.warmth_score,
             "risk_level": result.risk_level,

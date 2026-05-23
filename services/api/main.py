@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse
 
 from .core.config import get_settings
 from .middleware.logging import RequestLoggingMiddleware
-from .routers import health, accounts, warmthscore, autostr, recruiter, timeline
+from .routers import health, accounts, warmthscore, autostr, recruiter, timeline, ws
 
 logger = logging.getLogger("prism.main")
 settings = get_settings()
@@ -45,15 +45,22 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Middleware
+class SafeCORSMiddleware(CORSMiddleware):
+    async def __call__(self, scope, receive, send) -> None:
+        if scope["type"] == "websocket" and "/ws/live-feed" in scope.get("path", ""):
+            # Bypass CORSMiddleware completely for real-time WebSocket live-feed
+            await self.app(scope, receive, send)
+            return
+        await super().__call__(scope, receive, send)
+
 app.add_middleware(
-    CORSMiddleware,
+    SafeCORSMiddleware,
     allow_origins=["*"] if settings.environment == "development" else [
         "https://prism.unionbankofindia.co.in",
         "https://argus-prism.vercel.app",
         "https://dist-neon-six-82.vercel.app"
     ],
-    allow_credentials=True,
+    allow_credentials=False if settings.environment == "development" else True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -66,6 +73,8 @@ app.include_router(warmthscore.router, prefix="/api/v1/warmthscore", tags=["Warm
 app.include_router(autostr.router, prefix="/api")
 app.include_router(recruiter.router, prefix="/api/recruiter", tags=["Recruiter"])
 app.include_router(timeline.router, tags=["Account Timeline"])
+app.include_router(ws.router)
+
 
 # Exception Handlers
 @app.exception_handler(Exception)

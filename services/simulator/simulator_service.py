@@ -78,7 +78,7 @@ def _run_simulator():
     global _simulator_instance, _error
     try:
         # Import from the same directory (PYTHONPATH includes services/pipeline)
-        from demo_live_simulator import LiveSimulator
+        from bank_simulator import LiveSimulator
         _simulator_instance = LiveSimulator()
         log.info("Simulator instance created — starting main loop")
         _simulator_instance.run()

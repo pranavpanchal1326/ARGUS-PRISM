@@ -18,8 +18,10 @@ import threading
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional, List
 
-# Get config from parent module
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# Get config from pipeline module
+_parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_pipeline_dir = os.path.join(_parent_dir, "pipeline")
+sys.path.insert(0, _pipeline_dir)
 from config import TOPICS
 
 from confluent_kafka import Producer, KafkaException

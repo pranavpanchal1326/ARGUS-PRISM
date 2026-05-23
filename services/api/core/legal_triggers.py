@@ -253,6 +253,19 @@ class LegalTriggerEngine:
                 updated_at=datetime.now(timezone.utc),
             )
         )
+        try:
+            from services.api.routers.ws import manager
+            await manager.broadcast({
+                "type": "status_changed",
+                "data": {
+                    "account_id": account.account_id,
+                    "status": "KYC_FLAGGED",
+                    "reason": "WarmthScore crossed 75 threshold",
+                    "timestamp": datetime.now(timezone.utc).isoformat()
+                }
+            })
+        except Exception as wse:
+            logger.warning(f"Failed to broadcast status change via WebSocket: {wse}")
 
     async def _apply_restriction(self, account: Account, db: AsyncSession) -> None:
         await db.execute(
@@ -264,6 +277,19 @@ class LegalTriggerEngine:
                 updated_at=datetime.now(timezone.utc),
             )
         )
+        try:
+            from services.api.routers.ws import manager
+            await manager.broadcast({
+                "type": "status_changed",
+                "data": {
+                    "account_id": account.account_id,
+                    "status": "RESTRICTED",
+                    "reason": "WarmthScore crossed 85 threshold",
+                    "timestamp": datetime.now(timezone.utc).isoformat()
+                }
+            })
+        except Exception as wse:
+            logger.warning(f"Failed to broadcast status change via WebSocket: {wse}")
 
     async def _fire_alert(
         self,
@@ -291,6 +317,29 @@ class LegalTriggerEngine:
         )
         db.add(alert)
         await db.flush()  # Get alert_id before commit
+
+        # Broadcast alert to WebSockets
+        try:
+            from services.api.routers.ws import manager
+            await manager.broadcast({
+                "type": "alert_generated",
+                "data": {
+                    "alertId": f"ALT-{account_id}",
+                    "accountId": account_id,
+                    "warmthScore": int(round(warmth_score)),
+                    "firstSignalAt": datetime.now(timezone.utc).isoformat(),
+                    "topSignals": [
+                        {"name": primary_signal, "contribution": int(round(warmth_score / 4))},
+                        {"name": "LIVE BACKEND ALERT", "contribution": int(round(warmth_score / 8))}
+                    ],
+                    "taint": {"score": 0.0, "hopCount": 0},
+                    "status": "IMMINENT" if warmth_score >= 85 else "CRITICAL",
+                    "mlroRequired": warmth_score >= 85
+                }
+            })
+        except Exception as wse:
+            logger.warning(f"Failed to broadcast alert via WebSocket: {wse}")
+
         return str(alert.alert_id)
 
     @staticmethod
