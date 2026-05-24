@@ -47,4 +47,16 @@ export const api = {
     apiCall('POST', `/api/recruiter/${id}/freeze`, payload),
   generateSTR: (caseId, payload) =>
     apiCall('POST', `/api/autostr/generate/${caseId}`, payload),
+  getGlobalAlerts: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return apiCall('GET', `/api/alerts?${query}`);
+  },
+  resolveAlert: (alertId, payload) => apiCall('PATCH', `/api/alerts/${alertId}`, payload),
+  escalateAlert: (alertId, payload) => apiCall('PATCH', `/api/alerts/${alertId}/escalate`, payload),
+  freezeAccount: (id) => apiCall('POST', `/api/accounts/${id}/freeze`),
+  kycReview: (id) => apiCall('POST', `/api/accounts/${id}/kyc-review`),
+  getSignals: (id) => apiCall('GET', `/api/accounts/${id}/signals`),
+  getTransactions: (id) => apiCall('GET', `/api/accounts/${id}/transactions`),
+  toggleWatchlist: (id, payload) => apiCall('POST', `/api/accounts/${id}/watchlist`, payload),
+  getDashboardStats: () => apiCall('GET', '/api/accounts/dashboard/stats'),
 };
