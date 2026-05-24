@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse
 
 from .core.config import get_settings
 from .middleware.logging import RequestLoggingMiddleware
-from .routers import health, accounts, warmthscore, autostr, recruiter, timeline, ws
+from .routers import health, accounts, warmthscore, autostr, recruiter, timeline, ws, alerts
 
 logger = logging.getLogger("prism.main")
 settings = get_settings()
@@ -55,12 +55,8 @@ class SafeCORSMiddleware(CORSMiddleware):
 
 app.add_middleware(
     SafeCORSMiddleware,
-    allow_origins=["*"] if settings.environment == "development" else [
-        "https://prism.unionbankofindia.co.in",
-        "https://argus-prism.vercel.app",
-        "https://dist-neon-six-82.vercel.app"
-    ],
-    allow_credentials=False if settings.environment == "development" else True,
+    allow_origins=settings.cors_origins,
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -74,6 +70,7 @@ app.include_router(autostr.router, prefix="/api")
 app.include_router(recruiter.router, prefix="/api/recruiter", tags=["Recruiter"])
 app.include_router(timeline.router, tags=["Account Timeline"])
 app.include_router(ws.router)
+app.include_router(alerts.router)
 
 
 # Exception Handlers

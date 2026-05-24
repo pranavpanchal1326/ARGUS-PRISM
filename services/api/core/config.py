@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     # SECURITY
     secret_key: str = Field(..., min_length=32)
     api_key_header: str = "X-PRISM-API-Key"
+    cors_origins: list[str] = ["*"]
 
     # PRISM THRESHOLDS
     warmth_threshold_monitoring: float = 40.0
