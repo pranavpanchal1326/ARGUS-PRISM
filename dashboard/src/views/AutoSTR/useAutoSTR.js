@@ -36,7 +36,7 @@ const INIT = {
 async function resolveAccountId(selectedAccountId) {
   if (selectedAccountId) return selectedAccountId;
   const response = await api.getAccounts({ risk_level: 'CRITICAL', page_size: 1 });
-  const accounts = response?.data?.accounts ?? [];
+  const accounts = Array.isArray(response?.data) ? response.data : (response?.data?.accounts ?? []);
   return accounts[0]?.account_id || null;
 }
 
@@ -219,9 +219,9 @@ export default function useAutoSTR() {
       const accountId = targetAccountId || await resolveAccountId(focusedAccountId);
       if (!accountId) throw new Error('No eligible accounts found for AutoSTR generation');
       const [accountResponse, timeline, graph] = await Promise.all([
-        api.getAccount(accountId),
-        api.getScoreTimeline(accountId, 50),
-        api.getAccountGraphEvents(accountId),
+        api.getAccount(accountId).catch(() => ({ data: accountId ? { account_id: accountId } : null })),
+        api.getScoreTimeline(accountId, 50).catch(() => []),
+        api.getAccountGraphEvents(accountId).catch(() => ({ transactions: [] })),
       ]);
       const reportInput = buildReportInput(
         caseId,
