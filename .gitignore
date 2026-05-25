@@ -63,3 +63,4 @@ coverage.xml
 # AutoSTR Temp
 services/autostr/temp/
 
+.vercel
