@@ -3,16 +3,22 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 async function apiCall(method, path, body = null) {
   const options = {
     method,
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 
+      'Content-Type': 'application/json',
+      'X-PRISM-User': 'mlro-judge',
+      'X-PRISM-Role': 'MLRO'
+    },
   };
   if (body) options.body = JSON.stringify(body);
   const response = await fetch(`${BASE_URL}${path}`, options);
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || `API error ${response.status}`);
+    const msg = error.message || error.detail || `API error ${response.status}`;
+    throw new Error(msg);
   }
   return response.json();
 }
+
 
 export const api = {
   getHealth: () => apiCall('GET', '/health'),
@@ -47,4 +53,16 @@ export const api = {
     apiCall('POST', `/api/recruiter/${id}/freeze`, payload),
   generateSTR: (caseId, payload) =>
     apiCall('POST', `/api/autostr/generate/${caseId}`, payload),
+  getGlobalAlerts: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return apiCall('GET', `/api/alerts?${query}`);
+  },
+  resolveAlert: (alertId, payload) => apiCall('PATCH', `/api/alerts/${alertId}`, payload),
+  escalateAlert: (alertId, payload) => apiCall('PATCH', `/api/alerts/${alertId}/escalate`, payload),
+  freezeAccount: (id) => apiCall('POST', `/api/accounts/${id}/freeze`),
+  kycReview: (id) => apiCall('POST', `/api/accounts/${id}/kyc-review`),
+  getSignals: (id) => apiCall('GET', `/api/accounts/${id}/signals`),
+  getTransactions: (id) => apiCall('GET', `/api/accounts/${id}/transactions`),
+  toggleWatchlist: (id, payload) => apiCall('POST', `/api/accounts/${id}/watchlist`, payload),
+  getDashboardStats: () => apiCall('GET', '/api/accounts/dashboard/stats'),
 };

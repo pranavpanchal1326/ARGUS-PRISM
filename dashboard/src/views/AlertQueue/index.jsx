@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAlerts, acknowledgeAlert } from '../../api/hooks';
+import { useAlerts, acknowledgeAlert, escalateAlert } from '../../api/hooks';
 import { SkeletonAlertRow } from '../../components/Skeleton';
 import ApiErrorBoundary from '../../api/ApiErrorBoundary';
 import { useWindowSize } from '../../hooks/useWindowSize';
@@ -8,15 +8,24 @@ import { useWindowSize } from '../../hooks/useWindowSize';
 const SEV_COLOR = { CRITICAL:'var(--heat-4)', HIGH:'var(--heat-3)', MEDIUM:'var(--heat-2)', LOW:'var(--heat-0)' };
 const TYPE_LABEL = { WARMTH_THRESHOLD:'WarmthScore ↑', FLOWGRAPH_TRIGGER:'Flow Graph', TAINT_HIT:'Taint Hit', RECRUITER_DETECTED:'Recruiter' };
 
-const AlertRow = React.forwardRef(function AlertRow({ alert, onAcknowledge, isRemoving }, ref) {
+const AlertRow = React.forwardRef(function AlertRow({ alert, onAcknowledge, onEscalate, isRemoving }, ref) {
   const [ack, setAck] = useState(false);
+  const [esc, setEsc] = useState(false);
   const { width } = useWindowSize();
   const isMobile = width < 768;
+  
   function handle(e) {
     e.stopPropagation();
     setAck(true);
     onAcknowledge(alert.alert_id);
   }
+
+  function handleEscalate(e) {
+    e.stopPropagation();
+    setEsc(true);
+    onEscalate(alert.alert_id);
+  }
+
   const col = SEV_COLOR[alert.severity] || 'var(--text-tertiary)';
   return (
     <motion.div
@@ -57,15 +66,28 @@ const AlertRow = React.forwardRef(function AlertRow({ alert, onAcknowledge, isRe
           TAINT
         </span>
       )}
-      <button onClick={handle} disabled={ack}
-        style={{ fontFamily:'var(--font-ui)', fontSize:'11px', fontWeight:500,
-          color: ack ? 'var(--text-tertiary)' : 'var(--text-secondary)',
-          background:'var(--bg-subtle)', border:'1px solid var(--border-default)', borderRadius:'6px',
-          padding:'5px 12px', cursor: ack ? 'default' : 'pointer', flexShrink:0,
-          opacity: ack ? 0.5 : 1 }}>
-        {ack ? 'Ack\u2019d' : 'Acknowledge'}
-
-      </button>
+      <div style={{ display:'flex', gap:'8px', flexShrink:0 }}>
+        <button onClick={handle} disabled={ack || esc}
+          style={{ fontFamily:'var(--font-ui)', fontSize:'11px', fontWeight:500,
+            color: ack ? 'var(--text-tertiary)' : 'var(--text-secondary)',
+            background:'var(--bg-subtle)', border:'1px solid var(--border-default)', borderRadius:'6px',
+            padding:'5px 12px', cursor: (ack || esc) ? 'default' : 'pointer',
+            opacity: ack ? 0.5 : 1 }}>
+          {ack ? 'Ack\u2019d' : 'Acknowledge'}
+        </button>
+        
+        {!ack && (
+          <button onClick={handleEscalate} disabled={esc}
+            style={{ fontFamily:'var(--font-ui)', fontSize:'11px', fontWeight:500,
+              color: esc ? 'var(--text-tertiary)' : 'var(--error)',
+              background: esc ? 'var(--bg-subtle)' : 'rgba(207,52,33,0.05)',
+              border: esc ? '1px solid var(--border-default)' : '1px solid rgba(207,52,33,0.25)',
+              borderRadius:'6px', padding:'5px 12px', cursor: esc ? 'default' : 'pointer',
+              opacity: esc ? 0.5 : 1 }}>
+            {esc ? 'Escalated' : 'Escalate'}
+          </button>
+        )}
+      </div>
     </motion.div>
   );
 });
@@ -100,6 +122,17 @@ function AlertQueueContent() {
     }
   }
 
+  async function handleEscalate(alertId) {
+    const prev = localAlerts ?? alerts ?? [];
+    setLocalAlerts(prev.filter(a => a.alert_id !== alertId));
+    setRemoving(s => new Set([...s, alertId]));
+    const res = await escalateAlert(alertId, 'Escalated by analyst from queue view');
+    if (res.error) {
+      setLocalAlerts(prev);
+      setRemoving(s => { const n=new Set(s); n.delete(alertId); return n; });
+    }
+  }
+
   return (
     <div style={{ padding:'32px' }}>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'24px' }}>
@@ -117,6 +150,7 @@ function AlertQueueContent() {
         {displayed.map(a => (
           <AlertRow key={a.alert_id} alert={a}
             onAcknowledge={handleAcknowledge}
+            onEscalate={handleEscalate}
             isRemoving={removing.has(a.alert_id)} />
         ))}
       </AnimatePresence>

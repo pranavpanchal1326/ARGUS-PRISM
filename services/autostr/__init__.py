@@ -5,7 +5,7 @@ Responsible for generating regulatory-grade evidence packages for FIU-IND, CBI, 
 
 __version__ = "2.0.0"
 
-from .fiu_xml_generator import generate_fiu_xml
-from .schemas.fiu_schema import FIUReportInput
+from .generators.fiu_xml_generator import generate_fiu_xml
+from .templates.fiu_schema import FIUReportInput
 
 __all__ = ["generate_fiu_xml", "FIUReportInput"]

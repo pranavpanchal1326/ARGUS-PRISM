@@ -1,0 +1,24 @@
+# Ignore backend python services and training scripts
+services/
+src/
+scripts/
+tests/
+infra/
+docs/
+data/
+
+# Ignore virtual environments
+.venv/
+venv/
+env/
+ENV/
+.pytest_cache/
+
+# Ignore standard git/IDE/OS files
+.git/
+.github/
+.vscode/
+.idea/
+*.log
+.DS_Store
+Thumbs.db

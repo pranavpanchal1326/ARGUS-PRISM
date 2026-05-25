@@ -1,7 +1,6 @@
 # ═══════════════════════════════════════════════════════
 # ARGUS-PRISM | .gitignore
-# Engine: WarmthScore — Synthetic Dataset Generator
-# Branch: pranav/warmthscore
+# Branch: prismV1
 # ═══════════════════════════════════════════════════════
 
 # Python
@@ -14,6 +13,7 @@ dist/
 build/
 *.egg
 .eggs/
+.pytest_cache/
 
 # Virtual environments
 .venv/
@@ -23,6 +23,17 @@ ENV/
 
 # Generated synthetic data (large binary/JSON outputs)
 services/ml/warmthscore/dataset/data/
+services/ml/warmthscore/dataset/warmth_dataset.csv
+services/ml/warmthscore/training/warmthscore_training_v2.csv
+services/ml/warmthscore/training/warmthscore_training_v2.parquet
+
+# Model artifacts (binary, regenerated via training pipeline)
+# services/ml/warmthscore/model/artifacts/warmthscore_xgb.joblib
+# services/ml/warmthscore/model/artifacts/warmthscore_scaler.joblib
+# services/ml/warmthscore/model/artifacts/shap_explainer.joblib
+
+# Runtime logs
+*.log
 
 # Node / Next.js
 node_modules/
@@ -43,3 +54,13 @@ out/
 # OS
 .DS_Store
 Thumbs.db
+
+# Coverage
+htmlcov/
+.coverage
+coverage.xml
+
+# AutoSTR Temp
+services/autostr/temp/
+
+.vercel

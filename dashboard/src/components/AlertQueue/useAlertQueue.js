@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { api } from '../../api/client';
 import { sortAlerts, resolveCardState } from './alertQueueConfig';
+import { useWebSocket } from '../../hooks/useWebSocket';
+
 
 function accountToCardAlert(account, index) {
   const warmthScore = Math.round(Number(account.current_warmth_score ?? account.warmth_score ?? 0));
@@ -51,32 +53,68 @@ export function useAlertQueue({
     });
   }, [alerts]);
 
-  useEffect(() => {
-    let mounted = true;
-    async function load() {
-      try {
-        const response = await api.getAccounts({ risk_level: 'CRITICAL', page_size: 20 });
-        const nextAlerts = (response?.data?.accounts ?? []).map(accountToCardAlert);
-        if (!mounted) return;
-        setAlerts(nextAlerts);
-        setLastRefreshed(new Date().toISOString());
-        setIsLoading(false);
-        if (!initialLoadRef.current) {
-          const imminent = nextAlerts.find(alert => resolveCardState(alert.warmthScore).id === 'IMMINENT');
-          if (imminent) onNewImminent(imminent);
-          initialLoadRef.current = true;
-        }
-      } catch {
-        if (mounted) setIsLoading(false);
+  const load = useCallback(async () => {
+    try {
+      const response = await api.getAccounts({ risk_level: 'CRITICAL', page_size: 20 });
+      const nextAlerts = (response?.data?.accounts ?? []).map(accountToCardAlert);
+      setAlerts(nextAlerts);
+      setLastRefreshed(new Date().toISOString());
+      setIsLoading(false);
+      if (!initialLoadRef.current) {
+        const imminent = nextAlerts.find(alert => resolveCardState(alert.warmthScore).id === 'IMMINENT');
+        if (imminent) onNewImminent(imminent);
+        initialLoadRef.current = true;
       }
+    } catch (e) {
+      setIsLoading(false);
     }
+  }, [onNewImminent]);
+
+  const handleWebSocketMessage = useCallback((message) => {
+    console.log('[useAlertQueue] Received live WebSocket event:', message);
+    if (message.type === 'alert_generated') {
+      const newAlert = message.data;
+      setAlerts(prev => {
+        if (prev.some(a => a.alertId === newAlert.alertId)) return prev;
+        if (newAlert.status === 'IMMINENT') {
+          onNewImminent(newAlert);
+        }
+        return [newAlert, ...prev];
+      });
+    } else if (message.type === 'score_updated') {
+      const { account_id, warmth_score, top_signals } = message.data;
+      setAlerts(prev => prev.map(a => {
+        if (a.accountId === account_id) {
+          const warmthScore = Math.round(warmth_score);
+          const status = warmthScore >= 85 ? 'IMMINENT' : warmthScore >= 75 ? 'CRITICAL' : warmthScore >= 60 ? 'HOT' : 'WARMING';
+          return {
+            ...a,
+            warmthScore,
+            status,
+            mlroRequired: warmthScore >= 85,
+            topSignals: [
+              ...top_signals.map(s => ({ name: s.signal, contribution: Math.max(1, Math.round(s.impact * 100)) })),
+              ...a.topSignals.slice(top_signals.length)
+            ]
+          };
+        }
+        return a;
+      }));
+    } else if (message.type === 'status_changed' || message.type === 'account_created') {
+      load().catch(() => {});
+    }
+  }, [load, onNewImminent]);
+
+  const { status: wsStatus } = useWebSocket(handleWebSocketMessage);
+
+  useEffect(() => {
     load();
     const interval = setInterval(load, pollingInterval);
     return () => {
-      mounted = false;
       clearInterval(interval);
     };
-  }, [pollingInterval, onNewImminent]);
+  }, [load, pollingInterval]);
+
 
   const acknowledgeAlert = useCallback((alertId) => {
     setAlerts(prev => prev.filter(a => a.alertId !== alertId));

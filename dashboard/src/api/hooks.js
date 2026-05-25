@@ -285,6 +285,30 @@ export function useFlowGraph(accountId) {
 export function useAlerts({ severity = null, acknowledged = false } = {}) {
   return usePoll(async () => {
     try {
+      const response = await api.getGlobalAlerts({ is_acknowledged: acknowledged });
+      if (response && response.success && response.data && Array.isArray(response.data.alerts)) {
+        let alerts = response.data.alerts.map(a => ({
+          alert_id: a.alert_id,
+          account_id: a.account_id,
+          account_name: a.account_name || `Account ${a.account_id}`,
+          alert_type: a.alert_type,
+          severity: a.severity,
+          score: Number(a.warmth_score_at_alert ?? 0),
+          top_signal: a.alert_message || a.primary_signal || 'WarmthScore threshold crossed',
+          created_at: a.created_at,
+          acknowledged: a.is_acknowledged,
+          taint_hit: a.alert_type === 'TAINT_HIT' || a.severity === 'CRITICAL'
+        }));
+        if (severity) {
+          const allowed = new Set(severity.split(','));
+          alerts = alerts.filter(alert => allowed.has(alert.severity));
+        }
+        return ok(alerts);
+      }
+    } catch (e) {
+      console.warn("Failed to fetch global alerts from backend, trying prototype fallback:", e);
+    }
+    try {
       const response = await api.getAccounts({ risk_level: 'CRITICAL', page_size: 20 });
       let alerts = (response?.data?.accounts ?? []).map(accountToAlert);
       if (severity) {
@@ -296,7 +320,7 @@ export function useAlerts({ severity = null, acknowledged = false } = {}) {
     } catch (error) {
       return fail(error);
     }
-  }, [severity, acknowledged], 30000);
+  }, [severity, acknowledged], 10000);
 }
 
 export function useCases({ status = 'OPEN' } = {}) {
@@ -332,6 +356,36 @@ export function useRecruiters() {
   }, []);
 }
 
-export async function acknowledgeAlert(alertId) {
-  return ok({ success: true, alert_id: alertId, acknowledged_at: new Date().toISOString() });
+export async function acknowledgeAlert(alertId, payload = {}) {
+  try {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(alertId);
+    if (!isUuid) {
+      return ok({ success: true, alert_id: alertId, acknowledged_at: new Date().toISOString() });
+    }
+    const body = {
+      acknowledged_by: payload.acknowledged_by || 'PRISM MLRO',
+      is_false_positive: payload.is_false_positive || false,
+      false_positive_reason: payload.false_positive_reason || null,
+    };
+    const res = await api.resolveAlert(alertId, body);
+    return ok(res?.data ?? res);
+  } catch (error) {
+    console.warn("Failed to resolve alert on backend, using fallback:", error);
+    return ok({ success: true, alert_id: alertId, acknowledged_at: new Date().toISOString(), fallback: true });
+  }
 }
+
+export async function escalateAlert(alertId, notes = '') {
+  try {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(alertId);
+    if (!isUuid) {
+      return ok({ success: true, alert_id: alertId, status: 'ESCALATED', severity: 'CRITICAL' });
+    }
+    const res = await api.escalateAlert(alertId, { escalated_by: 'PRISM MLRO', notes });
+    return ok(res?.data ?? res);
+  } catch (error) {
+    console.warn("Failed to escalate alert on backend, using fallback:", error);
+    return ok({ success: true, alert_id: alertId, status: 'ESCALATED', severity: 'CRITICAL', fallback: true });
+  }
+}
+

@@ -1,0 +1,87 @@
+{
+  "schema_version": "2.0.0",
+  "total_features": 43,
+  "label_column": "is_mule",
+  "value_range": [0.0, 1.0],
+  "signals": {
+    "S1": {
+      "name": "Test Credit Pattern",
+      "feature_count": 7,
+      "features": [
+        {"name": "s1_micro_credit_count", "dtype": "float32", "description": "Normalized count of micro-credits (<₹500) in last 72 hours"},
+        {"name": "s1_micro_credit_total", "dtype": "float32", "description": "Normalized total amount of micro-credits"},
+        {"name": "s1_source_account_age_days", "dtype": "float32", "description": "Normalized age of source accounts (inverted: young = high)"},
+        {"name": "s1_inter_credit_timing_var", "dtype": "float32", "description": "Normalized variance of time between credits (low variance = suspicious)"},
+        {"name": "s1_source_dormancy_score", "dtype": "float32", "description": "Normalized dormancy score of source accounts"},
+        {"name": "s1_isolation_anomaly_score", "dtype": "float32", "description": "How isolated the credit pattern is from account's history"},
+        {"name": "s1_pattern_confidence", "dtype": "float32", "description": "Overall confidence that test credit pattern is present"}
+      ]
+    },
+    "S2": {
+      "name": "Device Fingerprint",
+      "feature_count": 9,
+      "features": [
+        {"name": "s2_imei_changed_24h", "dtype": "float32", "description": "Binary: IMEI changed within 24 hours"},
+        {"name": "s2_hours_between_change_norm", "dtype": "float32", "description": "Normalized hours between device changes (inverted)"},
+        {"name": "s2_unique_imei_count_norm", "dtype": "float32", "description": "Normalized count of unique IMEIs in last 30 days"},
+        {"name": "s2_unique_sim_count_norm", "dtype": "float32", "description": "Normalized count of unique SIMs in last 30 days"},
+        {"name": "s2_blocked_prefix_matches_norm", "dtype": "float32", "description": "Matches against known blocked IMEI prefixes"},
+        {"name": "s2_max_proximity", "dtype": "float32", "description": "Max proximity score to other flagged devices in Neo4j"},
+        {"name": "s2_shared_device_flag", "dtype": "float32", "description": "Binary: device shared with other accounts"},
+        {"name": "s2_device_velocity_norm", "dtype": "float32", "description": "Normalized rate of device changes"},
+        {"name": "s2_layer1_score", "dtype": "float32", "description": "Composite layer-1 device anomaly score"}
+      ]
+    },
+    "S3": {
+      "name": "Velocity Derivative",
+      "feature_count": 8,
+      "features": [
+        {"name": "s3_zc_before_48", "dtype": "float32", "description": "Zero-crossing count before 48-hour mark"},
+        {"name": "s3_zc_hour_proximity", "dtype": "float32", "description": "Proximity of zero-crossing to 48-hour mark"},
+        {"name": "s3_curve_shape_score", "dtype": "float32", "description": "Convexity score of velocity curve (1.0 = fully convex)"},
+        {"name": "s3_max_acceleration_norm", "dtype": "float32", "description": "Normalized maximum acceleration in transaction velocity"},
+        {"name": "s3_acceleration_ratio_norm", "dtype": "float32", "description": "Ratio of max acceleration to mean acceleration"},
+        {"name": "s3_total_tx_norm", "dtype": "float32", "description": "Normalized total transaction count in window"},
+        {"name": "s3_observation_age_norm", "dtype": "float32", "description": "Normalized age of observation window"},
+        {"name": "s3_mean_velocity_norm", "dtype": "float32", "description": "Normalized mean transaction velocity"}
+      ]
+    },
+    "S4": {
+      "name": "Dormant Reactivation",
+      "feature_count": 7,
+      "features": [
+        {"name": "s4_dormancy_days_norm", "dtype": "float32", "description": "Normalized dormancy period in days"},
+        {"name": "s4_device_delta_score", "dtype": "float32", "description": "Device change score at reactivation"},
+        {"name": "s4_reactivation_amount_norm", "dtype": "float32", "description": "Normalized transaction amount at reactivation"},
+        {"name": "s4_time_since_kyc_norm", "dtype": "float32", "description": "Normalized time since last KYC verification"},
+        {"name": "s4_channel_switch_score", "dtype": "float32", "description": "Score for switching from branch to digital channel"},
+        {"name": "s4_combined_signal_score", "dtype": "float32", "description": "Combined dormant reactivation signal"},
+        {"name": "s4_pattern_confidence", "dtype": "float32", "description": "Overall confidence that dormant reactivation pattern is present"}
+      ]
+    },
+    "S5": {
+      "name": "FRI Contradiction",
+      "feature_count": 6,
+      "features": [
+        {"name": "s5_fri_score_norm", "dtype": "float32", "description": "Normalized FRI score from DoT DIP API"},
+        {"name": "s5_internal_partial_score_norm", "dtype": "float32", "description": "Normalized internal partial risk score"},
+        {"name": "s5_contradiction_magnitude", "dtype": "float32", "description": "Magnitude of FRI vs internal score contradiction"},
+        {"name": "s5_sim_age_days_norm", "dtype": "float32", "description": "Normalized SIM age in days"},
+        {"name": "s5_complaint_history_norm", "dtype": "float32", "description": "Normalized complaint history score"},
+        {"name": "s5_pattern_confidence", "dtype": "float32", "description": "Overall confidence that FRI contradiction is present"}
+      ]
+    },
+    "S6": {
+      "name": "SIM Swap Velocity",
+      "feature_count": 6,
+      "features": [
+        {"name": "s6_days_to_upi_reg_norm", "dtype": "float32", "description": "Normalized days between SIM swap and UPI registration (inverted)"},
+        {"name": "s6_swap_frequency_norm", "dtype": "float32", "description": "Normalized SIM swap frequency in last 30 days"},
+        {"name": "s6_iccid_change_score", "dtype": "float32", "description": "Score for ICCID change pattern"},
+        {"name": "s6_post_swap_txn_velocity_norm", "dtype": "float32", "description": "Normalized transaction velocity after SIM swap"},
+        {"name": "s6_swap_to_fraud_window_score", "dtype": "float32", "description": "Score for swap-to-fraud time window alignment"},
+        {"name": "s6_pattern_confidence", "dtype": "float32", "description": "Overall confidence that SIM swap pattern is present"}
+      ]
+    }
+  }
+}

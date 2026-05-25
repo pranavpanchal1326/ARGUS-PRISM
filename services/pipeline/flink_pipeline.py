@@ -140,7 +140,7 @@ class PRISMPipeline:
 
     # ── Auto-Score Trigger ─────────────────────────────────────────────────────
 
-    WARMTHSCORE_API = "http://localhost:8000/api/v1/warmthscore/score"
+    WARMTHSCORE_API = "http://localhost:8000/api/v1/warmthscore/compute"
     SCORING_HEADERS = {
         "X-PRISM-User": "pipeline-auto-scorer",
         "X-PRISM-Role": "MLRO",
@@ -158,12 +158,11 @@ class PRISMPipeline:
         self._score_debounce.add(account_id)
 
         try:
-            signals = self._build_signal_payload(account_id)
+            url = f"{self.WARMTHSCORE_API}/{account_id}"
             r = httpx.post(
-                self.WARMTHSCORE_API,
-                json={"account_id": account_id, "signal_outputs": signals},
+                url,
                 headers=self.SCORING_HEADERS,
-                timeout=10.0,
+                timeout=15.0,
             )
             if r.status_code == 200:
                 data = r.json()
@@ -177,6 +176,7 @@ class PRISMPipeline:
         except Exception as e:
             self._stats["auto_scores_failed"] += 1
             log.warning("[AUTO-SCORE] %s failed: %s", account_id, e)
+
 
     def _build_signal_payload(self, account_id: str) -> dict:
         """

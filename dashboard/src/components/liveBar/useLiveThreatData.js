@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { api } from '../../api/client';
+import { useWebSocket } from '../../hooks/useWebSocket';
+
 
 const EMPTY_LIVE_DATA = {
   bandCounts: {
@@ -94,6 +96,34 @@ export function useLiveThreatData({
     if (highestScore >= 85 && onImminentAccount) onImminentAccount(highestScoreAccountId, highestScore);
   }, [onImminentAccount]);
 
+  const handleWebSocketMessage = useCallback((message) => {
+    console.log('[useLiveThreatData] Received live WebSocket event:', message);
+    if (message.type === 'score_updated') {
+      const { account_id, warmth_score } = message.data;
+      setData(prev => {
+        let nextHighest = prev.highestScore;
+        let nextHighestId = prev.highestScoreAccountId;
+        if (warmth_score > prev.highestScore) {
+          nextHighest = warmth_score;
+          nextHighestId = account_id;
+        }
+        if (warmth_score >= 85 && onImminentAccount) {
+          onImminentAccount(account_id, warmth_score);
+        }
+        return {
+          ...prev,
+          highestScore: nextHighest,
+          highestScoreAccountId: nextHighestId
+        };
+      });
+      loadData().catch(() => {});
+    } else if (message.type === 'status_changed' || message.type === 'account_created') {
+      loadData().catch(() => {});
+    }
+  }, [loadData, onImminentAccount]);
+
+  const { status: wsStatus } = useWebSocket(handleWebSocketMessage);
+
   useEffect(() => {
     loadData().catch(() => onSystemDegraded?.());
     intervalsRef.current.poll = setInterval(() => {
@@ -110,6 +140,6 @@ export function useLiveThreatData({
     lastUpdated,
     barState,
     scanningFlags,
-    connectionStatus: 'LIVE'
+    connectionStatus: wsStatus === 'OPEN' ? 'LIVE' : 'DEGRADED'
   };
 }

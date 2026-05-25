@@ -6,8 +6,8 @@ import pytest
 import json
 import hashlib
 from datetime import datetime, timezone
-from services.autostr.rbi_report_generator import generate_rbi_report
-from services.autostr.schemas.fiu_schema import (
+from services.autostr.generators.rbi_report_generator import generate_rbi_report
+from services.autostr.templates.fiu_schema import (
     FIUReportInput, AccountRecord, TransactionRecord, SignalScore, SHAPAttribution
 )
 

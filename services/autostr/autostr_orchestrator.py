@@ -11,10 +11,10 @@ from datetime import datetime, timezone
 from dataclasses import dataclass
 from typing import Dict, Any, Optional
 
-from .fiu_xml_generator import generate_fiu_xml
-from .cbi_pdf_generator import generate_cbi_pdf
-from .rbi_report_generator import generate_rbi_report
-from .schemas.fiu_schema import FIUReportInput
+from .generators.fiu_xml_generator import generate_fiu_xml
+from .generators.cbi_pdf_generator import generate_cbi_pdf
+from .generators.rbi_report_generator import generate_rbi_report
+from .templates.fiu_schema import FIUReportInput
 
 logger = logging.getLogger("prism.autostr.orchestrator")
 

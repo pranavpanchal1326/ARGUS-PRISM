@@ -39,7 +39,9 @@ XGB_PARAMS = {
     "eval_metric": "auc",
     "random_state": 42,
     "n_jobs": -1,
-    "tree_method": "hist"
+    "tree_method": "hist",
+    # Class imbalance correction for V2 dataset (85/15 split)
+    "scale_pos_weight": 5.67,
 }
 
 class WarmthScoreTrainer:
@@ -128,7 +130,7 @@ class WarmthScoreTrainer:
         
         metadata = {
             "trained_at": datetime.now(timezone.utc).isoformat(),
-            "model_version": "1.0.0",
+            "model_version": "2.0.0",
             "feature_count": len(FEATURE_NAMES),
             "feature_names": FEATURE_NAMES,
             "signal_lengths": SIGNAL_LENGTHS,

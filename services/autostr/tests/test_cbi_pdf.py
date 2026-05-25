@@ -6,8 +6,8 @@ import os
 import pytest
 import fitz  # PyMuPDF
 from datetime import datetime, timezone
-from services.autostr.cbi_pdf_generator import generate_cbi_pdf
-from services.autostr.schemas.fiu_schema import (
+from services.autostr.generators.cbi_pdf_generator import generate_cbi_pdf
+from services.autostr.templates.fiu_schema import (
     FIUReportInput, AccountRecord, TransactionRecord, SignalScore, SHAPAttribution
 )
 
