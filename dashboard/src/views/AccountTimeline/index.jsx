@@ -438,12 +438,23 @@ export default function AccountTimeline({
           risk_level: latest.risk_level ?? act.warmth_risk_level ?? 'CRITICAL',
         }],
         transactions,
-        signal_scores: Object.entries(latest.signals || {}).map(([signal_name, impact]) => ({
-          signal_name,
-          raw_score: Math.min(1, Math.max(0, Math.abs(Number(impact)) / 10)),
-          weighted_score: Math.min(100, Math.max(0, Math.abs(Number(impact)) * 10)),
-          shap_impact: Number(impact)
-        })),
+        signal_scores: (() => {
+          const signals = latest.signals || {};
+          const entries = Object.entries(signals);
+          const padded = entries.length >= 6 ? entries.slice(0, 6) : [
+            ...entries,
+            ...['S1', 'S2', 'S3', 'S4', 'S5', 'S6'].slice(entries.length).map(signal => [signal, 0]),
+          ];
+          return padded.map(([signal_name, impact]) => {
+            const value = Number(impact ?? 0);
+            return {
+              signal_name,
+              raw_score: Math.min(1, Math.max(0, Math.abs(value) / 10)),
+              weighted_score: Math.min(100, Math.max(0, Math.abs(value) * 10)),
+              shap_impact: value,
+            };
+          });
+        })(),
         shap_attribution: {
           primary_signal: 'S1', primary_impact: 0,
           secondary_signal: 'S2', secondary_impact: 0,
