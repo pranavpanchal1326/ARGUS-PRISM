@@ -1,0 +1,10 @@
+{
+  "github": {
+    "silent": true
+  },
+  "builds": [{ "src": "dashboard/package.json", "use": "@vercel/static-build" }],
+  "routes": [
+    { "src": "/assets/(.*)", "dest": "/dashboard/assets/$1" },
+    { "src": "/(.*)", "dest": "/dashboard/$1" }
+  ]
+}
