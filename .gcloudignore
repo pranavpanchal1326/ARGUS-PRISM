@@ -7,9 +7,9 @@ __pycache__
 *.pyc
 *.pyo
 .env
-.env.*
+#.env.*
 !.env.example
-*.joblib
+#*.joblib
 # data/synthetic_demo/
 *.csv
 !services/ml/warmthscore/model/artifacts/
