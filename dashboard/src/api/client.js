@@ -22,6 +22,8 @@ async function apiCall(method, path, body = null) {
 
 export const api = {
   getHealth: () => apiCall('GET', '/health'),
+  getHealthReady: () => apiCall('GET', '/health/ready'),
+  getHealthThresholds: () => apiCall('GET', '/health/thresholds'),
   getAccounts: (params = {}) => {
     const query = new URLSearchParams(params).toString();
     return apiCall('GET', `/api/accounts?${query}`);

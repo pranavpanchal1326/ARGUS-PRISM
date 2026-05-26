@@ -3,7 +3,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import NavBar              from './NavBar';
 import Sidebar             from './Sidebar';
 import { ViewProvider, useView } from './ViewContext';
-import { AutoPlayController } from '../demo/AutoPlayController';
 import { useDemoContext } from '../demo/DemoContext';
 import './ViewTransition.css';
 
@@ -13,6 +12,7 @@ import AccountTimelineView from '../views/AccountTimeline';
 import FlowGraphView       from '../views/FlowGraph';
 import RecruiterMapView    from '../views/RecruiterMap';
 import AutoSTRView         from '../views/AutoSTR';
+import HealthView          from '../views/Health/HealthView';
 
 /* ── Constants ────────────────────────────────────────────── */
 const VIEW_ORDER = [
@@ -21,6 +21,7 @@ const VIEW_ORDER = [
   'FLOW_GRAPH',
   'RECRUITER_MAP',
   'AUTOSTR',
+  'HEALTH',
 ];
 
 const VIEW_LABELS = {
@@ -29,6 +30,7 @@ const VIEW_LABELS = {
   FLOW_GRAPH:       'Flow Graph',
   RECRUITER_MAP:    'Recruiter Map',
   AUTOSTR:          'AutoSTR',
+  HEALTH:           'System Health',
 };
 
 /* ── Slide variants ──────────────────────────────────────── */
@@ -46,6 +48,7 @@ function renderView(view, focusedAccountId) {
     case 'FLOW_GRAPH':       return <FlowGraphView accountId={focusedAccountId} />;
     case 'RECRUITER_MAP':    return <RecruiterMapView />;
     case 'AUTOSTR':          return <AutoSTRView accountId={focusedAccountId} />;
+    case 'HEALTH':           return <HealthView />;
     default:                 return <AlertQueueView />;
   }
 }
@@ -56,8 +59,7 @@ function renderView(view, focusedAccountId) {
    ───────────────────────────────────────────────────────── */
 function ShellContent() {
   const { currentView, direction, navigateToView } = useView();
-  const { isDemoMode, focusedAccountId } = useDemoContext();
-  const bannerOffset = isDemoMode ? 36 : 0;
+  const { focusedAccountId } = useDemoContext();
 
   return (
     <div style={{
@@ -70,15 +72,12 @@ function ShellContent() {
       {/* Fixed top bar */}
       <NavBar />
 
-      {/* AutoPlayController — renders null, drives view on auto-play step */}
-      <AutoPlayController onNavigate={navigateToView} />
-
-      {/* Body row — below nav (+ demo banner offset when active) */}
+      {/* Body row — below nav */}
       <div style={{
         display:   'flex',
         flex:      1,
         overflow:  'hidden',
-        marginTop: `${56 + bannerOffset}px`,
+        marginTop: '56px',
       }}>
         {/* Fixed sidebar — receives nav state via props */}
         <Sidebar
@@ -94,7 +93,7 @@ function ShellContent() {
           padding:    '32px',
           background: 'var(--bg-base)',
         }}>
-          <div className="view-transition-wrapper">
+          <div className="view-transition-wrapper" style={{ transition: 'opacity 0.15s ease' }}>
             <AnimatePresence mode="popLayout" custom={direction}>
               <motion.div
                 key={currentView}

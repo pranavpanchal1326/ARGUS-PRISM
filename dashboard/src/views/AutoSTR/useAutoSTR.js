@@ -166,9 +166,18 @@ function buildReportInput(caseId, account, graph, timeline) {
 function resultToPackage(pkgId, caseId, result) {
   const key = pkgId === 'fiu' ? 'fiu_xml' : pkgId === 'cbi' ? 'cbi_pdf' : 'rbi_report';
   const packageResult = result?.[key] ?? {};
-  const type = pkgId === 'cbi' ? 'application/pdf' : pkgId === 'fiu' ? 'application/xml' : 'application/json';
-  const content = JSON.stringify({ case_id: caseId, package: key, result: packageResult }, null, 2);
-  const url = URL.createObjectURL(new Blob([content], { type }));
+  
+  let url = '';
+  if (pkgId === 'fiu' && result?.fiu_xml_download_path) {
+    url = result.fiu_xml_download_path;
+  } else if (pkgId === 'cbi' && result?.cbi_pdf_download_path) {
+    url = result.cbi_pdf_download_path;
+  } else {
+    const type = pkgId === 'cbi' ? 'application/pdf' : pkgId === 'fiu' ? 'application/xml' : 'application/json';
+    const content = JSON.stringify({ case_id: caseId, package: key, result: packageResult }, null, 2);
+    url = URL.createObjectURL(new Blob([content], { type }));
+  }
+
   return {
     status: packageResult.generated ? 'COMPLETE' : 'ERROR',
     progress: packageResult.generated ? 100 : 0,
@@ -193,7 +202,15 @@ export default function useAutoSTR() {
   useEffect(()=>()=>{ tids.current.forEach(clearTimeout); },[]);
 
   const generate = useCallback(async (targetAccountId, targetCaseId) => {
-    const caseId = targetCaseId || `CASE-${Date.now()}`;
+    const caseId = targetCaseId || (
+      (typeof crypto !== 'undefined' && crypto.randomUUID)
+        ? crypto.randomUUID()
+        : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+            const r = Math.random() * 16 | 0;
+            const v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+          })
+    );
     tids.current.forEach(clearTimeout);
     tids.current=[];
     t0.current=Date.now();

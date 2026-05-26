@@ -6,6 +6,7 @@ const VIEW_LABELS = {
   FLOW_GRAPH:       'Flow Graph',
   RECRUITER_MAP:    'Recruiter Map',
   AUTOSTR:          'AutoSTR',
+  HEALTH:           'System Health',
 };
 
 const VIEW_ORDER = [
@@ -14,6 +15,7 @@ const VIEW_ORDER = [
   'FLOW_GRAPH',
   'RECRUITER_MAP',
   'AUTOSTR',
+  'HEALTH',
 ];
 
 export const ViewContext = createContext({
