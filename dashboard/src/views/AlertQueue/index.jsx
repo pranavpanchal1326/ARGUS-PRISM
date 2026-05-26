@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAlerts, acknowledgeAlert, escalateAlert } from '../../api/hooks';
+import { useToast } from '../../components/Toast/ToastContext';
 import { SkeletonAlertRow } from '../../components/Skeleton';
 import ApiErrorBoundary from '../../api/ApiErrorBoundary';
 import { useWindowSize } from '../../hooks/useWindowSize';
@@ -96,6 +97,7 @@ function AlertQueueContent() {
   const { data: alerts, error, loading } = useAlerts({ acknowledged: false });
   const [localAlerts, setLocalAlerts] = useState(null);
   const [removing, setRemoving] = useState(new Set());
+  const { showToast } = useToast();
 
   const displayed = localAlerts ?? alerts ?? [];
 
@@ -119,6 +121,9 @@ function AlertQueueContent() {
     if (res.error) {
       setLocalAlerts(prev);
       setRemoving(s => { const n=new Set(s); n.delete(alertId); return n; });
+      showToast('Acknowledge failed — backend unreachable', 'error');
+    } else {
+      showToast('Alert acknowledged ✓', 'success');
     }
   }
 
@@ -130,6 +135,9 @@ function AlertQueueContent() {
     if (res.error) {
       setLocalAlerts(prev);
       setRemoving(s => { const n=new Set(s); n.delete(alertId); return n; });
+      showToast('Escalate failed — backend unreachable', 'error');
+    } else {
+      showToast('Alert escalated to CRITICAL ⚠️', 'warning');
     }
   }
 

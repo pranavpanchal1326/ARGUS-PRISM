@@ -7,6 +7,7 @@ import { SkeletonScore, SkeletonText } from '../../components/Skeleton';
 import { useWindowSize } from '../../hooks/useWindowSize';
 import { useDemoContext } from '../../demo/DemoContext';
 import { api } from '../../api/client';
+import { useToast } from '../../components/Toast/ToastContext';
 
 /* ── Data ─────────────────────────────────────────────── */
 const FALLBACK_ACCOUNT = {
@@ -241,6 +242,7 @@ export default function AccountTimeline({
   }
   const accountId = propAccountId || demoCtx?.focusedAccountId || 'UBI-2026-DEMO-001';
   const setAccountId = demoCtx?.setFocusedAccountId;
+  const { showToast } = useToast();
 
   const { data: accountsList } = useAccounts();
   const { data: accountData } = useAccount(accountId);
@@ -346,10 +348,11 @@ export default function AccountTimeline({
       await api.kycReview(accountId);
       setLocalKycStatus('RE_VERIFICATION');
       setActionStatus({ type: 'KYC', status: 'success', message: 'KYC re-verification successfully initiated.', details: 'Notification dispatched to customer device. Response required within 48h.' });
+      showToast(`Video KYC review requested for ${accountId}`, 'success');
     } catch (err) {
-      console.warn("Failed to request KYC, using offline fallback:", err);
-      setLocalKycStatus('RE_VERIFICATION');
-      setActionStatus({ type: 'KYC', status: 'success', message: 'KYC re-verification successfully initiated (Offline Fallback).', details: 'Notification logged to local workspace context.' });
+      console.warn("Failed to request KYC:", err);
+      showToast('Failed to request Video KYC — backend unreachable', 'error');
+      setActionStatus({ type: 'KYC', status: 'error', message: 'KYC request failed.', details: 'Backend offline or unreachable. Check infrastructure logs.' });
     } finally {
       setIsKYCLoading(false);
       setTimeout(() => setActionStatus({ type: null, status: 'idle', message: '', details: '' }), 5000);
@@ -381,7 +384,14 @@ export default function AccountTimeline({
     setIsGeneratingEvidence(true);
     setActionStatus({ type: 'EVIDENCE', status: 'loading', message: 'Generating AutoSTR Evidence Package...', details: 'Compiling transaction lineage (SC Writ 03/2025) and formatting FIU XML (PMLA Sec 12)...' });
     try {
-      const caseId = `CASE-${Date.now()}`;
+      const caseId = (typeof crypto !== 'undefined' && crypto.randomUUID)
+        ? crypto.randomUUID()
+        : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+            const r = Math.random() * 16 | 0;
+            const v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+          });
+
       const [accountResponse, timelineRes, graph] = await Promise.all([
         api.getAccount(accountId).catch(() => account),
         api.getScoreTimeline(accountId, 50).catch(() => []),
@@ -467,21 +477,15 @@ export default function AccountTimeline({
       const cbiUrl = result?.cbi_pdf_download_path;
       
       setActionStatus({ type: 'EVIDENCE', status: 'success', message: 'Evidence packages generated successfully!', details: 'Downloading signed CBI Evidence PDF and FIU XML...' });
+      showToast('Evidence packages generated successfully! ✓', 'success');
       
       if (cbiUrl) window.open(cbiUrl, '_blank');
       if (fiuUrl) window.open(fiuUrl, '_blank');
       
     } catch (err) {
-      console.warn("Failed to generate real AutoSTR package, downloading simulated copy:", err);
-      setActionStatus({ type: 'EVIDENCE', status: 'success', message: 'Evidence packages generated (Simulated Fallback).', details: 'Downloading CBI Evidence PDF package...' });
-      const blob = new Blob([JSON.stringify({ simulated: true, account_id: accountId, timestamp: new Date() }, null, 2)], { type: 'application/pdf' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `CBI-EVIDENCE-${accountId}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      console.error("Failed to generate real AutoSTR package:", err);
+      showToast('Evidence generation failed — backend unreachable', 'error');
+      setActionStatus({ type: 'EVIDENCE', status: 'error', message: 'Evidence generation failed.', details: 'Backend offline or unreachable. Check server connectivity.' });
     } finally {
       setIsGeneratingEvidence(false);
       setTimeout(() => setActionStatus({ type: null, status: 'idle', message: '', details: '' }), 5000);

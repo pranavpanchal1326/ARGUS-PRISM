@@ -42,6 +42,81 @@ async def generate_autostr_packages(
     try:
         # 2. Call Orchestrator
         result: AutoSTRResult = generate_all_packages(report_input)
+
+        # 2b. Persist generated packages to the database
+        packages_to_save = []
+        import uuid as _uuid
+        try:
+            case_uuid = _uuid.UUID(case_id)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid case_id UUID format")
+        account_id = report_input.accounts[0].account_id
+        warmth_score = report_input.accounts[0].warmth_score
+
+        if result.fiu_xml_path:
+            packages_to_save.append(AutoSTRPackage(
+                case_id=case_uuid,
+                account_id=account_id,
+                package_type="FIU_XML",
+                file_path=result.fiu_xml_path,
+                file_hash_sha256=result.fiu_xml_hash,
+                file_size_bytes=len(result.fiu_xml_string.encode('utf-8')),
+                generation_duration_seconds=result.fiu_generation_time_ms / 1000.0,
+                warmth_score_at_generation=warmth_score,
+                is_submitted=False,
+            ))
+
+        if result.cbi_pdf_path:
+            import os
+            try:
+                pdf_sz = os.path.getsize(result.cbi_pdf_path)
+            except Exception:
+                pdf_sz = 15000
+            packages_to_save.append(AutoSTRPackage(
+                case_id=case_uuid,
+                account_id=account_id,
+                package_type="CBI_PDF",
+                file_path=result.cbi_pdf_path,
+                file_hash_sha256=result.cbi_pdf_hash,
+                file_size_bytes=pdf_sz,
+                generation_duration_seconds=result.cbi_generation_time_ms / 1000.0,
+                warmth_score_at_generation=warmth_score,
+                is_submitted=False,
+            ))
+
+        if result.rbi_report_dict:
+            import json
+            rbi_str = json.dumps(result.rbi_report_dict)
+            packages_to_save.append(AutoSTRPackage(
+                case_id=case_uuid,
+                account_id=account_id,
+                package_type="RBI_JSON",
+                file_path="memory://rbi_report",
+                file_hash_sha256=result.rbi_report_hash,
+                file_size_bytes=len(rbi_str.encode('utf-8')),
+                generation_duration_seconds=result.rbi_generation_time_ms / 1000.0,
+                warmth_score_at_generation=warmth_score,
+                is_submitted=False,
+            ))
+
+        for pkg in packages_to_save:
+            chk_row = await db.execute(
+                select(AutoSTRPackage)
+                .where(
+                    AutoSTRPackage.case_id == case_uuid,
+                    AutoSTRPackage.package_type == pkg.package_type
+                ).limit(1)
+            )
+            chk_pkg = chk_row.scalar_one_or_none()
+            if not chk_pkg:
+                db.add(pkg)
+            else:
+                chk_pkg.file_path = pkg.file_path
+                chk_pkg.file_hash_sha256 = pkg.file_hash_sha256
+                chk_pkg.file_size_bytes = pkg.file_size_bytes
+                chk_pkg.generation_duration_seconds = pkg.generation_duration_seconds
+                chk_pkg.warmth_score_at_generation = pkg.warmth_score_at_generation
+                chk_pkg.is_submitted = False
         
         # 3. Write Audit Log
         try:
@@ -137,9 +212,14 @@ async def download_evidence_package(
         except ValueError:
             raise HTTPException(status_code=400, detail="Invalid case_id format")
 
+        p_type = package_type.upper()
+        if p_type == "FIU": p_type = "FIU_XML"
+        elif p_type == "CBI": p_type = "CBI_PDF"
+        elif p_type == "RBI": p_type = "RBI_JSON"
+
         stmt = select(AutoSTRPackage).where(
             AutoSTRPackage.case_id == case_uuid,
-            AutoSTRPackage.package_type == package_type.upper()
+            AutoSTRPackage.package_type == p_type
         )
         result = await db.execute(stmt)
         package = result.scalar_one_or_none()

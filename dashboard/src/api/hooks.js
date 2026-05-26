@@ -32,7 +32,7 @@ function riskFromScore(score, fallback = 'CRITICAL') {
 }
 
 function accountToAlert(account, index = 0) {
-  const score = Number(account.current_warmth_score ?? account.warmth_score ?? 0);
+  const score = Math.round(Number(account.current_warmth_score ?? account.warmth_score ?? 0) * 10) / 10;
   const risk = riskFromScore(score, account.warmth_risk_level ?? account.risk_level);
   return {
     alert_id: `ALERT-${account.account_id ?? index}`,
@@ -51,7 +51,7 @@ function accountToAlert(account, index = 0) {
 function normalizeTimeline(raw) {
   const rows = Array.isArray(raw) ? raw : [];
   const points = rows.map((point, index) => {
-    const score = Number(point.score ?? point.warmth_score ?? 0);
+    const score = Math.round(Number(point.score ?? point.warmth_score ?? 0) * 10) / 10;
     return {
       hour: point.hour ?? index,
       timestamp: point.timestamp ?? point.computed_at,
@@ -84,13 +84,13 @@ function normalizeTimeline(raw) {
 function timelinePointToScore(point, accountId) {
   const signals = point?.signals ?? {};
   const topSignals = point?.top_signals ?? Object.entries(signals)
-    .map(([signal, impact]) => ({ signal, impact: Number(impact ?? 0) }))
+    .map(([signal, impact]) => ({ signal, impact: Math.round(Number(impact ?? 0) * 10) / 10 }))
     .sort((a, b) => Math.abs(b.impact) - Math.abs(a.impact));
 
   return {
     account_id: accountId,
-    warmth_score: Number(point?.score ?? 0),
-    risk_level: point?.risk_level ?? riskFromScore(Number(point?.score ?? 0)),
+    warmth_score: Math.round(Number(point?.score ?? 0) * 10) / 10,
+    risk_level: point?.risk_level ?? riskFromScore(Math.round(Number(point?.score ?? 0) * 10) / 10),
     signals: Object.entries(signals).map(([signal_name, impact]) => ({
       signal_name,
       score: Number(impact ?? 0),
@@ -99,7 +99,7 @@ function timelinePointToScore(point, accountId) {
     })),
     shap_top3: topSignals.slice(0, 3).map(item => ({
       signal: item.signal,
-      impact: Number(item.impact ?? 0),
+      impact: Math.round(Number(item.impact ?? 0) * 10) / 10,
     })),
     timestamp: point?.timestamp ?? new Date().toISOString(),
   };
@@ -293,7 +293,7 @@ export function useAlerts({ severity = null, acknowledged = false } = {}) {
           account_name: a.account_name || `Account ${a.account_id}`,
           alert_type: a.alert_type,
           severity: a.severity,
-          score: Number(a.warmth_score_at_alert ?? 0),
+          score: Math.round(Number(a.warmth_score_at_alert ?? 0) * 10) / 10,
           top_signal: a.alert_message || a.primary_signal || 'WarmthScore threshold crossed',
           created_at: a.created_at,
           acknowledged: a.is_acknowledged,
@@ -332,7 +332,7 @@ export function useCases({ status = 'OPEN' } = {}) {
         account_id: account.account_id,
         account_name: accountName(account),
         status,
-        risk_score: Number(account.current_warmth_score ?? 0),
+        risk_score: Math.round(Number(account.current_warmth_score ?? 0) * 10) / 10,
         created_at: account.updated_at || account.account_opened_at,
         assigned_to: 'MLRO',
         notes: '',

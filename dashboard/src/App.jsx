@@ -4,9 +4,7 @@ import { LazyMotion, domAnimation } from 'framer-motion';
 import GrainFilter from './design/GrainFilter';
 import { PaperGrain } from './design/PaperGrain';
 import { useTheme } from './hooks/useTheme';
-import { useDemoMode } from './demo/useDemoMode';
-import { DemoContext } from './demo/DemoContext';
-import DemoBanner from './demo/DemoBanner';
+import { ToastProvider } from './components/Toast/ToastContext';
 import Shell from './shell/Shell';
 
 /* ── Lazy views ─────────────────────────────────────────── */
@@ -35,17 +33,14 @@ function ViewLoadingSkeleton() {
 const PerfMonitor = React.lazy(() => import('./dev/PerfMonitor'));
 
 export default function App() {
-  const { theme }   = useTheme();
-  const demoState   = useDemoMode();
+  const { theme } = useTheme();
 
   return (
     <LazyMotion features={domAnimation} strict={false}>
-      <DemoContext.Provider value={demoState}>
+      <ToastProvider>
         <div data-theme={theme}>
           <GrainFilter />
           <PaperGrain />
-          {/* DemoBanner sits above everything — fixed, z-index 9999 */}
-          <DemoBanner />
           <Router>
             <Suspense fallback={<ViewLoadingSkeleton />}>
               <Routes>
@@ -59,7 +54,7 @@ export default function App() {
             <Suspense fallback={null}><PerfMonitor /></Suspense>
           )}
         </div>
-      </DemoContext.Provider>
+      </ToastProvider>
     </LazyMotion>
   );
 }
