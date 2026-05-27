@@ -214,15 +214,15 @@ export default function useAutoSTR() {
   useEffect(()=>()=>{ tids.current.forEach(clearTimeout); },[]);
 
   const generate = useCallback(async (targetAccountId, targetCaseId) => {
-    const caseId = targetCaseId || (
-      (typeof crypto !== 'undefined' && crypto.randomUUID)
-        ? crypto.randomUUID()
-        : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    // Always generate a real UUID — backend requires valid UUID format.
+    // targetCaseId from AutoSTRPanel is a fake display ID like "CASE-9912"
+    const caseId = (typeof crypto !== 'undefined' && crypto.randomUUID)
+      ? crypto.randomUUID()
+      : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
             const r = Math.random() * 16 | 0;
             const v = c === 'x' ? r : (r & 0x3 | 0x8);
             return v.toString(16);
-          })
-    );
+          });
     tids.current.forEach(clearTimeout);
     tids.current=[];
     t0.current=Date.now();
