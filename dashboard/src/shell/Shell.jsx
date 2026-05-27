@@ -3,7 +3,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import NavBar              from './NavBar';
 import Sidebar             from './Sidebar';
 import { ViewProvider, useView } from './ViewContext';
-import { useDemoContext } from '../demo/DemoContext';
 import './ViewTransition.css';
 
 /* ── View imports ─────────────────────────────────────────── */
@@ -41,13 +40,13 @@ const viewVariants = {
 };
 
 /* ── View renderer ───────────────────────────────────────── */
-function renderView(view, focusedAccountId) {
+function renderView(view) {
   switch (view) {
     case 'ALERT_QUEUE':      return <AlertQueueView />;
-    case 'ACCOUNT_TIMELINE': return <AccountTimelineView accountId={focusedAccountId} />;
-    case 'FLOW_GRAPH':       return <FlowGraphView accountId={focusedAccountId} />;
+    case 'ACCOUNT_TIMELINE': return <AccountTimelineView />;
+    case 'FLOW_GRAPH':       return <FlowGraphView />;
     case 'RECRUITER_MAP':    return <RecruiterMapView />;
-    case 'AUTOSTR':          return <AutoSTRView accountId={focusedAccountId} />;
+    case 'AUTOSTR':          return <AutoSTRView />;
     case 'HEALTH':           return <HealthView />;
     default:                 return <AlertQueueView />;
   }
@@ -59,7 +58,6 @@ function renderView(view, focusedAccountId) {
    ───────────────────────────────────────────────────────── */
 function ShellContent() {
   const { currentView, direction, navigateToView } = useView();
-  const { focusedAccountId } = useDemoContext();
 
   return (
     <div style={{
@@ -105,7 +103,7 @@ function ShellContent() {
                 exit="exit"
                 transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
               >
-                {renderView(currentView, focusedAccountId)}
+                {renderView(currentView)}
               </motion.div>
             </AnimatePresence>
           </div>

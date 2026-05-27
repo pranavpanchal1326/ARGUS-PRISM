@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSpring, animated } from '@react-spring/web';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ReferenceLine, ResponsiveContainer } from 'recharts';
-import { useAccount, useWarmthScore, useWarmthTimeline, useAccounts } from '../../api/hooks';
+import { useAccount, useWarmthScore, useWarmthTimeline, useAlerts } from '../../api/hooks';
 import { SkeletonScore, SkeletonText } from '../../components/Skeleton';
 import { useWindowSize } from '../../hooks/useWindowSize';
-import { useDemoContext } from '../../demo/DemoContext';
+
 import { api } from '../../api/client';
 import { useToast } from '../../components/Toast/ToastContext';
 
@@ -234,22 +234,25 @@ export default function AccountTimeline({
   onMarkFalsePositive = null,
   onRequestKYC        = null,
 }) {
-  let demoCtx = null;
-  try {
-    demoCtx = useDemoContext();
-  } catch (e) {
-    // Standalone fallback
-  }
-  const accountId = propAccountId || demoCtx?.focusedAccountId || 'UBI-2026-DEMO-001';
-  const setAccountId = demoCtx?.setFocusedAccountId;
+  // Own local state for account selection (DemoContext no longer manages this)
+  const [selectedAccountId, setSelectedAccountId] = useState(propAccountId || null);
+  const accountId = selectedAccountId || propAccountId || 'UBI-2026-DEMO-001';
   const { showToast } = useToast();
 
-  const { data: accountsList } = useAccounts();
+  // Use alerts for dropdown so scores match Alert Queue view
+  const { data: alertsList } = useAlerts({ acknowledged: false });
   const { data: accountData } = useAccount(accountId);
   const { data: scoreData,    loading: scoreLoading }    = useWarmthScore(accountId);
   const { data: timelineData, loading: timelineLoading } = useWarmthTimeline(accountId);
   const { width } = useWindowSize();
   const isMobile = width < 768;
+
+  // Auto-select the first alert account if none selected yet
+  useEffect(() => {
+    if (!selectedAccountId && alertsList && alertsList.length > 0) {
+      setSelectedAccountId(alertsList[0].account_id);
+    }
+  }, [alertsList, selectedAccountId]);
 
   // Local overrides for UI synchronisation
   const [localStatus, setLocalStatus] = useState(null);
@@ -572,7 +575,7 @@ export default function AccountTimeline({
               <div style={{ ...LABEL, marginBottom: '6px' }}>Select Account Profile</div>
               <select
                 value={accountId}
-                onChange={(e) => setAccountId?.(e.target.value)}
+                onChange={(e) => setSelectedAccountId(e.target.value)}
                 style={{
                   width: '100%',
                   background: 'var(--bg-subtle)',
@@ -589,14 +592,13 @@ export default function AccountTimeline({
                 onFocus={(e) => e.target.style.borderColor = 'var(--accent)'}
                 onBlur={(e) => e.target.style.borderColor = 'var(--border-default)'}
               >
-                <option value="UBI-2026-DEMO-001">John Doe IMMINENT (UBI-2026-DEMO-001)</option>
-                {accountsList && accountsList.map(acc => (
-                  acc.account_id !== 'UBI-2026-DEMO-001' && (
-                    <option key={acc.account_id} value={acc.account_id}>
-                      {acc.account_holder_name || acc.name || acc.account_id} ({acc.account_id}) - Score: {Math.round(acc.current_warmth_score ?? acc.warmth_score ?? 0)}
-                    </option>
-                  )
-                ))}
+                {alertsList && alertsList.length > 0 ? alertsList.map(alert => (
+                  <option key={alert.account_id} value={alert.account_id}>
+                    {alert.account_name} ({alert.account_id}) — Score: {alert.score}
+                  </option>
+                )) : (
+                  <option value="" disabled>Loading accounts...</option>
+                )}
               </select>
             </div>
             <div style={{ height: '1px', background: 'var(--border-default)', marginBottom: '16px' }} />

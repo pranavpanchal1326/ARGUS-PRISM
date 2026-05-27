@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../hooks/useTheme';
 import { ThemeToggle } from '../components';
 import { useView } from './ViewContext';
-import { useDemoContext } from '../demo/DemoContext';
 import { api } from '../api/client';
 
 const SERVICES = ['postgres', 'neo4j', 'redis', 'kafka', 'ml_model'];
@@ -124,17 +123,15 @@ export default function NavBar() {
   const { activeView }     = useView();
   const { health, error }  = useServiceHealth();
   const clock              = useISTClock();
-  const { isDemoMode }     = useDemoContext();
   const navigate           = useNavigate();
   const [logoHovered, setLogoHovered] = useState(false);
 
   const loading = health === null && !error;
-  const topOffset = isDemoMode ? 36 : 0;
 
   return (
     <header style={{
       position:     'fixed',
-      top:          topOffset,
+      top:          0,
       left:         0,
       right:        0,
       minHeight:    '56px',
