@@ -68,11 +68,16 @@ export default function PackageCard({ pkg, index, isGlobalIdle }) {
 
   function download(){
     if(!pkg.downloadUrl) return;
-    const ext={fiu:'xml',cbi:'pdf',rbi:'json'}[pkg.id]||'txt';
-    const a=document.createElement('a');
-    a.href=pkg.downloadUrl;
-    a.download=`PRISM-${pkg.id.toUpperCase()}-${Date.now()}.${ext}`;
-    a.click();
+    // Backend URLs should be opened directly; blob URLs use anchor trick
+    if(pkg.downloadUrl.startsWith('blob:')) {
+      const ext={fiu:'xml',cbi:'pdf',rbi:'json'}[pkg.id]||'txt';
+      const a=document.createElement('a');
+      a.href=pkg.downloadUrl;
+      a.download=`PRISM-${pkg.id.toUpperCase()}-${Date.now()}.${ext}`;
+      a.click();
+    } else {
+      window.open(pkg.downloadUrl, '_blank');
+    }
   }
 
   const pct=Math.round(pkg.progress);

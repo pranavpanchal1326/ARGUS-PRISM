@@ -172,7 +172,19 @@ function resultToPackage(pkgId, caseId, result) {
     url = result.fiu_xml_download_path;
   } else if (pkgId === 'cbi' && result?.cbi_pdf_download_path) {
     url = result.cbi_pdf_download_path;
+  } else if (pkgId === 'rbi') {
+    // Construct RBI download URL from the same base as FIU/CBI
+    const baseUrl = result?.fiu_xml_download_path || result?.cbi_pdf_download_path || '';
+    const apiBase = baseUrl.replace(/\/api\/autostr\/download\/.*/, '');
+    if (apiBase) {
+      url = `${apiBase}/api/autostr/download/RBI/${caseId}`;
+    } else {
+      // Fallback: create downloadable JSON blob
+      const content = JSON.stringify({ case_id: caseId, package: key, result: packageResult }, null, 2);
+      url = URL.createObjectURL(new Blob([content], { type: 'application/json' }));
+    }
   } else {
+    // Fallback for when backend doesn't return download paths
     const type = pkgId === 'cbi' ? 'application/pdf' : pkgId === 'fiu' ? 'application/xml' : 'application/json';
     const content = JSON.stringify({ case_id: caseId, package: key, result: packageResult }, null, 2);
     url = URL.createObjectURL(new Blob([content], { type }));
