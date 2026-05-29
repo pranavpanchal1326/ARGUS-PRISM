@@ -11,7 +11,13 @@ from services.api.main import app
 from services.api.dependencies import get_db
 
 # Shared mock for DB verification
-db_mock = AsyncMock()
+db_mock = MagicMock()
+db_mock.execute = AsyncMock()
+db_mock.commit = AsyncMock()
+
+mock_result = MagicMock()
+mock_result.scalar_one_or_none.return_value = None
+db_mock.execute.return_value = mock_result
 
 async def override_get_db():
     yield db_mock
@@ -26,7 +32,7 @@ client.headers.update({
 @pytest.fixture
 def valid_payload():
     return {
-        "case_id": "UBI-API-TEST-001",
+        "case_id": "a7b2756d-74d1-4ad9-bf9d-2b7be5154388",
         "reporting_entity_code": "UBI0001",
         "principal_officer_name": "Pranav",
         "principal_officer_designation": "CCO",
@@ -77,10 +83,10 @@ def valid_payload():
     }
 
 def test_generate_returns_200(valid_payload):
-    response = client.post("/api/autostr/generate/UBI-API-TEST-001", json=valid_payload)
+    response = client.post("/api/autostr/generate/a7b2756d-74d1-4ad9-bf9d-2b7be5154388", json=valid_payload)
     assert response.status_code == 200
     data = response.json()
-    assert data["case_id"] == "UBI-API-TEST-001"
+    assert data["case_id"] == "a7b2756d-74d1-4ad9-bf9d-2b7be5154388"
     assert data["status"] == "COMPLETE"
 
 def test_case_id_mismatch_returns_400(valid_payload):
@@ -88,7 +94,7 @@ def test_case_id_mismatch_returns_400(valid_payload):
     assert response.status_code == 400
 
 def test_all_legal_flags_true_on_success(valid_payload):
-    response = client.post("/api/autostr/generate/UBI-API-TEST-001", json=valid_payload)
+    response = client.post("/api/autostr/generate/a7b2756d-74d1-4ad9-bf9d-2b7be5154388", json=valid_payload)
     data = response.json()
     assert data["pmla_s12_fulfilled"] == True
     assert data["sc_writ_03_2025_fulfilled"] == True
@@ -97,7 +103,7 @@ def test_all_legal_flags_true_on_success(valid_payload):
 
 def test_audit_log_written(valid_payload):
     db_mock.reset_mock()
-    client.post("/api/autostr/generate/UBI-API-TEST-001", json=valid_payload)
+    client.post("/api/autostr/generate/a7b2756d-74d1-4ad9-bf9d-2b7be5154388", json=valid_payload)
     # Check if execute was called with the correct action
     assert db_mock.execute.called
     args, kwargs = db_mock.execute.call_args
@@ -105,13 +111,13 @@ def test_audit_log_written(valid_payload):
     params = args[1]
     assert "INSERT INTO audit_log" in query
     assert params["action"] == "STR_GENERATED"
-    assert params["target_id"] == "UBI-API-TEST-001"
+    assert params["target_id"] == "a7b2756d-74d1-4ad9-bf9d-2b7be5154388"
 
 def test_generation_time_under_60_seconds(valid_payload):
     # Add more transactions to payload
     for i in range(19):
         valid_payload["transactions"].append(valid_payload["transactions"][0])
     
-    response = client.post("/api/autostr/generate/UBI-API-TEST-001", json=valid_payload)
+    response = client.post("/api/autostr/generate/a7b2756d-74d1-4ad9-bf9d-2b7be5154388", json=valid_payload)
     data = response.json()
     assert data["total_generation_time_seconds"] < 60
