@@ -1,0 +1,9 @@
+name: recruiter_fanout
+description: >-
+  A coordinator account fans out small "test" payments to 23 freshly recruited mules,
+  who then round-trip larger inflows straight back out. Drives mules into HOT/CRITICAL
+  and surfaces the recruiter as the hub. A 48-hour campaign compressed ~2880x.
+accounts: 23
+seed_funds: 4200000
+compression: 2880
+duration_hours: 48
