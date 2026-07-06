@@ -1,6 +1,0 @@
-Postgres unavailable ((psycopg.errors.ConnectionTimeout) connection timeout expired
-(Background on this error at: https://sqlalche.me/e/20/e3q8)); falling back to local SQLite.
-MULE scores: [75.8, 73.2, 72.6, 70.5, 70.4, 70.0, 69.6, 68.6, 66.2, 65.2, 64.7, 64.2, 62.5, 60.8, 60.6, 60.6, 59.1, 58.7, 57.5, 56.1, 55.6, 52.0, 51.1, 23.6]
-MULE bands: ['CLEAN', 'HOT', 'WARMING']
-top mule shap: [(75.79, [{'code': 'S2', 'label': 'round-trip 94%', 'contribution': 26.12}, {'code': 'S1', 'label': '13 txns / 48h', 'contribution': 16.67}, {'code': 'S3', 'label': '11 sub-threshold transfers', 'contribution': 14.0}, {'code': 'S5', 'label': '10.8x retail profile', 'contribution': 12.0}, {'code': 'S6', 'label': '2 SIM swaps / 72h', 'contribution': 7.0}])]
-legit max: 4.6 legit avg: 0.8
