@@ -1,0 +1,601 @@
+openapi: 3.1.0
+info:
+  title: ARGUS-PRISM API
+  version: 3.0.0
+  description: |
+    Pre-crime Intelligence System for Mule Detection — the single source of truth.
+
+    **Conventions (enforced by CI, no exceptions):**
+    - Success responses are enveloped: `{ "data": ..., "meta": {...} }`.
+    - List responses put pagination in `meta`: `{ "cursor": ..., "total": ... }`.
+    - Errors are RFC-7807 `application/problem+json`.
+    - No response consumed by the UI ever contains key material (Law 3).
+  contact:
+    name: ARGUS-PRISM Engineering
+  license:
+    name: Proprietary
+
+servers:
+  - url: http://localhost:8000
+    description: Local development
+  - url: /
+    description: Same-origin (behind reverse proxy)
+
+tags:
+  - name: Health
+  - name: Auth
+  - name: Alerts
+  - name: Stream
+  - name: Metrics
+  - name: Simulator
+
+paths:
+  # ─────────────────────────────── Health ───────────────────────────────
+  /health:
+    get:
+      tags: [Health]
+      summary: Liveness + dependency status
+      operationId: getHealth
+      security: []
+      responses:
+        "200":
+          description: Service is up; reports each dependency.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/HealthEnvelope" }
+
+  # ─────────────────────────────── Auth ─────────────────────────────────
+  /api/v1/auth/login:
+    post:
+      tags: [Auth]
+      summary: Email + password → MFA challenge
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoginRequest" }
+      responses:
+        "200":
+          description: Credentials valid; MFA required.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/MfaChallenge" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "429": { $ref: "#/components/responses/Problem" }
+
+  /api/v1/auth/oauth/google:
+    post:
+      tags: [Auth]
+      summary: Google OAuth code exchange → MFA challenge
+      operationId: oauthGoogle
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              properties:
+                code: { type: string }
+                redirect_uri: { type: string, format: uri }
+      responses:
+        "200":
+          description: OAuth valid; MFA required.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/MfaChallenge" }
+        "401": { $ref: "#/components/responses/Problem" }
+
+  /api/v1/auth/mfa/enroll:
+    post:
+      tags: [Auth]
+      summary: Begin TOTP enrolment → otpauth provisioning URI (rendered as QR client-side)
+      operationId: mfaEnroll
+      description: |
+        Returns the `otpauth://` URI exactly once. The secret is never logged and
+        never re-displayed. Regenerating produces a **different** secret every time.
+      responses:
+        "200":
+          description: Provisioning URI issued.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/MfaEnrolment" }
+        "401": { $ref: "#/components/responses/Problem" }
+
+  /api/v1/auth/mfa/verify:
+    post:
+      tags: [Auth]
+      summary: TOTP code + mfa_token → access + refresh JWT
+      operationId: mfaVerify
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/MfaVerifyRequest" }
+      responses:
+        "200":
+          description: MFA verified; tokens issued.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/TokenPair" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "429": { $ref: "#/components/responses/Problem" }
+
+  /api/v1/auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Rotate refresh token
+      operationId: refresh
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refresh_token]
+              properties:
+                refresh_token: { type: string }
+      responses:
+        "200":
+          description: New token pair (old refresh token revoked).
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/TokenPair" }
+        "401": { $ref: "#/components/responses/Problem" }
+
+  /api/v1/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Revoke the current session
+      operationId: logout
+      responses:
+        "204": { description: Session revoked. }
+
+  /api/v1/auth/me:
+    get:
+      tags: [Auth]
+      summary: Current profile, role, and active sessions
+      operationId: getMe
+      responses:
+        "200":
+          description: Profile.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/Me" }
+        "401": { $ref: "#/components/responses/Problem" }
+
+  /api/v1/auth/sessions/{id}:
+    delete:
+      tags: [Auth]
+      summary: Revoke a specific session
+      operationId: revokeSession
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "204": { description: Revoked. }
+        "404": { $ref: "#/components/responses/Problem" }
+
+  # ─────────────────────────────── Alerts ───────────────────────────────
+  /api/v1/alerts:
+    get:
+      tags: [Alerts]
+      summary: Cursor-paginated, server-sorted alert queue
+      operationId: listAlerts
+      parameters:
+        - { name: status, in: query, schema: { $ref: "#/components/schemas/AlertStatus" } }
+        - { name: severity, in: query, schema: { $ref: "#/components/schemas/Severity" } }
+        - { name: sort, in: query, schema: { type: string, enum: [score_desc, score_asc, newest, sla_soonest], default: sla_soonest } }
+        - { name: cursor, in: query, schema: { type: string } }
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 25 } }
+      responses:
+        "200":
+          description: A page of alerts.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AlertListEnvelope" }
+        "401": { $ref: "#/components/responses/Problem" }
+
+  /api/v1/alerts/{id}:
+    get:
+      tags: [Alerts]
+      summary: One alert
+      operationId: getAlert
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Alert detail.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/Alert" }
+        "404": { $ref: "#/components/responses/Problem" }
+    patch:
+      tags: [Alerts]
+      summary: Acknowledge / assign / resolve / mark false-positive
+      operationId: updateAlert
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AlertUpdate" }
+      responses:
+        "200":
+          description: Updated alert.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/Alert" }
+        "403": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+
+  /api/v1/alerts/{id}/escalate:
+    post:
+      tags: [Alerts]
+      summary: Escalate an alert to MLRO
+      operationId: escalateAlert
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                note: { type: string }
+      responses:
+        "200":
+          description: Escalated alert.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/Alert" }
+        "403": { $ref: "#/components/responses/Problem" }
+
+  # ─────────────────────────────── Stream / Metrics ─────────────────────
+  /api/v1/feed/recent:
+    get:
+      tags: [Stream]
+      summary: Replay buffer for page load / WS backfill
+      operationId: getRecentFeed
+      parameters:
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 500, default: 100 } }
+        - { name: after_id, in: query, schema: { type: integer }, description: "Return events with id greater than this (backfill)." }
+      responses:
+        "200":
+          description: Recent events (monotonic ids).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/EventListEnvelope" }
+
+  /api/v1/metrics/pulse:
+    get:
+      tags: [Metrics]
+      summary: Rolling operational KPIs
+      operationId: getPulse
+      responses:
+        "200":
+          description: Live KPIs.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/Pulse" }
+
+  /api/v1/stream:
+    get:
+      tags: [Stream]
+      summary: "WebSocket: multiplexed event stream (documented here for the contract)"
+      operationId: stream
+      description: |
+        Upgrade to WebSocket. Client subscribes to channels
+        (`transactions`, `alerts`, `scores`, `metrics`). Server pushes
+        `Event` objects with monotonic ids; gaps are backfilled via
+        `/feed/recent?after_id=`.
+      responses:
+        "101": { description: Switching Protocols (WebSocket). }
+
+  # ─────────────────────────────── Simulator (SYS_ADMIN) ────────────────
+  /api/v1/sim/scenario:
+    post:
+      tags: [Simulator]
+      summary: Load / start / pause a scenario (SYS_ADMIN only)
+      operationId: controlScenario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ScenarioControl" }
+      responses:
+        "200":
+          description: Simulator status after the command.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/SimStatus" }
+        "403": { $ref: "#/components/responses/Problem" }
+
+  /api/v1/sim/status:
+    get:
+      tags: [Simulator]
+      summary: Current simulator status
+      operationId: getSimStatus
+      responses:
+        "200":
+          description: Simulator status.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/SimStatus" }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    Problem:
+      description: RFC-7807 problem+json error.
+      content:
+        application/problem+json:
+          schema: { $ref: "#/components/schemas/Problem" }
+
+  schemas:
+    # ── Envelope + error ──────────────────────────────────────
+    Meta:
+      type: object
+      properties:
+        cursor: { type: [string, "null"], description: "Opaque cursor for the next page; null when exhausted." }
+        total: { type: [integer, "null"] }
+
+    Problem:
+      type: object
+      required: [type, title, status]
+      properties:
+        type: { type: string, format: uri, default: "about:blank" }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+        instance: { type: string }
+        code: { type: string, description: "Machine-readable error code, e.g. mfa_required, rate_limited." }
+
+    # ── Health ────────────────────────────────────────────────
+    HealthEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          required: [status, version, dependencies]
+          properties:
+            status: { type: string, enum: [ok, degraded] }
+            version: { type: string }
+            dependencies:
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  status: { type: string, enum: [up, down, disabled] }
+                  detail: { type: string }
+
+    # ── Auth ──────────────────────────────────────────────────
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, format: password, minLength: 1 }
+
+    MfaChallenge:
+      type: object
+      required: [mfa_required, mfa_token, mfa_enrolled]
+      properties:
+        mfa_required: { type: boolean, const: true }
+        mfa_token: { type: string, description: "Short-lived token to bind the MFA step." }
+        mfa_enrolled: { type: boolean, description: "False on first login → client must enrol first." }
+
+    MfaEnrolment:
+      type: object
+      required: [otpauth_uri]
+      properties:
+        otpauth_uri:
+          type: string
+          description: "otpauth:// provisioning URI. Appears in exactly this one response; never re-displayed."
+
+    MfaVerifyRequest:
+      type: object
+      required: [mfa_token, code]
+      properties:
+        mfa_token: { type: string }
+        code: { type: string, pattern: "^[0-9]{6}$" }
+
+    TokenPair:
+      type: object
+      required: [access_token, refresh_token, token_type, expires_in]
+      properties:
+        access_token: { type: string }
+        refresh_token: { type: string }
+        token_type: { type: string, const: bearer }
+        expires_in: { type: integer, description: "Access token TTL in seconds." }
+
+    Role:
+      type: string
+      enum: [MLRO, FRAUD_ANALYST, COMPLIANCE_AUDITOR, SYS_ADMIN]
+
+    Me:
+      type: object
+      required: [id, email, name, role, mfa_active, sessions]
+      properties:
+        id: { type: string }
+        email: { type: string, format: email }
+        name: { type: string }
+        role: { $ref: "#/components/schemas/Role" }
+        mfa_active: { type: boolean }
+        mfa_active_since: { type: [string, "null"], format: date-time }
+        sessions:
+          type: array
+          items: { $ref: "#/components/schemas/Session" }
+
+    Session:
+      type: object
+      required: [id, device, ip, created_at, current]
+      properties:
+        id: { type: string }
+        device: { type: string }
+        ip: { type: string }
+        created_at: { type: string, format: date-time }
+        last_seen_at: { type: string, format: date-time }
+        current: { type: boolean }
+
+    # ── Alerts ────────────────────────────────────────────────
+    Severity: { type: string, enum: [CLEAN, WARMING, HOT, CRITICAL, IMMINENT] }
+    AlertStatus: { type: string, enum: [NEW, ACKNOWLEDGED, ASSIGNED, ESCALATED, RESOLVED, FALSE_POSITIVE] }
+
+    ShapSignal:
+      type: object
+      required: [code, label, contribution]
+      properties:
+        code: { type: string, example: S3 }
+        label: { type: string, example: "Round-trip ratio 0.94" }
+        contribution: { type: number, description: "Warmth points contributed." }
+
+    Alert:
+      type: object
+      required: [id, account_ref, warmth_score, severity, status, top_signals, first_signal_at, taint_linked]
+      properties:
+        id: { type: string }
+        account_ref: { type: string, description: "Masked account reference (PII-safe)." }
+        warmth_score: { type: number, minimum: 0, maximum: 100 }
+        severity: { $ref: "#/components/schemas/Severity" }
+        status: { $ref: "#/components/schemas/AlertStatus" }
+        top_signals:
+          type: array
+          maxItems: 2
+          items: { $ref: "#/components/schemas/ShapSignal" }
+        first_signal_at: { type: string, format: date-time }
+        sla_deadline: { type: [string, "null"], format: date-time, description: "STR filing deadline (PMLA §12) — the ticking clock." }
+        taint_linked: { type: boolean }
+        assignee: { type: [string, "null"] }
+        case_id: { type: [string, "null"] }
+
+    AlertListEnvelope:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items: { $ref: "#/components/schemas/Alert" }
+        meta: { $ref: "#/components/schemas/Meta" }
+
+    AlertUpdate:
+      type: object
+      properties:
+        action: { type: string, enum: [acknowledge, assign, resolve, mark_false_positive] }
+        assignee: { type: string }
+        note: { type: string }
+
+    # ── Stream / metrics ──────────────────────────────────────
+    Event:
+      type: object
+      required: [id, type, ts, payload]
+      properties:
+        id: { type: integer, description: "Monotonic event id." }
+        type:
+          type: string
+          enum: [transaction.posted, account.created, device.registered, kyc.updated, alert.raised, score.updated]
+        ts: { type: string, format: date-time }
+        payload: { type: object, additionalProperties: true }
+
+    EventListEnvelope:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items: { $ref: "#/components/schemas/Event" }
+        meta: { $ref: "#/components/schemas/Meta" }
+
+    Pulse:
+      type: object
+      required: [tx_per_sec, active_alerts, accounts_watched, avg_score, updated_at]
+      properties:
+        tx_per_sec: { type: number }
+        active_alerts: { type: integer }
+        accounts_watched: { type: integer }
+        avg_score: { type: number }
+        updated_at: { type: string, format: date-time }
+
+    # ── Simulator ─────────────────────────────────────────────
+    ScenarioControl:
+      type: object
+      required: [command]
+      properties:
+        command: { type: string, enum: [load, start, pause, reset] }
+        scenario: { type: string, description: "Campaign name (YAML file stem), required for load." }
+        seed: { type: integer }
+
+    SimStatus:
+      type: object
+      required: [state, scenario, seed, emitted, tx_per_sec]
+      properties:
+        state: { type: string, enum: [idle, loaded, running, paused] }
+        scenario: { type: [string, "null"] }
+        seed: { type: [integer, "null"] }
+        emitted: { type: integer, description: "Events emitted so far." }
+        tx_per_sec: { type: number }
+        available_scenarios:
+          type: array
+          items: { type: string }
+
+security:
+  - bearerAuth: []
