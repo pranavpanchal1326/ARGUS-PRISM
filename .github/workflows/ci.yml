@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── Backend: lint, type-check, tests ──────────────────────────
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Ruff
+        run: ruff check .
+      - name: Mypy
+        run: mypy app || true   # advisory until types are fully annotated
+      - name: Pytest
+        run: pytest -q
+
+  # ── Contract: the API is machine-checked against openapi.yaml ──
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e "./backend[dev]"
+      - name: Validate OpenAPI document
+        run: |
+          python - <<'PY'
+          import yaml, sys
+          spec = yaml.safe_load(open("contracts/openapi.yaml"))
+          assert spec["openapi"].startswith("3.1"), "must be OpenAPI 3.1"
+          assert spec["paths"], "no paths defined"
+          print(f"Contract OK: {len(spec['paths'])} paths")
+          PY
+      - name: Schemathesis (contract ↔ implementation)
+        working-directory: backend
+        run: |
+          uvicorn app.main:app --port 8000 &
+          for i in $(seq 1 30); do curl -sf http://localhost:8000/health && break; sleep 1; done
+          schemathesis run ../contracts/openapi.yaml --base-url http://localhost:8000 \
+            --hypothesis-max-examples 15 --checks all || true   # advisory in Phase 0
+
+  # ── Law 3 tripwire: no secret material may reach the UI bundle ─
+  secret-grep:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan for secrets on glass
+        run: |
+          echo "Scanning frontend bundle + source for key material..."
+          PATTERNS='BEGIN (RSA|EC|OPENSSH|PRIVATE) KEY|-----BEGIN|otpauth://|PRIVATE_KEY|SIGNING_KEY|HMAC_KEY'
+          # Only frontend build output + source; backend legitimately holds keys.
+          TARGETS="frontend dashboard ui-shell ui-live-feed ui-chatbot"
+          FOUND=0
+          for t in $TARGETS; do
+            [ -d "$t" ] || continue
+            if grep -rInE "$PATTERNS" "$t" --include='*.ts' --include='*.tsx' \
+                 --include='*.js' --include='*.json' 2>/dev/null; then
+              FOUND=1
+            fi
+          done
+          if [ "$FOUND" = "1" ]; then
+            echo "::error::Secret material found in UI — violates Law 3."
+            exit 1
+          fi
+          echo "No secrets on glass. ✓"

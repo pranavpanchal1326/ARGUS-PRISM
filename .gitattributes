@@ -1,0 +1,11 @@
+# Normalize line endings — LF in the repo, checked out native on Windows.
+* text=auto eol=lf
+
+# Binary assets never get EOL conversion.
+*.png binary
+*.jpg binary
+*.pdf binary
+*.parquet binary
+*.pt binary
+*.pkl binary
+*.ico binary

@@ -1,0 +1,45 @@
+# ─── Python ────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.log
+
+# ─── Node / Frontend (Pranav) ──────────────────────────────
+node_modules/
+dist/
+.vite/
+*.local
+
+# ─── Env & secrets ─────────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+!**/keys/.gitkeep
+secrets/
+
+# ─── Data & ML artifacts (large, generated) ────────────────
+*.parquet
+*.pt
+*.pkl
+*.joblib
+backend/data/*.db
+backend/data/*.sqlite3
+!ml-models/**/artifacts/.gitkeep
+
+# ─── OS / IDE ──────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
