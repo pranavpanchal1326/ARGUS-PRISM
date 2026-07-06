@@ -2,3 +2,7 @@
 
 Populated as domains land (auth, alerts, accounts, cases, audit …).
 """
+
+from app.models.user import Session, User
+
+__all__ = ["User", "Session"]
