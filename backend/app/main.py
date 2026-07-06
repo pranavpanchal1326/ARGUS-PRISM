@@ -19,7 +19,7 @@ from app.core.config import get_settings
 from app.core.logging import configure_logging
 from app.core.response import register_exception_handlers
 from app.db.session import active_backend, init_db
-from app.routers import auth, health
+from app.routers import alerts, auth, health, sim, stream
 
 settings = get_settings()
 configure_logging(settings.debug)
@@ -79,6 +79,9 @@ async def request_context(request: Request, call_next):
 # ── Routers ───────────────────────────────────────────────────
 app.include_router(health.router)
 app.include_router(auth.router)
+app.include_router(alerts.router)
+app.include_router(stream.router)
+app.include_router(sim.router)
 
 
 @app.get("/", include_in_schema=False)
