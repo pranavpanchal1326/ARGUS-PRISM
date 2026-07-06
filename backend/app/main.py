@@ -19,7 +19,7 @@ from app.core.config import get_settings
 from app.core.logging import configure_logging
 from app.core.response import register_exception_handlers
 from app.db.session import active_backend, init_db
-from app.routers import health
+from app.routers import auth, health
 
 settings = get_settings()
 configure_logging(settings.debug)
@@ -33,6 +33,9 @@ async def lifespan(app: FastAPI):
     )
     init_db()
     log.info("Database ready on backend: %s", active_backend())
+    from app.auth.seed import seed_users
+
+    seed_users()
     yield
     log.info("Shutting down %s", settings.app_name)
 
@@ -75,6 +78,7 @@ async def request_context(request: Request, call_next):
 
 # ── Routers ───────────────────────────────────────────────────
 app.include_router(health.router)
+app.include_router(auth.router)
 
 
 @app.get("/", include_in_schema=False)
