@@ -564,6 +564,232 @@ paths:
         "403": { $ref: "#/components/responses/Problem" }
         "404": { $ref: "#/components/responses/Problem" }
 
+  # ─────────────────────────────── Cases ────────────────────────────────
+  /api/v1/cases:
+    get:
+      tags: [Cases]
+      summary: List cases
+      operationId: listCases
+      parameters:
+        - { name: status, in: query, schema: { $ref: "#/components/schemas/CaseStatus" } }
+        - { name: cursor, in: query, schema: { type: string } }
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 25 } }
+      responses:
+        "200":
+          description: A page of cases.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CaseListEnvelope" }
+    post:
+      tags: [Cases]
+      summary: Open a case (optionally from an alert)
+      operationId: createCase
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CaseCreate" }
+      responses:
+        "201":
+          description: Created case.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/Case" }
+
+  /api/v1/cases/{id}:
+    get:
+      tags: [Cases]
+      summary: One case
+      operationId: getCase
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Case detail.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/Case" }
+        "404": { $ref: "#/components/responses/Problem" }
+    patch:
+      tags: [Cases]
+      summary: Transition a case (state change is audit-logged)
+      operationId: updateCase
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status: { $ref: "#/components/schemas/CaseStatus" }
+                title: { type: string }
+      responses:
+        "200":
+          description: Updated case.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/Case" }
+        "403": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+
+  /api/v1/cases/{id}/notes:
+    post:
+      tags: [Cases]
+      summary: Add an analyst note
+      operationId: addCaseNote
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [body]
+              properties:
+                body: { type: string }
+      responses:
+        "201":
+          description: Note added.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/CaseNote" }
+
+  /api/v1/cases/{id}/evidence:
+    post:
+      tags: [Cases]
+      summary: Attach a graph snapshot / timeline export
+      operationId: attachEvidence
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [kind, ref]
+              properties:
+                kind: { type: string, enum: [graph_snapshot, timeline_export, note] }
+                ref: { type: string }
+                label: { type: string }
+      responses:
+        "200":
+          description: Updated case.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/Case" }
+
+  /api/v1/cases/{id}/activity:
+    get:
+      tags: [Cases]
+      summary: Full state-transition history
+      operationId: getCaseActivity
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Activity log.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/CaseActivity" }
+
+  # ─────────────────────────────── Compliance ───────────────────────────
+  /api/v1/audit:
+    get:
+      tags: [Compliance]
+      summary: Append-only, HMAC-chained audit entries
+      operationId: getAudit
+      parameters:
+        - { name: actor, in: query, schema: { type: string } }
+        - { name: action, in: query, schema: { type: string } }
+        - { name: cursor, in: query, schema: { type: string } }
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 200, default: 50 } }
+      responses:
+        "200":
+          description: A page of audit entries (no key material).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuditListEnvelope" }
+
+  /api/v1/audit/verify:
+    get:
+      tags: [Compliance]
+      summary: Chain-integrity check → "Ledger intact ✓ (N entries)"
+      operationId: verifyAudit
+      responses:
+        "200":
+          description: Verification result (boolean + count only, never the key).
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/LedgerVerification" }
+
+  /api/v1/compliance/reports:
+    get:
+      tags: [Compliance]
+      summary: Scheduled report registry
+      operationId: getReports
+      responses:
+        "200":
+          description: Report registry.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/ComplianceReport" }
+
+  /api/v1/compliance/fairness:
+    get:
+      tags: [Compliance]
+      summary: Bias / false-positive metrics by segment (DPDP story)
+      operationId: getFairness
+      responses:
+        "200":
+          description: Fairness metrics.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/Fairness" }
+
   # ─────────────────────────────── Stream / Metrics ─────────────────────
   /api/v1/feed/recent:
     get:
@@ -1034,6 +1260,112 @@ components:
         mule_ids: { type: array, items: { type: string } }
         nodes: { type: array, items: { $ref: "#/components/schemas/GraphNode" } }
         edges: { type: array, items: { $ref: "#/components/schemas/GraphEdge" } }
+
+    # ── Cases ─────────────────────────────────────────────────
+    CaseStatus:
+      type: string
+      enum: [OPEN, UNDER_REVIEW, PENDING_MLRO, CLOSED_CONFIRMED_MULE, CLOSED_FALSE_POSITIVE]
+
+    CaseCreate:
+      type: object
+      required: [title]
+      properties:
+        title: { type: string }
+        account_ids: { type: array, items: { type: string } }
+        alert_id: { type: string, description: "Open from an alert (links account + alert)." }
+
+    CaseNote:
+      type: object
+      required: [id, author, body, created_at]
+      properties:
+        id: { type: string }
+        author: { type: string }
+        body: { type: string }
+        created_at: { type: string, format: date-time }
+
+    CaseActivity:
+      type: object
+      required: [actor, action, at]
+      properties:
+        actor: { type: string }
+        action: { type: string }
+        from_status: { type: [string, "null"] }
+        to_status: { type: [string, "null"] }
+        at: { type: string, format: date-time }
+
+    Case:
+      type: object
+      required: [id, title, status, account_ids, created_by, created_at]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        status: { $ref: "#/components/schemas/CaseStatus" }
+        account_ids: { type: array, items: { type: string } }
+        alert_ids: { type: array, items: { type: string } }
+        evidence: { type: array, items: { type: object, additionalProperties: true } }
+        created_by: { type: string }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        notes: { type: array, items: { $ref: "#/components/schemas/CaseNote" } }
+
+    CaseListEnvelope:
+      type: object
+      required: [data, meta]
+      properties:
+        data: { type: array, items: { $ref: "#/components/schemas/Case" } }
+        meta: { $ref: "#/components/schemas/Meta" }
+
+    # ── Compliance ────────────────────────────────────────────
+    AuditRecord:
+      type: object
+      required: [seq, at, actor, action, target, fingerprint]
+      properties:
+        seq: { type: integer }
+        at: { type: string, format: date-time }
+        actor: { type: string }
+        action: { type: string }
+        target: { type: string }
+        detail: { type: object, additionalProperties: true }
+        fingerprint: { type: string, description: "Last 8 chars of the entry hash (chain marker, not key material)." }
+
+    AuditListEnvelope:
+      type: object
+      required: [data, meta]
+      properties:
+        data: { type: array, items: { $ref: "#/components/schemas/AuditRecord" } }
+        meta: { $ref: "#/components/schemas/Meta" }
+
+    LedgerVerification:
+      type: object
+      required: [intact, entries]
+      properties:
+        intact: { type: boolean }
+        entries: { type: integer }
+        broken_at: { type: [integer, "null"] }
+
+    ComplianceReport:
+      type: object
+      required: [id, name, cadence, last_generated]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        cadence: { type: string }
+        last_generated: { type: [string, "null"], format: date-time }
+
+    Fairness:
+      type: object
+      required: [segments, overall_fp_rate]
+      properties:
+        overall_fp_rate: { type: number }
+        segments:
+          type: array
+          items:
+            type: object
+            properties:
+              segment: { type: string }
+              accounts: { type: integer }
+              flagged: { type: integer }
+              false_positive_rate: { type: number }
 
     # ── Simulator ─────────────────────────────────────────────
     ScenarioControl:

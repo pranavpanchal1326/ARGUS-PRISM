@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session as DbSession
 from app.core.domain import AccountStatus
 from app.engines.taint.propagation import propagate_taint
 from app.models.account import Account
+from app.services import audit
 from app.services.event_bus import emit
 from app.services.pipeline import mask_ref
 
@@ -28,6 +29,9 @@ def freeze_accounts(
         account.status_reason = reason or f"frozen by {actor}"
         frozen_refs.append(mask_ref(account.id))
         emit(db, "account.action", {"account_ref": mask_ref(account.id), "action": "freeze", "by": actor})
+        audit.record(
+            db, actor=actor, action="account.freeze", target=account.id, detail={"reason": reason}
+        )
         # A confirmed (frozen) mule seeds taint into its network.
         tainted_total += propagate_taint(db, account_id)
     db.commit()
