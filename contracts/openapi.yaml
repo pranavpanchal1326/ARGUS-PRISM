@@ -292,6 +292,145 @@ paths:
                   data: { $ref: "#/components/schemas/Alert" }
         "403": { $ref: "#/components/responses/Problem" }
 
+  # ─────────────────────────────── Accounts ─────────────────────────────
+  /api/v1/accounts:
+    get:
+      tags: [Accounts]
+      summary: Account lookup (cursor-paginated, server-sorted)
+      operationId: listAccounts
+      parameters:
+        - { name: query, in: query, schema: { type: string }, description: "Match account ref or holder." }
+        - { name: risk_tier, in: query, schema: { $ref: "#/components/schemas/Severity" } }
+        - { name: cursor, in: query, schema: { type: string } }
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 25 } }
+      responses:
+        "200":
+          description: A page of account summaries.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AccountListEnvelope" }
+        "401": { $ref: "#/components/responses/Problem" }
+
+  /api/v1/accounts/{id}:
+    get:
+      tags: [Accounts]
+      summary: Account profile (PII masked by role)
+      operationId: getAccount
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Account profile.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/Account" }
+        "404": { $ref: "#/components/responses/Problem" }
+
+  /api/v1/accounts/{id}/score-history:
+    get:
+      tags: [Accounts]
+      summary: WarmthScore trajectory + SHAP per point
+      operationId: getScoreHistory
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Score history.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/ScorePoint" }
+        "404": { $ref: "#/components/responses/Problem" }
+
+  /api/v1/accounts/{id}/transactions:
+    get:
+      tags: [Accounts]
+      summary: Account transactions (cursor-paginated)
+      operationId: getAccountTransactions
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+        - { name: cursor, in: query, schema: { type: string } }
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 50 } }
+      responses:
+        "200":
+          description: A page of transactions.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TransactionListEnvelope" }
+        "404": { $ref: "#/components/responses/Problem" }
+
+  /api/v1/accounts/{id}/devices:
+    get:
+      tags: [Accounts]
+      summary: IMEI/SIM event history
+      operationId: getAccountDevices
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Device events.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/DeviceEvent" }
+
+  /api/v1/accounts/{id}/signals:
+    get:
+      tags: [Accounts]
+      summary: Current S1–S6 signal breakdown
+      operationId: getAccountSignals
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Signal breakdown.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/SignalBreakdown" }
+
+  /api/v1/accounts/{id}/actions:
+    post:
+      tags: [Accounts]
+      summary: "Freeze / restrict / KYC-review (MLRO; server re-checks role)"
+      operationId: accountAction
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AccountAction" }
+      responses:
+        "200":
+          description: Updated account.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/Account" }
+        "403": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+
   # ─────────────────────────────── Stream / Metrics ─────────────────────
   /api/v1/feed/recent:
     get:
@@ -574,6 +713,112 @@ components:
         accounts_watched: { type: integer }
         avg_score: { type: number }
         updated_at: { type: string, format: date-time }
+
+    # ── Accounts ──────────────────────────────────────────────
+    AccountSummary:
+      type: object
+      required: [id, account_ref, holder, warmth_score, severity, status, tainted]
+      properties:
+        id: { type: string }
+        account_ref: { type: string, description: "Masked reference for lists." }
+        holder: { type: string, description: "Holder name, masked unless the role may view PII." }
+        branch: { type: string }
+        segment: { type: string }
+        warmth_score: { type: number }
+        severity: { $ref: "#/components/schemas/Severity" }
+        status: { $ref: "#/components/schemas/AccountStatus" }
+        tainted: { type: boolean }
+
+    Account:
+      allOf:
+        - $ref: "#/components/schemas/AccountSummary"
+        - type: object
+          required: [kyc_status, response_tier, opened_at, last_active]
+          properties:
+            ifsc: { type: string }
+            kyc_status: { type: string }
+            status_reason: { type: [string, "null"] }
+            response_tier: { type: integer }
+            taint_score: { type: number }
+            opened_at: { type: string, format: date-time }
+            last_active: { type: string, format: date-time }
+            pii_masked: { type: boolean, description: "True when the caller's role only sees masked PII." }
+            top_signals:
+              type: array
+              items: { $ref: "#/components/schemas/ShapSignal" }
+
+    AccountStatus:
+      type: string
+      enum: [ACTIVE, WATCH, KYC_HOLD, RESTRICTED, FROZEN]
+
+    AccountListEnvelope:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items: { $ref: "#/components/schemas/AccountSummary" }
+        meta: { $ref: "#/components/schemas/Meta" }
+
+    ScorePoint:
+      type: object
+      required: [ts, score, severity]
+      properties:
+        ts: { type: string, format: date-time }
+        score: { type: number }
+        severity: { $ref: "#/components/schemas/Severity" }
+        shap:
+          type: array
+          items: { $ref: "#/components/schemas/ShapSignal" }
+
+    AccountTransaction:
+      type: object
+      required: [id, ts, amount, direction, channel]
+      properties:
+        id: { type: string }
+        ts: { type: string, format: date-time }
+        counterparty_ref: { type: [string, "null"], description: "Masked counterparty, or null if external." }
+        amount: { type: number }
+        direction: { type: string, enum: [IN, OUT] }
+        channel: { type: string }
+        description: { type: [string, "null"] }
+
+    TransactionListEnvelope:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items: { $ref: "#/components/schemas/AccountTransaction" }
+        meta: { $ref: "#/components/schemas/Meta" }
+
+    DeviceEvent:
+      type: object
+      required: [imei, event_type, registered_at]
+      properties:
+        imei: { type: string, description: "Masked IMEI (last 4 shown)." }
+        event_type: { type: string }
+        registered_at: { type: string, format: date-time }
+
+    SignalBreakdown:
+      type: object
+      required: [score, signals, shap]
+      properties:
+        score: { type: number }
+        signals:
+          type: object
+          additionalProperties: { type: number }
+          description: "Raw S1–S6 values in [0,1]."
+        shap:
+          type: array
+          items: { $ref: "#/components/schemas/ShapSignal" }
+
+    AccountAction:
+      type: object
+      required: [action]
+      properties:
+        action: { type: string, enum: [freeze, restrict, kyc_review, unfreeze] }
+        reason: { type: string }
 
     # ── Simulator ─────────────────────────────────────────────
     ScenarioControl:
