@@ -23,6 +23,7 @@ from app.routers import (
     accounts,
     alerts,
     auth,
+    autostr,
     cases,
     compliance,
     graph,
@@ -95,6 +96,7 @@ app.include_router(accounts.router)
 app.include_router(graph.router)
 app.include_router(recruiter.router)
 app.include_router(cases.router)
+app.include_router(autostr.router)
 app.include_router(compliance.router)
 app.include_router(stream.router)
 app.include_router(sim.router)

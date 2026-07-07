@@ -722,6 +722,100 @@ paths:
                     type: array
                     items: { $ref: "#/components/schemas/CaseActivity" }
 
+  # ─────────────────────────────── AutoSTR ──────────────────────────────
+  /api/v1/autostr/{case_id}/generate:
+    post:
+      tags: [AutoSTR]
+      summary: Generate the three evidence packages (async job)
+      operationId: generateStr
+      parameters:
+        - { name: case_id, in: path, required: true, schema: { type: string } }
+      responses:
+        "202":
+          description: Job accepted.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/StrJob" }
+        "404": { $ref: "#/components/responses/Problem" }
+
+  /api/v1/autostr/jobs/{job_id}:
+    get:
+      tags: [AutoSTR]
+      summary: "Job status: ASSEMBLING → SIGNING → SEALED"
+      operationId: getStrJob
+      parameters:
+        - { name: job_id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Job status.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/StrJob" }
+        "404": { $ref: "#/components/responses/Problem" }
+
+  /api/v1/autostr/{case_id}/packages:
+    get:
+      tags: [AutoSTR]
+      summary: List sealed packages (with document fingerprint chip)
+      operationId: listPackages
+      parameters:
+        - { name: case_id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Packages.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/PackageSummary" }
+
+  /api/v1/autostr/packages/{id}/download:
+    get:
+      tags: [AutoSTR]
+      summary: Stream a package file (server-side authz; audit-logged)
+      operationId: downloadPackage
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: The file stream.
+          content:
+            application/octet-stream:
+              schema: { type: string, format: binary }
+        "404": { $ref: "#/components/responses/Problem" }
+
+  /api/v1/autostr/packages/{id}/approve:
+    post:
+      tags: [AutoSTR]
+      summary: "MLRO approval → mark submitted (countersignature)"
+      operationId: approvePackage
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Approved package.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/PackageSummary" }
+        "403": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+
   # ─────────────────────────────── Compliance ───────────────────────────
   /api/v1/audit:
     get:
@@ -1314,6 +1408,32 @@ components:
       properties:
         data: { type: array, items: { $ref: "#/components/schemas/Case" } }
         meta: { $ref: "#/components/schemas/Meta" }
+
+    # ── AutoSTR ───────────────────────────────────────────────
+    StrJob:
+      type: object
+      required: [id, case_id, status, created_at]
+      properties:
+        id: { type: string }
+        case_id: { type: string }
+        status: { type: string, enum: [ASSEMBLING, SIGNING, SEALED, FAILED] }
+        created_at: { type: string, format: date-time }
+        package_ids: { type: array, items: { type: string } }
+        error: { type: [string, "null"] }
+
+    PackageSummary:
+      type: object
+      required: [id, type, filename, fingerprint, generated_at, status]
+      properties:
+        id: { type: string }
+        type: { type: string, enum: [FIU_STR_XML, CBI_PDF, RBI_JSON] }
+        filename: { type: string }
+        # "Document fingerprint": last 8 chars of the content SHA-256. NOT key material.
+        fingerprint: { type: string, minLength: 8, maxLength: 8 }
+        generated_at: { type: string, format: date-time }
+        status: { type: string, enum: [SEALED, SUBMITTED] }
+        approved_by: { type: [string, "null"] }
+        approved_at: { type: [string, "null"], format: date-time }
 
     # ── Compliance ────────────────────────────────────────────
     AuditRecord:
