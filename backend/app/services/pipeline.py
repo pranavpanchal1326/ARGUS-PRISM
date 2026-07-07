@@ -55,6 +55,7 @@ def _build_input(db: DbSession, account: Account) -> ScoreInput:
             ts=t.ts if t.ts.tzinfo else t.ts.replace(tzinfo=UTC),
             amount=t.amount,
             direction="OUT" if t.src_account == account.id else "IN",
+            channel=t.channel,
         )
         for t in txns
     ]

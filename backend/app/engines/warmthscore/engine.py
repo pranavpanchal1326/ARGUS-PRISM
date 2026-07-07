@@ -1,155 +1,94 @@
-"""WarmthScore engine — the 6-signal ensemble (proven V2 IP, re-homed off Kafka).
+"""WarmthScore engine — trained XGBoost ensemble with a rule-based fallback.
 
-Computes a 0–100 risk score from an account's own transaction/device features, with a
-per-signal SHAP-style contribution breakdown so every score is explainable. Legit
-accounts score near 0; mule-warming accounts climb toward 100 as signals stack.
-
-Signals (weights sum to 100):
-  S1 velocity              20   rapid, high-count movement
-  S2 round_trip            28   funds out shortly after in (layering)
-  S3 structuring           15   many just-below-reporting-threshold credits
-  S4 dormant_device        15   dormant 90d+ then reactivated on a new device
-  S5 profile_mismatch      12   throughput far above the account's declared segment
-  S6 sim_swap              10   2+ SIM swaps in 72h
+Primary path: the trained model maps the feature vector to P(mule); WarmthScore =
+probability x 100, with SHAP contributions per feature for the explanation panel.
+Fallback (no artifact / no xgboost): the transparent weighted 6-signal scorer. Either
+way the score is real and explainable — legit accounts near 0, mules climbing high.
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from datetime import UTC, datetime, timedelta
+from app.engines.warmthscore.features import FEATURE_LABELS, extract, vector
+from app.engines.warmthscore.model import get_model
+from app.engines.warmthscore.signals import WEIGHTS, raw_signals
+from app.engines.warmthscore.types import ScoreInput, ScoreResult, TxnFeature
 
-STRUCTURING_THRESHOLD = 50_000.0   # ₹ — just below the ₹10L CTR line, layered small
-_WEIGHTS = {
-    "S1": ("velocity", 20.0),
-    "S2": ("round_trip", 30.0),
-    "S3": ("structuring", 14.0),
-    "S4": ("dormant_device", 14.0),
-    "S5": ("profile_mismatch", 12.0),
-    "S6": ("sim_swap", 10.0),
-}
-
-# Rough monthly-throughput expectation per segment (₹), for profile mismatch.
-_SEGMENT_EXPECTED = {
-    "salary": 150_000.0,
-    "retail": 80_000.0,
-    "student": 30_000.0,
-    "business": 1_500_000.0,
-    "senior": 60_000.0,
-}
+__all__ = ["ScoreInput", "TxnFeature", "ScoreResult", "score"]
 
 
-@dataclass
-class TxnFeature:
-    ts: datetime
-    amount: float
-    direction: str  # "IN" | "OUT" relative to the account
-
-
-@dataclass
-class ScoreInput:
-    segment: str
-    last_active: datetime
-    opened_at: datetime
-    transactions: list[TxnFeature] = field(default_factory=list)
-    device_imeis: list[str] = field(default_factory=list)
-    sim_swaps_72h: int = 0
-    dormant_reactivated_new_device: bool = False
-
-
-@dataclass
-class ScoreResult:
-    score: float
-    signals: dict[str, float]           # raw 0..1 per signal code
-    shap: list[dict]                    # [{code,label,contribution}] desc
-    signals_fired: list[str]
-
-
-def _now() -> datetime:
-    return datetime.now(UTC)
-
-
-def _sig_velocity(inp: ScoreInput) -> tuple[float, str]:
-    recent = [t for t in inp.transactions if _now() - t.ts < timedelta(hours=48)]
-    n = len(recent)
-    # 0 at <=3 txns, saturates at ~15 txns / 48h.
-    raw = max(0.0, min(1.0, (n - 3) / 12.0))
-    return raw, f"{n} txns / 48h"
-
-
-def _sig_round_trip(inp: ScoreInput) -> tuple[float, str]:
-    inflow = sum(t.amount for t in inp.transactions if t.direction == "IN")
-    outflow = sum(t.amount for t in inp.transactions if t.direction == "OUT")
-    if inflow <= 0:
-        return 0.0, "no inflow"
-    ratio = min(1.0, outflow / inflow)
-    # Only suspicious once a large fraction cycles straight back out.
-    raw = max(0.0, (ratio - 0.5) / 0.5) if ratio > 0.5 else 0.0
-    return min(1.0, raw), f"round-trip {ratio:.0%}"
-
-
-def _sig_structuring(inp: ScoreInput) -> tuple[float, str]:
-    # Many transfers just below the reporting threshold, in either direction.
-    near = [
-        t
-        for t in inp.transactions
-        if 0.5 * STRUCTURING_THRESHOLD <= t.amount < STRUCTURING_THRESHOLD
-    ]
-    raw = max(0.0, min(1.0, (len(near) - 2) / 6.0))
-    return raw, f"{len(near)} sub-threshold transfers"
-
-
-def _sig_dormant_device(inp: ScoreInput) -> tuple[float, str]:
-    dormant_days = (_now() - inp.last_active).total_seconds() / 86400
-    if inp.dormant_reactivated_new_device and dormant_days > 90:
-        raw = min(1.0, dormant_days / 180 + 0.3)
-        return raw, f"dormant {int(dormant_days)}d + new device"
-    return 0.0, "active / same device"
-
-
-def _sig_profile_mismatch(inp: ScoreInput) -> tuple[float, str]:
-    expected = _SEGMENT_EXPECTED.get(inp.segment, 80_000.0)
-    throughput = sum(t.amount for t in inp.transactions)
-    ratio = throughput / expected if expected else 0.0
-    # 0 up to 1.5x expected, saturates by ~6x.
-    raw = max(0.0, min(1.0, (ratio - 1.5) / 4.5))
-    return raw, f"{ratio:.1f}x {inp.segment} profile"
-
-
-def _sig_sim_swap(inp: ScoreInput) -> tuple[float, str]:
-    if inp.sim_swaps_72h >= 2:
-        return min(1.0, inp.sim_swaps_72h * 0.35), f"{inp.sim_swaps_72h} SIM swaps / 72h"
-    return 0.0, "no SIM velocity"
-
-
-_SCORERS = {
-    "S1": _sig_velocity,
-    "S2": _sig_round_trip,
-    "S3": _sig_structuring,
-    "S4": _sig_dormant_device,
-    "S5": _sig_profile_mismatch,
-    "S6": _sig_sim_swap,
-}
-
-
-def score(inp: ScoreInput) -> ScoreResult:
-    signals: dict[str, float] = {}
+def _rule_based(inp: ScoreInput, sigs: dict[str, tuple[float, str]]) -> ScoreResult:
     shap: list[dict] = []
+    signals: dict[str, float] = {}
     fired: list[str] = []
     total = 0.0
-    for code, (_name, weight) in _WEIGHTS.items():
-        raw, label = _SCORERS[code](inp)
+    for code, (_name, weight) in WEIGHTS.items():
+        raw, label = sigs[code]
         signals[code] = round(raw, 3)
         contribution = raw * weight
         total += contribution
         if raw > 0:
             fired.append(code)
-            shap.append(
-                {"code": code, "label": label, "contribution": round(contribution, 2)}
-            )
+            shap.append({"code": code, "label": label, "contribution": round(contribution, 2)})
     shap.sort(key=lambda s: s["contribution"], reverse=True)
     return ScoreResult(
         score=round(min(100.0, total), 2),
         signals=signals,
         shap=shap,
         signals_fired=fired,
+        model="rules",
     )
+
+
+_SIGNAL_FEATURES = {
+    "s1_velocity": "S1",
+    "s2_round_trip": "S2",
+    "s3_structuring": "S3",
+    "s4_dormant_device": "S4",
+    "s5_profile_mismatch": "S5",
+    "s6_sim_swap": "S6",
+}
+
+
+def _model_based(inp: ScoreInput, sigs: dict[str, tuple[float, str]], model) -> ScoreResult:
+    prob, shap_contribs = model.predict(vector(inp))
+    score_val = round(prob * 100.0, 2)
+    signals = {code: round(raw, 3) for code, (raw, _label) in sigs.items()}
+
+    # Total absolute SHAP mass → scale contributions into "warmth points" for display.
+    total_abs = sum(abs(v) for v in shap_contribs.values()) or 1.0
+    shap: list[dict] = []
+    for feat, contrib in shap_contribs.items():
+        if contrib <= 0:  # only risk-increasing drivers on the panel
+            continue
+        points = round(contrib / total_abs * score_val, 2)
+        if points < 0.5:
+            continue
+        if feat in _SIGNAL_FEATURES:
+            code = _SIGNAL_FEATURES[feat]
+            label = sigs[code][1]
+        else:
+            code = feat.upper()
+            label = FEATURE_LABELS.get(feat, feat)
+        shap.append({"code": code, "label": label, "contribution": points})
+    shap.sort(key=lambda s: s["contribution"], reverse=True)
+
+    fired = [code for code, (raw, _l) in sigs.items() if raw > 0]
+    return ScoreResult(
+        score=score_val, signals=signals, shap=shap[:6], signals_fired=fired, model="xgboost"
+    )
+
+
+def score(inp: ScoreInput) -> ScoreResult:
+    sigs = raw_signals(inp)
+    model = get_model()
+    if model is not None:
+        try:
+            return _model_based(inp, sigs, model)
+        except Exception:  # noqa: BLE001 - never let the model break scoring
+            pass
+    return _rule_based(inp, sigs)
+
+
+# Re-export the feature dict helper for callers that want raw features.
+def features(inp: ScoreInput) -> dict[str, float]:
+    return extract(inp)

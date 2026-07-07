@@ -18,7 +18,19 @@ from app.simulator.engine import simulator
 
 
 @pytest.fixture(scope="module", autouse=True)
-def _seed():
+def _seed(tmp_path_factory):
+    # Isolate this module's DB so the "newly tainted" count is deterministic (other
+    # modules freeze accounts on the shared session DB, which would pollute it).
+    from app.core.config import get_settings
+    from app.db import session as sess
+    from app.db.session import init_db
+
+    settings = get_settings()
+    settings.sqlite_path = str(tmp_path_factory.mktemp("graph") / "graph.db")
+    sess._engine = None
+    sess._backend = "uninitialized"
+    init_db()
+
     simulator.reset()
     simulator.load("recruiter_fanout", seed=2024)
     simulator.run_to_completion()
