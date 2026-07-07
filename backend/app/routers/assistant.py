@@ -44,21 +44,32 @@ class ChatBody(BaseModel):
     screen_context: dict | None = None
 
 
-async def _stream_ollama(prompt: str) -> AsyncIterator[str]:
+async def _stream_ollama(system: str, message: str) -> AsyncIterator[str]:
     import httpx
 
     settings = get_settings()
-    async with httpx.AsyncClient(timeout=30) as http, http.stream(
+    payload = {
+        "model": settings.ollama_model,
+        "messages": [
+            {"role": "system", "content": system},
+            {"role": "user", "content": message},
+        ],
+        "stream": True,
+    }
+    async with httpx.AsyncClient(timeout=60) as http, http.stream(
         "POST",
-        f"{settings.ollama_url}/api/generate",
-        json={"model": settings.ollama_model, "prompt": prompt, "stream": True},
+        f"{settings.ollama_url}/api/chat",
+        json=payload,
+        headers=settings.ollama_headers,
     ) as resp:
+        resp.raise_for_status()
         async for line in resp.aiter_lines():
             if not line.strip():
                 continue
             chunk = json.loads(line)
-            if chunk.get("response"):
-                yield chunk["response"]
+            token = (chunk.get("message") or {}).get("content")
+            if token:
+                yield token
 
 
 def _system_prompt(facts: dict) -> str:
@@ -89,13 +100,16 @@ async def chat(
             yield _sse({"type": "done"})
             return
         if available:
-            prompt = f"{_system_prompt(facts)}\n\nUser: {message}\nAssistant:"
+            emitted = False
             try:
-                async for token in _stream_ollama(prompt):
+                async for token in _stream_ollama(_system_prompt(facts), message):
                     if await request.is_disconnected():
                         break
+                    emitted = True
                     yield _sse({"type": "token", "text": token})
             except Exception:  # noqa: BLE001 - fall back to grounded reply
+                emitted = False
+            if not emitted:
                 yield _sse({"type": "token", "text": assistant._grounded_reply(message, facts)})
         else:
             # Ollama offline: honest degrade, but still answer with live figures.

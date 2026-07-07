@@ -139,6 +139,9 @@ def ollama_available() -> bool:
     try:
         import httpx
 
-        return httpx.get(f"{settings.ollama_url}/api/tags", timeout=1.0).status_code == 200
+        resp = httpx.get(
+            f"{settings.ollama_url}/api/tags", headers=settings.ollama_headers, timeout=3.0
+        )
+        return resp.status_code == 200
     except Exception:  # noqa: BLE001
         return False

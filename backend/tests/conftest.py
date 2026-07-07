@@ -20,6 +20,10 @@ def _isolated_db(tmp_path_factory):
     # Force the SQLite fallback (unreachable Postgres) at a throwaway path.
     settings.postgres_url = "postgresql+psycopg://invalid:invalid@127.0.0.1:1/none"
     settings.sqlite_path = str(db_path)
+    # Keep the suite hermetic: never call the real Ollama/Gemma cloud from tests,
+    # even when a developer's .env has ASSISTANT_ENABLED=true. The live path is
+    # verified manually; tests exercise the grounded degraded path deterministically.
+    settings.assistant_enabled = False
     sess._engine = None
     sess._backend = "uninitialized"
 

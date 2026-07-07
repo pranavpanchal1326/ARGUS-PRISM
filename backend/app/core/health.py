@@ -97,7 +97,9 @@ def _probe_ollama() -> dict[str, str]:
     try:
         import httpx
 
-        resp = httpx.get(f"{settings.ollama_url}/api/tags", timeout=1.0)
+        resp = httpx.get(
+            f"{settings.ollama_url}/api/tags", headers=settings.ollama_headers, timeout=2.0
+        )
         resp.raise_for_status()
         return {"status": "up", "detail": settings.ollama_model}
     except Exception as exc:  # noqa: BLE001

@@ -74,10 +74,16 @@ class Settings(BaseSettings):
     sim_default_seed: int = 20260707
     sim_tick_ms: int = 1000
 
-    # ── Chatbot ───────────────────────────────────────────────
+    # ── Chatbot (Ollama — local or cloud) ─────────────────────
     ollama_url: str = "http://localhost:11434"
     ollama_model: str = "gemma:2b"
+    # Set for Ollama Cloud (https://ollama.com). Kept in .env only, never committed.
+    ollama_api_key: str = ""
     assistant_enabled: bool = False
+
+    @property
+    def ollama_headers(self) -> dict[str, str]:
+        return {"Authorization": f"Bearer {self.ollama_api_key}"} if self.ollama_api_key else {}
 
     # ── CORS ──────────────────────────────────────────────────
     cors_origins: str = "http://localhost:5173,http://localhost:4173"
