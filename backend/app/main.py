@@ -19,7 +19,18 @@ from app.core.config import get_settings
 from app.core.logging import configure_logging
 from app.core.response import register_exception_handlers
 from app.db.session import active_backend, init_db
-from app.routers import accounts, alerts, auth, graph, health, recruiter, sim, stream
+from app.routers import (
+    accounts,
+    alerts,
+    auth,
+    cases,
+    compliance,
+    graph,
+    health,
+    recruiter,
+    sim,
+    stream,
+)
 
 settings = get_settings()
 configure_logging(settings.debug)
@@ -83,6 +94,8 @@ app.include_router(alerts.router)
 app.include_router(accounts.router)
 app.include_router(graph.router)
 app.include_router(recruiter.router)
+app.include_router(cases.router)
+app.include_router(compliance.router)
 app.include_router(stream.router)
 app.include_router(sim.router)
 
