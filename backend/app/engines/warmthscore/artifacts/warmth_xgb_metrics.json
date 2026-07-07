@@ -1,0 +1,11 @@
+{
+  "auc_roc": 0.9808,
+  "precision": 0.9874,
+  "recall": 0.9702,
+  "f1": 0.9787,
+  "decision_threshold": 0.325,
+  "n_test": 4000,
+  "hard_negative_fp_rate": 0.0,
+  "hard_negative_n": 728,
+  "best_iteration": 48
+}
