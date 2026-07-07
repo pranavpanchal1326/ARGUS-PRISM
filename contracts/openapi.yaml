@@ -431,6 +431,139 @@ paths:
         "403": { $ref: "#/components/responses/Problem" }
         "404": { $ref: "#/components/responses/Problem" }
 
+  # ─────────────────────────────── Network Graph ────────────────────────
+  /api/v1/graph/neighborhood/{account_id}:
+    get:
+      tags: [Graph]
+      summary: Force-directed neighborhood subgraph
+      operationId: getNeighborhood
+      parameters:
+        - { name: account_id, in: path, required: true, schema: { type: string } }
+        - { name: hops, in: query, schema: { type: integer, minimum: 1, maximum: 4, default: 3 } }
+      responses:
+        "200":
+          description: Nodes + edges within N hops.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/Graph" }
+        "404": { $ref: "#/components/responses/Problem" }
+
+  /api/v1/graph/patterns/{type}:
+    get:
+      tags: [Graph]
+      summary: Detected layering / round-trip / structuring subgraphs
+      operationId: getPatterns
+      parameters:
+        - { name: type, in: path, required: true, schema: { type: string, enum: [round_trip, layering, structuring, velocity, any] } }
+      responses:
+        "200":
+          description: Matching pattern subgraphs.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/PatternMatch" }
+
+  /api/v1/graph/freeze-cluster:
+    post:
+      tags: [Graph]
+      summary: "Freeze a selected node set (MLRO); propagates taint"
+      operationId: freezeCluster
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [account_ids]
+              properties:
+                account_ids: { type: array, items: { type: string } }
+                reason: { type: string }
+      responses:
+        "200":
+          description: Freeze result + taint summary.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/FreezeResult" }
+        "403": { $ref: "#/components/responses/Problem" }
+
+  # ─────────────────────────────── Recruiter Map ────────────────────────
+  /api/v1/recruiters:
+    get:
+      tags: [Recruiter]
+      summary: Detected coordinators + campaign scale class
+      operationId: listRecruiters
+      responses:
+        "200":
+          description: Detected recruiters.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/Recruiter" }
+
+  /api/v1/recruiters/{id}/campaign:
+    get:
+      tags: [Recruiter]
+      summary: Full fan-out subgraph for a recruiter
+      operationId: getRecruiterCampaign
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Campaign subgraph.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/RecruiterCampaign" }
+        "404": { $ref: "#/components/responses/Problem" }
+
+  /api/v1/recruiters/{id}/freeze-campaign:
+    post:
+      tags: [Recruiter]
+      summary: "One-click network freeze (MLRO); propagates taint"
+      operationId: freezeCampaign
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason: { type: string }
+      responses:
+        "200":
+          description: Freeze result + taint summary.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/FreezeResult" }
+        "403": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+
   # ─────────────────────────────── Stream / Metrics ─────────────────────
   /api/v1/feed/recent:
     get:
@@ -819,6 +952,88 @@ components:
       properties:
         action: { type: string, enum: [freeze, restrict, kyc_review, unfreeze] }
         reason: { type: string }
+
+    # ── Graph ─────────────────────────────────────────────────
+    GraphNode:
+      type: object
+      required: [id, account_ref, warmth_score, severity, tainted]
+      properties:
+        id: { type: string }
+        account_ref: { type: string }
+        holder: { type: string }
+        warmth_score: { type: number }
+        severity: { $ref: "#/components/schemas/Severity" }
+        status: { $ref: "#/components/schemas/AccountStatus" }
+        tainted: { type: boolean }
+        is_recruiter: { type: boolean }
+
+    GraphEdge:
+      type: object
+      required: [source, target, value, count]
+      properties:
+        source: { type: string }
+        target: { type: string }
+        value: { type: number, description: "Summed transaction value (edge weight)." }
+        count: { type: integer }
+
+    Graph:
+      type: object
+      required: [root, nodes, edges]
+      properties:
+        root: { type: string }
+        nodes: { type: array, items: { $ref: "#/components/schemas/GraphNode" } }
+        edges: { type: array, items: { $ref: "#/components/schemas/GraphEdge" } }
+
+    PatternMatch:
+      type: object
+      required: [anchor, anchor_id, severity, nodes, edges]
+      properties:
+        anchor: { type: string }
+        anchor_id: { type: string }
+        severity: { $ref: "#/components/schemas/Severity" }
+        warmth_score: { type: number }
+        nodes: { type: array, items: { $ref: "#/components/schemas/GraphNode" } }
+        edges: { type: array, items: { $ref: "#/components/schemas/GraphEdge" } }
+
+    FreezeResult:
+      type: object
+      required: [frozen, tainted]
+      properties:
+        frozen: { type: integer, description: "Accounts frozen." }
+        tainted: { type: integer, description: "Downstream accounts tainted by propagation." }
+        account_refs: { type: array, items: { type: string } }
+
+    # ── Recruiter ─────────────────────────────────────────────
+    Recruiter:
+      type: object
+      required: [id, account_ref, downstream_count, scale_class]
+      properties:
+        id: { type: string }
+        account_ref: { type: string }
+        holder: { type: string }
+        branch: { type: string }
+        warmth_score: { type: number }
+        downstream_count: { type: integer }
+        total_distributed: { type: number }
+        scale_class:
+          type: string
+          enum: [FACILITATOR, COORDINATOR, INDUSTRIAL_ORCHESTRATOR, NATIONAL_SYNDICATE]
+        campaign: { type: [string, "null"] }
+
+    RecruiterCampaign:
+      type: object
+      required: [recruiter, mule_ids, nodes, edges]
+      properties:
+        recruiter:
+          type: object
+          properties:
+            id: { type: string }
+            account_ref: { type: string }
+            scale_class: { type: string }
+            downstream_count: { type: integer }
+        mule_ids: { type: array, items: { type: string } }
+        nodes: { type: array, items: { $ref: "#/components/schemas/GraphNode" } }
+        edges: { type: array, items: { $ref: "#/components/schemas/GraphEdge" } }
 
     # ── Simulator ─────────────────────────────────────────────
     ScenarioControl:

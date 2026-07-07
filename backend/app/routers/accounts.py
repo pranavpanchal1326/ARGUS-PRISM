@@ -202,8 +202,16 @@ def account_action(
 ) -> dict:
     account = _get_or_404(db, account_id)
     action = body.action.lower()
+
+    if action == "freeze":
+        # Freezing a confirmed mule seeds taint into its network (shared helper).
+        from app.services.freeze import freeze_accounts
+
+        freeze_accounts(db, [account.id], actor=user.email, reason=body.reason)
+        db.refresh(account)
+        return envelope(_detail(account, can_pii=user.can(Permission.VIEW_PII)))
+
     mapping = {
-        "freeze": AccountStatus.FROZEN,
         "restrict": AccountStatus.RESTRICTED,
         "kyc_review": AccountStatus.KYC_HOLD,
     }

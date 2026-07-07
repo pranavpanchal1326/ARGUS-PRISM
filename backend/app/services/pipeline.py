@@ -84,39 +84,59 @@ def _build_input(db: DbSession, account: Account) -> ScoreInput:
 
 
 def rescore_account(db: DbSession, account: Account) -> None:
-    """Recompute an account's WarmthScore, persist state, and cascade to an alert."""
+    """Recompute an account's WarmthScore, persist state, and cascade to an alert.
+
+    The final score is the 6-signal base plus a network contribution from taint
+    (proximity to a confirmed mule) — this is the ensemble agreement that lifts a
+    tainted network into CRITICAL/IMMINENT, exactly as the old PRD's fusion rule
+    intends (warmth alone tops out at HOT).
+    """
     result = score(_build_input(db, account))
     prev_score = account.warmth_score
-    band = band_for(result.score)
 
-    account.warmth_score = result.score
+    shap = list(result.shap)
+    final_score = result.score
+    if account.taint_score > 0:
+        final_score = min(100.0, result.score + account.taint_score)
+        shap.insert(
+            0,
+            {
+                "code": "NET",
+                "label": "tainted network (near confirmed mule)",
+                "contribution": round(account.taint_score, 2),
+            },
+        )
+        shap.sort(key=lambda s: s["contribution"], reverse=True)
+
+    band = band_for(final_score)
+    account.warmth_score = round(final_score, 2)
     account.severity = band.value
-    account.response_tier = response_tier(result.score)
+    account.response_tier = response_tier(final_score)
     account.signals = result.signals
-    account.shap = result.shap
+    account.shap = shap
 
     # Recommend a status, but never *downgrade* a human/authority freeze automatically.
     if account.status not in {"FROZEN", "RESTRICTED", "KYC_HOLD"}:
-        account.status = recommended_status(result.score).value
+        account.status = recommended_status(final_score).value
 
     db.add(
         ScoreHistory(
             account_id=account.id,
-            score=result.score,
+            score=final_score,
             severity=band.value,
             signals=result.signals,
-            shap=result.shap,
+            shap=shap,
         )
     )
 
     emit(
         db,
         "score.updated",
-        {"account_ref": mask_ref(account.id), "score": result.score, "severity": band.value},
+        {"account_ref": mask_ref(account.id), "score": final_score, "severity": band.value},
     )
 
     if band != Sev.CLEAN:
-        _raise_or_update_alert(db, account, band, result.shap)
+        _raise_or_update_alert(db, account, band, shap)
     # Meaningful jump worth surfacing even below alert threshold is left to the UI feed.
     _ = prev_score
 
