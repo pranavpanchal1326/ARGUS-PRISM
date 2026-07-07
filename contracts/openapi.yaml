@@ -884,6 +884,133 @@ paths:
                 properties:
                   data: { $ref: "#/components/schemas/Fairness" }
 
+  # ─────────────────────────────── Administration ───────────────────────
+  /api/v1/admin/users:
+    get:
+      tags: [Admin]
+      summary: List users (SYS_ADMIN)
+      operationId: listUsers
+      responses:
+        "200":
+          description: Users.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { type: array, items: { $ref: "#/components/schemas/AdminUser" } }
+        "403": { $ref: "#/components/responses/Problem" }
+    post:
+      tags: [Admin]
+      summary: Invite a user (SYS_ADMIN; no public signup)
+      operationId: inviteUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UserInvite" }
+      responses:
+        "201":
+          description: Invited user.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/AdminUser" }
+        "403": { $ref: "#/components/responses/Problem" }
+
+  /api/v1/admin/users/{id}:
+    patch:
+      tags: [Admin]
+      summary: Change role / disable / force MFA reset (SYS_ADMIN)
+      operationId: updateUser
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UserUpdate" }
+      responses:
+        "200":
+          description: Updated user.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/AdminUser" }
+        "403": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+
+  /api/v1/admin/health:
+    get:
+      tags: [Admin]
+      summary: Service status strip (SYS_ADMIN)
+      operationId: adminHealth
+      responses:
+        "200":
+          description: Per-service status lamps.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: object
+                    additionalProperties:
+                      type: object
+                      properties:
+                        status: { type: string, enum: [up, down, disabled] }
+                        detail: { type: string }
+        "403": { $ref: "#/components/responses/Problem" }
+
+  # ─────────────────────────────── PRISM Assistant ──────────────────────
+  /api/v1/assistant/suggestions:
+    get:
+      tags: [Assistant]
+      summary: Per-screen canned prompts (3 chips)
+      operationId: assistantSuggestions
+      parameters:
+        - { name: screen, in: query, schema: { type: string } }
+      responses:
+        "200":
+          description: Suggestion chips.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { type: array, items: { type: string } }
+
+  /api/v1/assistant/chat:
+    post:
+      tags: [Assistant]
+      summary: Ask the on-prem assistant (SSE streamed reply)
+      operationId: assistantChat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [message]
+              properties:
+                message: { type: string }
+                screen_context: { type: object, additionalProperties: true }
+      responses:
+        "200":
+          description: "text/event-stream of reply tokens; degrades to an 'unavailable' event when Ollama is offline."
+          content:
+            text/event-stream:
+              schema: { type: string }
+
   # ─────────────────────────────── Stream / Metrics ─────────────────────
   /api/v1/feed/recent:
     get:
@@ -1486,6 +1613,35 @@ components:
               accounts: { type: integer }
               flagged: { type: integer }
               false_positive_rate: { type: number }
+
+    # ── Administration ────────────────────────────────────────
+    AdminUser:
+      type: object
+      required: [id, email, name, role, disabled, mfa_active]
+      properties:
+        id: { type: string }
+        email: { type: string, format: email }
+        name: { type: string }
+        role: { $ref: "#/components/schemas/Role" }
+        disabled: { type: boolean }
+        mfa_active: { type: boolean }
+        created_at: { type: string, format: date-time }
+
+    UserInvite:
+      type: object
+      required: [email, name, role]
+      properties:
+        email: { type: string, format: email }
+        name: { type: string }
+        role: { $ref: "#/components/schemas/Role" }
+        temp_password: { type: string, description: "Optional initial password; user re-enrols MFA on first login." }
+
+    UserUpdate:
+      type: object
+      properties:
+        role: { $ref: "#/components/schemas/Role" }
+        disabled: { type: boolean }
+        force_mfa_reset: { type: boolean }
 
     # ── Simulator ─────────────────────────────────────────────
     ScenarioControl:

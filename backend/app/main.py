@@ -21,7 +21,9 @@ from app.core.response import register_exception_handlers
 from app.db.session import active_backend, init_db
 from app.routers import (
     accounts,
+    admin,
     alerts,
+    assistant,
     auth,
     autostr,
     cases,
@@ -98,6 +100,8 @@ app.include_router(recruiter.router)
 app.include_router(cases.router)
 app.include_router(autostr.router)
 app.include_router(compliance.router)
+app.include_router(admin.router)
+app.include_router(assistant.router)
 app.include_router(stream.router)
 app.include_router(sim.router)
 
