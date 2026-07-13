@@ -3,6 +3,7 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { Eye } from "../components/Eye";
+import { ViewBoundary } from "./ViewBoundary";
 import { useAuth } from "./AuthContext";
 import { WS_BASE, tokens } from "../api/client";
 import "./shell.css";
@@ -90,7 +91,9 @@ export function AppShell() {
       <div className="meridian" aria-hidden />
 
       <main className="content">
-        <Outlet />
+        <ViewBoundary>
+          <Outlet />
+        </ViewBoundary>
       </main>
 
       <aside className="margin-watch" aria-hidden>

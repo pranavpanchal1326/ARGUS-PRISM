@@ -43,6 +43,18 @@
   padding-top: var(--s-3);
 }
 
+.teller__enrol { align-items: center; text-align: center; }
+.teller__qr {
+  border: 1px solid var(--brass);
+  border-radius: 2px;
+  width: 180px; height: 180px;
+}
+.teller__enrol-note {
+  font-size: var(--text-12);
+  color: var(--ink-faint);
+  max-width: 280px;
+}
+
 .returned {
   display: flex; align-items: center; gap: var(--s-2);
   padding: var(--s-1) 0;

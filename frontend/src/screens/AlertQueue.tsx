@@ -17,12 +17,14 @@ export function AlertQueue() {
   const [arrived, setArrived] = useState<Set<string>>(new Set());
   const [, forceTick] = useState(0);
   const wsRef = useRef<WebSocket | null>(null);
+  const reloadTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const load = useCallback(async () => {
     setError(null);
     try {
-      const res = await api<{ data: Alert[] }>("/api/v1/alerts?status=NEW,ACKNOWLEDGED,ASSIGNED,ESCALATED&sort=-warmth_score");
-      setAlerts(res.data);
+      const OPEN = new Set(["NEW", "ACKNOWLEDGED", "ASSIGNED", "ESCALATED"]);
+      const res = await api<{ data: Alert[] }>("/api/v1/alerts?sort=-warmth_score");
+      setAlerts(res.data.filter((a) => OPEN.has(a.status)));
     } catch (err) {
       setAlerts(null);
       setError(err instanceof WatchInterrupted ? err.message
@@ -51,15 +53,14 @@ export function AlertQueue() {
       ws.onmessage = (m) => {
         try {
           const ev = JSON.parse(m.data);
-          if (ev.type === "alert.raised" && ev.payload) {
-            const alert = ev.payload as Alert;
-            setAlerts((prev) => {
-              if (!prev || prev.some((a) => a.id === alert.id)) return prev;
-              const next = [...prev, alert].sort((a, b) => b.warmth_score - a.warmth_score);
-              return next;
-            });
-            setArrived((s) => new Set(s).add(alert.id));
-            setTimeout(() => setArrived((s) => { const n = new Set(s); n.delete(alert.id); return n; }), 1200);
+          // The WS event is a signal, not the record. The queue always
+          // refetches from /alerts — the single source of truth (Law 2).
+          if (ev.type === "alert.raised" && ev.payload?.alert_id) {
+            const id = String(ev.payload.alert_id);
+            setArrived((s) => new Set(s).add(id));
+            setTimeout(() => setArrived((s) => { const n = new Set(s); n.delete(id); return n; }), 1600);
+            if (reloadTimer.current) clearTimeout(reloadTimer.current);
+            reloadTimer.current = setTimeout(() => void load(), 400); // burst-debounced
           }
         } catch { /* ignore non-JSON frames */ }
       };
@@ -146,7 +147,7 @@ function AlertRow({ alert, justArrived }: { alert: Alert; justArrived: boolean }
       <span className={`arow__notch${critical ? " arow__notch--critical" : ""}`} aria-hidden />
       <span className="arow__ref v-machine">{alert.account_ref}</span>
       <span className="arow__signals">
-        {alert.top_signals.slice(0, 2).map((s) => (
+        {(alert.top_signals ?? []).slice(0, 2).map((s) => (
           <span key={s.code} className="chip" title={`${s.label} · +${s.contribution.toFixed(1)} warmth`}>
             {s.code} · {s.label}
           </span>

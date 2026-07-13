@@ -2,17 +2,19 @@
    email+password → MFA challenge → 6 engraved digit boxes → vault door. */
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import QRCode from "qrcode";
 import { api, tokens, ApiProblem, WatchInterrupted, type MfaChallenge, type TokenPair } from "../api/client";
 import { useAuth } from "../shell/AuthContext";
 import "./login.css";
 
-type Stage = "credentials" | "totp" | "vault-door";
+type Stage = "credentials" | "enrol" | "totp" | "vault-door";
 
 export function Login() {
   const [stage, setStage] = useState<Stage>("credentials");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mfaToken, setMfaToken] = useState("");
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [digits, setDigits] = useState<string[]>(Array(6).fill(""));
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -29,8 +31,25 @@ export function Login() {
         body: JSON.stringify({ email, password }),
       });
       setMfaToken(res.data.mfa_token);
-      setStage("totp");
-      setTimeout(() => digitRefs.current[0]?.focus(), 50);
+      if (!res.data.mfa_enrolled) {
+        // First login: enrol. The otpauth URI arrives exactly once and is
+        // rendered as a QR only — never displayed as text (Law 3).
+        const enrol = await fetch(`${import.meta.env.VITE_API_BASE ?? "http://localhost:8000"}/api/v1/auth/mfa/enroll`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${res.data.mfa_token}` },
+        });
+        if (!enrol.ok) throw new ApiProblem(enrol.status, "Enrolment failed");
+        const body = await enrol.json();
+        const dataUrl = await QRCode.toDataURL(body.data.otpauth_uri, {
+          margin: 1, width: 180,
+          color: { dark: "#1c1b16", light: "#f3eddf" },
+        });
+        setQrDataUrl(dataUrl);
+        setStage("enrol");
+      } else {
+        setStage("totp");
+        setTimeout(() => digitRefs.current[0]?.focus(), 50);
+      }
     } catch (err) {
       setError(err instanceof WatchInterrupted ? err.message
         : err instanceof ApiProblem ? (err.detail ?? err.title)
@@ -95,7 +114,9 @@ export function Login() {
           <div className="teller__wordmark v-institution">ARGUS · PRISM</div>
           <div className="teller__rule" />
           <h1 className="teller__invite v-institution">
-            {stage === "credentials" ? "Present your credentials." : "The second key, please."}
+            {stage === "credentials" ? "Present your credentials."
+              : stage === "enrol" ? "Your key is cut once."
+              : "The second key, please."}
           </h1>
         </div>
 
@@ -118,6 +139,21 @@ export function Login() {
               {busy ? "Verifying…" : "Approach the window"}
             </button>
           </form>
+        ) : stage === "enrol" ? (
+          <div className="teller__form teller__enrol">
+            {qrDataUrl && <img className="teller__qr" src={qrDataUrl} alt="TOTP enrolment QR — scan with your authenticator" />}
+            <p className="teller__enrol-note">
+              Scan with your authenticator app. This key is shown once and
+              never again — regenerating cuts a different key.
+            </p>
+            <button className="btn-brass" onClick={() => {
+              setQrDataUrl(null);
+              setStage("totp");
+              setTimeout(() => digitRefs.current[0]?.focus(), 50);
+            }}>
+              I hold the key — continue
+            </button>
+          </div>
         ) : (
           <div className="teller__form">
             <div className="totp">
