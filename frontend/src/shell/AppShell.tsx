@@ -60,6 +60,17 @@ export function AppShell() {
   }, []);
 
   return (
+    <>
+    <div className="desk-gate">
+      <div className="paper desk-gate__card">
+        <p className="v-institution" style={{ fontSize: "var(--text-24)", marginBottom: "var(--s-2)" }}>
+          A wider desk is required.
+        </p>
+        <p style={{ fontSize: "var(--text-13)" }}>
+          The PRISM console needs a display of at least 1280 pixels.
+        </p>
+      </div>
+    </div>
     <div className="app-frame on-vault">
       <nav className="rail">
         <div className="rail__wordmark v-institution">
@@ -101,5 +112,6 @@ export function AppShell() {
           title={eyeState === "closed" ? "The watch is interrupted" : "The watch continues"} />
       </aside>
     </div>
+    </>
   );
 }

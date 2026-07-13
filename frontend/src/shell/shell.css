@@ -2,47 +2,56 @@
   display: grid;
   grid-template-columns: var(--nav-rail) 1px 1fr var(--margin-watch);
   height: 100%;
+  background: var(--grad-vault);
 }
 
 /* ── Nav rail ── */
 .rail {
   display: flex;
   flex-direction: column;
-  background: var(--vault-800);
-  padding: var(--s-6) 0 var(--s-4);
+  background: var(--vault-850);
+  padding: var(--s-6) var(--s-3) var(--s-4);
   overflow-y: auto;
 }
 .rail__wordmark {
   font-size: var(--text-16);
   letter-spacing: 0.14em;
-  color: var(--brass-bright);
-  padding: 0 var(--s-6) var(--s-8);
+  color: var(--gold-bright);
+  padding: 0 var(--s-3) var(--s-8);
   user-select: none;
 }
-.rail__sep { color: var(--brass-dim); margin: 0 2px; }
+.rail__sep { color: var(--gold-dim); margin: 0 2px; }
 
-.rail__items { display: flex; flex-direction: column; flex: 1; }
+.rail__items { display: flex; flex-direction: column; flex: 1; gap: 2px; }
 .rail__item {
-  padding: var(--s-2) var(--s-6);
+  padding: var(--s-3) var(--s-4);
+  border-radius: var(--r-md);
   color: var(--ivory-muted);
   font-size: var(--text-13);
-  border-left: 2px solid transparent;
-  transition: color var(--dur-tick) var(--ease-mechanical),
-              background var(--dur-tick) var(--ease-mechanical);
+  position: relative;
+  transition: color var(--dur-tick) var(--ease-optical),
+              background var(--dur-tick) var(--ease-optical);
 }
 .rail__item:hover { color: var(--ivory-text); background: var(--vault-700); text-decoration: none; }
 .rail__item--active {
-  color: var(--brass-bright);
-  border-left-color: var(--brass);
-  background: var(--vault-700);
+  color: #24170a;
+  background: var(--grad-gold);
+  font-weight: 600;
+  box-shadow: var(--glow-gold);
 }
 
-.rail__foot { padding: var(--s-4) var(--s-6) 0; display: flex; flex-direction: column; gap: var(--s-2); }
-.rail__user { display: flex; flex-direction: column; }
+.rail__foot { padding: var(--s-4) var(--s-3) 0; display: flex; flex-direction: column; gap: var(--s-3); }
+.rail__user {
+  display: flex; flex-direction: column;
+  padding: var(--s-3) var(--s-4);
+  border-radius: var(--r-md);
+  background: var(--vault-800);
+  border: 1px solid var(--gold-hairline);
+}
 .rail__name { font-size: var(--text-13); color: var(--ivory-text); }
 
-/* ── The Meridian: one brass hairline binding every screen ── */
-.meridian { background: var(--brass-hairline); }
+/* ── The Meridian: one gold hairline binding every screen ── */
+.meridian { background: var(--gold-hairline); }
 
 /* ── Content ── */
 .content {
@@ -58,23 +67,18 @@
   flex-direction: column;
   align-items: center;
   padding-top: var(--s-8);
-  background: var(--vault-900);
+  background: transparent;
 }
 
 /* ── Screen title: The Institution speaks once per screen ── */
 .screen-title {
   font-family: var(--font-institution);
   font-weight: 600;
-  font-size: var(--text-28);
+  font-size: var(--text-40);
   color: var(--ivory-text);
-  letter-spacing: -0.01em;
-  margin-bottom: var(--s-6);
+  letter-spacing: -0.02em;
+  margin-bottom: var(--s-8);
 }
 
-/* ── Desk-width notice ── */
-.desk-notice {
-  height: 100%;
-  align-items: center;
-  justify-content: center;
-}
-.desk-notice__card { padding: var(--s-8) var(--s-12); text-align: center; max-width: 420px; }
+/* ── Desk-width gate (console only) ── */
+.desk-gate__card { padding: var(--s-8) var(--s-12); text-align: center; max-width: 440px; }

@@ -1,38 +1,56 @@
 /* ═══════════════════════════════════════════════════════════════
-   ARGUS-PRISM — THE HUNDRED EYES · Design tokens v1.0
-   Two worlds: Paper (fact — ivory, ink, brass) and Light (analysis
-   — phosphor). They never blend. Paper has shadows, light has glow.
+   ARGUS-PRISM — MODERN VAULT · Design tokens v2.0
+   The heritage soul (vigilance, depth, the eye) executed with 2026
+   craft: champagne gold, vivid mint, richer near-black, generous
+   curves, soft glow + glass. Paper = fact, Light = analysis.
    ═══════════════════════════════════════════════════════════════ */
 :root {
-  /* ── The Vault (dark world surfaces) ── */
-  --vault-900: #0a1f1a;
-  --vault-800: #0e2a23;
-  --vault-700: #143229;
+  /* ── The Vault: richer, deeper, near-black green ── */
+  --vault-900: #071310;            /* app base — near-black */
+  --vault-850: #0a1a16;
+  --vault-800: #0e231f;            /* elevated surface */
+  --vault-700: #16332c;            /* hover / selected */
+  --vault-600: #1f453b;            /* strong hover, borders */
+  --vault-glass: rgba(16, 40, 34, 0.55);
+  --vault-glass-strong: rgba(10, 26, 22, 0.78);
 
-  /* ── Paper (fact) ── */
-  --paper: #f3eddf;
-  --paper-aged: #e9dfc8;
-  --ink: #1c1b16;
-  --ink-faint: #1c1b1699;
+  /* ── Paper (fact — real documents only) ── */
+  --paper: #f5f0e6;
+  --paper-aged: #ece1c9;
+  --ink: #1a1a16;
+  --ink-faint: #1a1a1699;
 
-  /* ── Brass (the only metal) ── */
-  --brass: #b08d3e;
-  --brass-bright: #d4b36a;         /* text/icons on vault — AA+ */
-  --brass-hairline: #b08d3e1f;     /* 12% — table rules, borders */
-  --brass-dim: #b08d3e4d;          /* 30% — RBAC-disabled */
+  /* ── Champagne gold: the accent (modern, warm, luminous) ──
+        legacy --brass-* names kept so the canon keeps working */
+  --gold: #e8c583;
+  --gold-bright: #f4dca2;          /* text/icons on vault — AA+ */
+  --gold-deep: #c9a24e;
+  --gold-hairline: #e8c5831f;      /* 12% rules/borders */
+  --gold-dim: #e8c58347;           /* ~28% disabled */
+  --brass: var(--gold);
+  --brass-bright: var(--gold-bright);
+  --brass-hairline: var(--gold-hairline);
+  --brass-dim: var(--gold-dim);
 
-  /* ── Phosphor (analysis — rationed: ≤5% of viewport, strokes only) ── */
-  --phosphor: #8ce8c8;
-  --phosphor-dim: #8ce8c866;
-  --phosphor-ghost: #8ce8c826;
+  /* ── Mint (analysis — vivid, rationed to strokes/glyphs) ── */
+  --mint: #5eead4;
+  --mint-dim: #5eead488;
+  --mint-ghost: #5eead42b;
+  --phosphor: var(--mint);
+  --phosphor-dim: var(--mint-dim);
+  --phosphor-ghost: var(--mint-ghost);
 
-  /* ── Authority ── */
-  --oxblood: #7a2e2e;              /* CRITICAL/IMMINENT + wax only */
-  --oxblood-bright: #a84848;       /* oxblood legible on vault */
+  /* ── Signal (CRITICAL/IMMINENT + wax) — cleaner modern crimson ── */
+  --signal: #e5484d;
+  --signal-bright: #ff6b6f;
+  --signal-deep: #7a2626;
+  --oxblood: var(--signal-deep);
+  --oxblood-bright: var(--signal-bright);
 
   /* ── Text on vault ── */
-  --ivory-text: #ede6d6;           /* 12.8:1 on vault-900 */
-  --ivory-muted: #ede6d699;
+  --ivory-text: #f0ebdf;
+  --ivory-muted: #f0ebdf9e;
+  --ivory-faint: #f0ebdf5c;
 
   /* ── The three voices ── */
   --font-institution: "Playfair Display", "Georgia", serif;
@@ -41,31 +59,53 @@
 
   /* ── Modular scale ── */
   --text-11: 11px; --text-12: 12px; --text-13: 13px; --text-14: 14px;
-  --text-16: 16px; --text-20: 20px; --text-28: 28px; --text-40: 40px;
-  --text-56: 56px;
+  --text-16: 16px; --text-20: 20px; --text-24: 24px; --text-28: 28px;
+  --text-40: 40px; --text-56: 56px; --text-72: 72px; --text-96: 96px;
 
   /* ── 4px spacing grid ── */
   --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px; --s-6: 24px;
-  --s-8: 32px; --s-12: 48px; --s-16: 64px; --s-24: 96px;
+  --s-8: 32px; --s-12: 48px; --s-16: 64px; --s-24: 96px; --s-32: 128px;
+
+  /* ── Radii: generous, modern curves ── */
+  --r-xs: 6px; --r-sm: 10px; --r-md: 14px; --r-lg: 20px;
+  --r-xl: 28px; --r-2xl: 36px; --r-full: 999px;
 
   /* ── Layout ── */
-  --nav-rail: 240px;
-  --nav-rail-collapsed: 64px;
-  --margin-watch: 32px;            /* the haunted margin, every screen */
+  --nav-rail: 248px;
+  --nav-rail-collapsed: 68px;
+  --margin-watch: 36px;
   --content-max: 1600px;
-  --row-h: 36px;
-  --row-h-compact: 32px;
+  --row-h: 40px;
+  --row-h-compact: 34px;
 
-  /* ── Motion: mechanical (mass) or optical (light) ── */
+  /* ── Motion ── */
   --ease-mechanical: cubic-bezier(0.2, 0.9, 0.25, 1);
   --ease-optical: cubic-bezier(0.4, 0, 0.2, 1);
-  --dur-tick: 120ms;
-  --dur-move: 240ms;
-  --dur-act: 450ms;
-  --dur-scene: 600ms;
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-tick: 140ms;
+  --dur-move: 260ms;
+  --dur-act: 460ms;
+  --dur-scene: 640ms;
 
-  /* ── Elevation: desk(0) paper(1) lifted(2) drawer(3) vault(4) ── */
-  --z-paper: 1; --z-lifted: 2; --z-drawer: 3; --z-vault: 4;
-  --shadow-paper: 0 3px 0 rgb(0 0 0 / 0.08);          /* paper sits, never floats */
-  --shadow-lifted: 0 6px 0 rgb(0 0 0 / 0.10);
+  /* ── Modern soft elevation ── */
+  --shadow-sm: 0 2px 10px rgb(0 0 0 / 0.25);
+  --shadow-md: 0 12px 34px rgb(0 0 0 / 0.34);
+  --shadow-lg: 0 28px 70px rgb(0 0 0 / 0.44);
+  --shadow-paper: 0 8px 30px rgb(0 0 0 / 0.30);
+  --shadow-lifted: 0 18px 50px rgb(0 0 0 / 0.40);
+  --glow-gold: 0 0 44px rgb(232 197 131 / 0.18);
+  --glow-mint: 0 0 34px rgb(94 234 212 / 0.24);
+  --glow-signal: 0 0 34px rgb(229 72 77 / 0.28);
+
+  /* ── Gradients ── */
+  --grad-gold: linear-gradient(135deg, #f4dca2 0%, #e8c583 42%, #c9a24e 100%);
+  --grad-vault: radial-gradient(120% 120% at 50% -10%, #123029 0%, #0a1a16 46%, #071310 100%);
+  --grad-mesh:
+    radial-gradient(60% 55% at 18% 8%, rgba(94, 234, 212, 0.10) 0%, transparent 60%),
+    radial-gradient(55% 60% at 88% 22%, rgba(232, 197, 131, 0.14) 0%, transparent 62%),
+    radial-gradient(80% 80% at 50% 110%, rgba(18, 48, 41, 0.9) 0%, transparent 70%);
+  --hairline: 1px solid var(--gold-hairline);
+
+  /* ── z-index ── */
+  --z-paper: 1; --z-lifted: 2; --z-drawer: 3; --z-vault: 4; --z-toast: 60;
 }

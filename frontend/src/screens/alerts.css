@@ -11,19 +11,20 @@
 
 .tray__list { list-style: none; }
 
-/* ── The canonical alert row: 36px, hairline-separated ── */
+/* ── The canonical alert row: rounded, hover-lifted ── */
 .arow {
   display: flex;
   align-items: center;
   gap: var(--s-3);
   height: var(--row-h);
-  padding: 0 var(--s-2);
-  border-bottom: 1px solid var(--brass-hairline);
+  padding: 0 var(--s-4);
+  border-radius: var(--r-md);
+  border: 1px solid transparent;
   position: relative;
   cursor: pointer;
-  transition: background var(--dur-tick) var(--ease-mechanical);
+  transition: background var(--dur-tick) var(--ease-optical), border-color var(--dur-tick) var(--ease-optical);
 }
-.arow:hover { background: var(--vault-700); }
+.arow:hover { background: var(--vault-700); border-color: var(--gold-hairline); }
 .arow:hover::after {
   /* the row's phosphor underline draws in */
   content: "";
@@ -33,8 +34,8 @@
 }
 @keyframes underline-draw { from { width: 0; } to { width: 100%; } }
 
-.arow__notch { width: 2px; height: 60%; background: var(--brass-dim); flex: none; }
-.arow__notch--critical { background: var(--oxblood-bright); }
+.arow__notch { width: 3px; height: 56%; border-radius: var(--r-full); background: var(--gold-dim); flex: none; }
+.arow__notch--critical { background: var(--signal); box-shadow: var(--glow-signal); }
 
 .arow__ref { font-size: var(--text-12); color: var(--ivory-text); width: 150px; flex: none; }
 .arow__signals { display: flex; gap: var(--s-1); flex: 1; min-width: 0; overflow: hidden; }
@@ -77,10 +78,11 @@
 .void-state__epigraph { font-size: var(--text-20); color: var(--ivory-text); }
 .void-state__detail { font-size: var(--text-12); color: var(--ivory-muted); max-width: 480px; }
 
-/* ── Skeleton: unprinted form, no shimmer ── */
+/* ── Skeleton: unprinted form ── */
 .row-skeleton {
   height: var(--row-h);
-  border-bottom: 1px solid var(--brass-hairline);
+  margin-bottom: var(--s-1);
+  border-radius: var(--r-md);
   background: linear-gradient(90deg, var(--vault-800) 25%, var(--vault-700) 50%, var(--vault-800) 75%);
   opacity: 0.5;
 }

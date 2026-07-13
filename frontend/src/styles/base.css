@@ -10,6 +10,7 @@ body {
   font-size: var(--text-14);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
   overflow-x: hidden;
 }
 
@@ -37,51 +38,73 @@ body {
 
 /* ── Focus: ARGUS looks where you look ── */
 :focus-visible {
-  outline: 1.5px solid var(--phosphor);
-  outline-offset: 2px;
-  border-radius: 1px;
+  outline: 1.5px solid var(--mint);
+  outline-offset: 3px;
+  border-radius: var(--r-xs);
 }
 
 /* ── Selection ── */
 ::selection { background: var(--brass); color: var(--vault-900); }
 
-/* ── Scrollbars: thin brass rail ── */
-* { scrollbar-width: thin; scrollbar-color: var(--brass-dim) transparent; }
-*::-webkit-scrollbar { width: 4px; height: 4px; }
-*::-webkit-scrollbar-thumb { background: var(--brass-dim); }
+/* ── Scrollbars: thin gold rail ── */
+* { scrollbar-width: thin; scrollbar-color: var(--gold-dim) transparent; }
+*::-webkit-scrollbar { width: 6px; height: 6px; }
+*::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: var(--r-full); }
+*::-webkit-scrollbar-thumb:hover { background: var(--gold-deep); }
 *::-webkit-scrollbar-track { background: transparent; }
 
-a { color: var(--brass-bright); text-decoration: none; }
+a { color: var(--gold-bright); text-decoration: none; }
 a:hover { text-decoration: underline; text-underline-offset: 3px; }
 
 button { font: inherit; cursor: pointer; background: none; border: none; color: inherit; }
 input, textarea, select { font: inherit; }
 
-/* ── Paper surface: fact world ── */
+/* ── Glass surface: the modern chrome ── */
+.glass {
+  background: var(--vault-glass);
+  backdrop-filter: blur(18px) saturate(1.2);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  border: 1px solid rgb(255 255 255 / 0.06);
+  border-radius: var(--r-lg);
+}
+
+/* ── Card: elevated vault surface, curved ── */
+.card {
+  background: var(--vault-800);
+  border: 1px solid var(--gold-hairline);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-md);
+}
+
+/* ── Paper surface: fact world (documents), now softly curved ── */
 .paper {
   background: var(--paper);
   color: var(--ink);
-  border: 1px solid var(--brass);
-  border-radius: 2px;
+  border: 1px solid var(--gold-deep);
+  border-radius: var(--r-md);
   box-shadow: var(--shadow-paper);
   position: relative;
 }
-/* 2% archival grain, paper only */
 .paper::after {
   content: "";
   position: absolute; inset: 0;
   pointer-events: none;
+  border-radius: inherit;
   opacity: 0.02;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* ── Minimum desk width ── */
+/* ── Minimum desk width — gates the console only, not landing/login ── */
+.desk-gate { display: none; }
 @media (max-width: 1279px) {
-  .desk-notice { display: flex; }
+  .desk-gate {
+    display: flex;
+    position: fixed; inset: 0; z-index: 100;
+    align-items: center; justify-content: center;
+    background: var(--vault-900);
+    padding: var(--s-6);
+  }
   .app-frame { display: none; }
-}
-@media (min-width: 1280px) {
-  .desk-notice { display: none; }
 }
 
 /* ── Reduced motion: mechanical → instant, optical → fade ── */
