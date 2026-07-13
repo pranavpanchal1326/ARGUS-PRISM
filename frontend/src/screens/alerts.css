@@ -1,0 +1,86 @@
+/* ── Trays ── */
+.tray { margin-bottom: var(--s-6); }
+.tray__head {
+  display: flex; align-items: center; gap: var(--s-3);
+  margin-bottom: var(--s-2);
+}
+.tray__sev { color: var(--brass-bright); letter-spacing: 0.12em; }
+.tray__sev--critical { color: var(--oxblood-bright); }
+.tray__count { font-size: var(--text-11); color: var(--ivory-muted); }
+.tray__rule { flex: 1; height: 1px; background: var(--brass-hairline); }
+
+.tray__list { list-style: none; }
+
+/* ── The canonical alert row: 36px, hairline-separated ── */
+.arow {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  height: var(--row-h);
+  padding: 0 var(--s-2);
+  border-bottom: 1px solid var(--brass-hairline);
+  position: relative;
+  cursor: pointer;
+  transition: background var(--dur-tick) var(--ease-mechanical);
+}
+.arow:hover { background: var(--vault-700); }
+.arow:hover::after {
+  /* the row's phosphor underline draws in */
+  content: "";
+  position: absolute; left: 0; bottom: -1px; height: 1px;
+  background: var(--phosphor-dim);
+  animation: underline-draw 160ms var(--ease-optical) forwards;
+}
+@keyframes underline-draw { from { width: 0; } to { width: 100%; } }
+
+.arow__notch { width: 2px; height: 60%; background: var(--brass-dim); flex: none; }
+.arow__notch--critical { background: var(--oxblood-bright); }
+
+.arow__ref { font-size: var(--text-12); color: var(--ivory-text); width: 150px; flex: none; }
+.arow__signals { display: flex; gap: var(--s-1); flex: 1; min-width: 0; overflow: hidden; }
+.arow__since { font-size: var(--text-11); color: var(--ivory-muted); width: 64px; text-align: right; flex: none; }
+
+.arow__sla {
+  font-size: var(--text-11);
+  width: 110px; flex: none; text-align: right;
+  /* paper-aging: the slip yellows as the deadline burns */
+  color: color-mix(in srgb, var(--ivory-muted) calc((1 - var(--burn, 0)) * 100%), var(--oxblood-bright) calc(var(--burn, 0) * 100%));
+}
+
+.arow__score { font-size: var(--text-12); width: 28px; text-align: right; flex: none; }
+
+/* new arrival: slide to rank + one brass shimmer across the hairline */
+.arow--arrived { animation: row-feed var(--dur-move) var(--ease-mechanical); }
+.arow--arrived::before {
+  content: "";
+  position: absolute; left: 0; right: 0; bottom: -1px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--brass-bright), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s var(--ease-optical) forwards;
+}
+@keyframes row-feed {
+  from { transform: translateY(-8px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; opacity: 0; }
+}
+
+/* ── Void states (empty / interrupted) ── */
+.void-state {
+  display: flex; flex-direction: column; align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-24) 0;
+  text-align: center;
+}
+.void-state__epigraph { font-size: var(--text-20); color: var(--ivory-text); }
+.void-state__detail { font-size: var(--text-12); color: var(--ivory-muted); max-width: 480px; }
+
+/* ── Skeleton: unprinted form, no shimmer ── */
+.row-skeleton {
+  height: var(--row-h);
+  border-bottom: 1px solid var(--brass-hairline);
+  background: linear-gradient(90deg, var(--vault-800) 25%, var(--vault-700) 50%, var(--vault-800) 75%);
+  opacity: 0.5;
+}

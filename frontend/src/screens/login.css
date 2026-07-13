@@ -1,0 +1,68 @@
+.teller-field {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(ellipse at 50% 120%, #10241e 0%, var(--vault-900) 65%);
+}
+
+.teller {
+  width: 420px;
+  padding: var(--s-8) var(--s-8) var(--s-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-6);
+}
+
+.teller__head { text-align: center; }
+.teller__wordmark {
+  font-size: var(--text-13);
+  letter-spacing: 0.22em;
+  color: var(--brass);
+}
+.teller__rule {
+  height: 1px; background: var(--brass);
+  opacity: 0.35; margin: var(--s-3) auto; width: 64px;
+}
+.teller__invite {
+  font-size: var(--text-28);
+  color: var(--ink);
+}
+
+.teller__form { display: flex; flex-direction: column; gap: var(--s-4); }
+.teller__submit { align-self: center; margin-top: var(--s-2); }
+.teller__back { align-self: center; }
+
+.teller__micr {
+  text-align: center;
+  font-size: var(--text-11);
+  color: var(--ink-faint);
+  letter-spacing: 0.1em;
+  border-top: 1px dashed var(--brass-hairline);
+  padding-top: var(--s-3);
+}
+
+.returned {
+  display: flex; align-items: center; gap: var(--s-2);
+  padding: var(--s-1) 0;
+}
+.returned__reason { font-size: var(--text-11); color: var(--oxblood); }
+
+/* ── The vault door: 600ms, once, then Alert Queue ── */
+.vault-door {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+.vault-door__leaf {
+  position: absolute; inset: 0;
+  background: var(--vault-800);
+  border-right: 2px solid var(--brass);
+  transform-origin: left center;
+  animation: door-swing var(--dur-scene) var(--ease-mechanical) forwards;
+}
+@keyframes door-swing {
+  from { transform: perspective(1200px) rotateY(0deg); }
+  to { transform: perspective(1200px) rotateY(-88deg); }
+}

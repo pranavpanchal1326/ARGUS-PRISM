@@ -1,0 +1,71 @@
+/* ═══════════════════════════════════════════════════════════════
+   ARGUS-PRISM — THE HUNDRED EYES · Design tokens v1.0
+   Two worlds: Paper (fact — ivory, ink, brass) and Light (analysis
+   — phosphor). They never blend. Paper has shadows, light has glow.
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+  /* ── The Vault (dark world surfaces) ── */
+  --vault-900: #0a1f1a;
+  --vault-800: #0e2a23;
+  --vault-700: #143229;
+
+  /* ── Paper (fact) ── */
+  --paper: #f3eddf;
+  --paper-aged: #e9dfc8;
+  --ink: #1c1b16;
+  --ink-faint: #1c1b1699;
+
+  /* ── Brass (the only metal) ── */
+  --brass: #b08d3e;
+  --brass-bright: #d4b36a;         /* text/icons on vault — AA+ */
+  --brass-hairline: #b08d3e1f;     /* 12% — table rules, borders */
+  --brass-dim: #b08d3e4d;          /* 30% — RBAC-disabled */
+
+  /* ── Phosphor (analysis — rationed: ≤5% of viewport, strokes only) ── */
+  --phosphor: #8ce8c8;
+  --phosphor-dim: #8ce8c866;
+  --phosphor-ghost: #8ce8c826;
+
+  /* ── Authority ── */
+  --oxblood: #7a2e2e;              /* CRITICAL/IMMINENT + wax only */
+  --oxblood-bright: #a84848;       /* oxblood legible on vault */
+
+  /* ── Text on vault ── */
+  --ivory-text: #ede6d6;           /* 12.8:1 on vault-900 */
+  --ivory-muted: #ede6d699;
+
+  /* ── The three voices ── */
+  --font-institution: "Playfair Display", "Georgia", serif;
+  --font-analyst: "Inter", "Segoe UI", system-ui, sans-serif;
+  --font-machine: "IBM Plex Mono", "Consolas", monospace;
+
+  /* ── Modular scale ── */
+  --text-11: 11px; --text-12: 12px; --text-13: 13px; --text-14: 14px;
+  --text-16: 16px; --text-20: 20px; --text-28: 28px; --text-40: 40px;
+  --text-56: 56px;
+
+  /* ── 4px spacing grid ── */
+  --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px; --s-6: 24px;
+  --s-8: 32px; --s-12: 48px; --s-16: 64px; --s-24: 96px;
+
+  /* ── Layout ── */
+  --nav-rail: 240px;
+  --nav-rail-collapsed: 64px;
+  --margin-watch: 32px;            /* the haunted margin, every screen */
+  --content-max: 1600px;
+  --row-h: 36px;
+  --row-h-compact: 32px;
+
+  /* ── Motion: mechanical (mass) or optical (light) ── */
+  --ease-mechanical: cubic-bezier(0.2, 0.9, 0.25, 1);
+  --ease-optical: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-tick: 120ms;
+  --dur-move: 240ms;
+  --dur-act: 450ms;
+  --dur-scene: 600ms;
+
+  /* ── Elevation: desk(0) paper(1) lifted(2) drawer(3) vault(4) ── */
+  --z-paper: 1; --z-lifted: 2; --z-drawer: 3; --z-vault: 4;
+  --shadow-paper: 0 3px 0 rgb(0 0 0 / 0.08);          /* paper sits, never floats */
+  --shadow-lifted: 0 6px 0 rgb(0 0 0 / 0.10);
+}

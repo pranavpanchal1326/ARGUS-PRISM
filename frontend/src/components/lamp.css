@@ -1,0 +1,18 @@
+.lamp { display: inline-flex; align-items: center; gap: var(--s-2); }
+.lamp__bulb {
+  width: 8px; height: 8px; border-radius: 50%;
+  border: 1px solid var(--brass);
+  position: relative;
+  flex: none;
+}
+.lamp__bulb::after {
+  content: ""; position: absolute; inset: 1px; border-radius: 50%;
+}
+.lamp__bulb--green::after { background: #4f9f7a; }
+.lamp__bulb--amber::after { background: var(--brass-bright); animation: lamp-breathe 4s var(--ease-optical) infinite; }
+.lamp__bulb--red::after { background: var(--oxblood-bright); }
+.lamp__bulb--off::after { background: transparent; }
+
+@keyframes lamp-breathe {
+  0%, 100% { opacity: 1; } 50% { opacity: 0.45; }
+}

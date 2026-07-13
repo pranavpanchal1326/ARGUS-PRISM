@@ -1,0 +1,88 @@
+/* Controls — the brass plate button, paper fields, request-slip chips. */
+
+/* ── Primary: the brass plate. One per view. Things depress. ── */
+.btn-brass {
+  display: inline-flex; align-items: center; gap: var(--s-2);
+  background: var(--vault-800);
+  border: 1px solid var(--brass-dim);
+  color: var(--brass-bright);
+  font-size: var(--text-13);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  padding: var(--s-2) var(--s-4);
+  border-radius: 2px;
+  transition: border-color var(--dur-tick) var(--ease-mechanical),
+              transform var(--dur-tick) var(--ease-mechanical);
+}
+.btn-brass:hover { border-color: var(--brass); }
+.btn-brass:active { transform: translateY(1px); }
+.btn-brass:disabled {
+  color: var(--brass-dim);
+  border-color: var(--brass-hairline);
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── Quiet secondary ── */
+.btn-quiet {
+  color: var(--ivory-muted);
+  font-size: var(--text-13);
+  padding: var(--s-2) var(--s-3);
+  transition: color var(--dur-tick) var(--ease-mechanical);
+}
+.btn-quiet:hover { color: var(--ivory-text); }
+
+/* ── Paper field: ivory, ink, brass hairline underline ── */
+.field { display: flex; flex-direction: column; gap: var(--s-1); }
+.field__label {
+  font-size: var(--text-11); font-weight: 500;
+  letter-spacing: 0.02em; text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.on-vault .field__label { color: var(--ivory-muted); }
+.field__input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--brass);
+  color: var(--ink);
+  font-size: var(--text-14);
+  padding: var(--s-2) 2px;
+  border-radius: 0;
+}
+.field__input::placeholder { font-family: var(--font-machine); color: var(--ink-faint); font-size: var(--text-13); }
+.field__input:focus { outline: none; border-bottom-width: 2px; margin-bottom: -1px; }
+.field--error .field__input { border-bottom-color: var(--oxblood); }
+.field__error {
+  color: var(--oxblood);
+  font-family: var(--font-machine);
+  font-size: var(--text-11);
+}
+
+/* ── TOTP: six engraved digit boxes, letterpress press-in ── */
+.totp { display: flex; gap: var(--s-2); justify-content: center; }
+.totp__digit {
+  width: 40px; height: 52px;
+  background: transparent;
+  border: 1px solid var(--brass);
+  border-radius: 2px;
+  color: var(--ink);
+  font-family: var(--font-machine);
+  font-size: var(--text-20);
+  text-align: center;
+}
+.totp__digit:focus { outline: 1.5px solid var(--phosphor); outline-offset: 2px; }
+.totp__digit--filled { animation: letterpress 60ms var(--ease-mechanical); }
+@keyframes letterpress {
+  from { transform: scale(1.08); } to { transform: scale(1); }
+}
+
+/* ── SHAP tag: small engraved chip ── */
+.chip {
+  display: inline-block;
+  border: 1px solid var(--brass-hairline);
+  color: var(--ivory-muted);
+  font-size: var(--text-11);
+  padding: 1px 6px;
+  border-radius: 2px;
+  white-space: nowrap;
+}
