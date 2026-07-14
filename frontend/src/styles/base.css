@@ -1,0 +1,124 @@
+/* ═══════════════════════════════════════════════════════════════
+   base.css — reset, surfaces, controls, states.
+   LAW I: ink, never glow. No gradients, no blur, no neon.
+   ═══════════════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body, #root { height: 100%; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  overflow-x: hidden;
+}
+
+/* Fiber texture — literal short fiber strokes, not noise (Part 6.2).
+   Never applied to data tables (the Ration). */
+.fibered {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cg stroke='%231A1B18' stroke-opacity='0.016' stroke-width='0.6'%3E%3Cpath d='M12 30l9 2M60 14l7-3M110 44l8 1M170 22l6 4M210 60l9-2M34 90l8-2M84 120l7 3M140 96l9 1M196 130l7-3M20 160l9 2M70 190l8-1M126 170l7 3M180 200l9-2M228 170l6 2M48 224l8-2M104 214l9 1M160 228l7-3M8 120l7 2M224 100l8 2M150 60l7-2'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* ── Focus ring: 2px reserve @ 3px offset, never suppressed ── */
+:focus-visible {
+  outline: 2px solid var(--reserve);
+  outline-offset: 3px;
+  border-radius: var(--radius);
+}
+
+::selection { background: var(--reserve-wash); color: var(--ink); }
+
+* { scrollbar-width: thin; scrollbar-color: var(--rule-strong) transparent; }
+
+a { color: var(--reserve); text-decoration: none; }
+a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+button { font: inherit; cursor: pointer; background: none; border: none; color: inherit; }
+input, textarea, select { font: inherit; color: inherit; }
+
+/* ── Plane 1 — the index card. NEVER moves on hover. ── */
+.card {
+  background: var(--paper-raised);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}
+
+/* ── Buttons (Part 9.15) — one PRIMARY per view ── */
+.btn {
+  display: inline-flex; align-items: center; gap: var(--s-2);
+  height: 32px; padding: 0 var(--s-4);
+  border-radius: var(--radius);
+  font-size: var(--text-13); font-weight: 500;
+  transition: background var(--dur-hover) var(--press-out);
+}
+.btn--primary { background: var(--ink); color: var(--paper); }
+.btn--primary:hover { background: var(--ink-mut); }
+.btn--secondary { border: 1px solid var(--rule-strong); color: var(--ink); }
+.btn--secondary:hover { background: var(--paper-sunken); }
+.btn--quiet {
+  color: var(--ink-mut); text-decoration: underline;
+  text-underline-offset: 3px; padding: 0 var(--s-1); height: auto;
+}
+.btn--quiet:hover { color: var(--ink); }
+.btn:active { transform: translateY(1px); background-color: var(--paper-sunken); }
+.btn--primary:active { background: var(--ink); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── Ruled input (Part 9.15) ── */
+.field { display: flex; flex-direction: column; gap: var(--s-1); }
+.field__label {
+  font-size: var(--text-11); font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--ink-mut);
+}
+.field__input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--rule-strong);
+  border-radius: 0;
+  padding: var(--s-2) 0;
+  font-size: var(--text-14);
+  transition: border-color var(--dur-hover) var(--press-out);
+}
+.field__input:focus {
+  outline: none;
+  border-bottom: 2px solid var(--reserve);
+  margin-bottom: -1px;
+}
+.field__input::placeholder { color: var(--ink-faint); }
+.field--error .field__input { border-bottom-color: var(--vermilion); }
+
+/* ── Punch-card filter (Part 9.19) ── */
+.punch {
+  display: inline-flex; align-items: center; gap: var(--s-2);
+  padding: var(--s-1) var(--s-3);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  font-size: var(--text-11); font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--ink-mut);
+  transition: background var(--dur-hover) var(--press-out);
+}
+.punch::before {
+  content: ""; width: 8px; height: 8px;
+  border: 1.5px solid currentColor; border-radius: 50%;
+}
+.punch:hover { background: var(--paper-sunken); }
+.punch--active { color: var(--ink); border-color: var(--ink); }
+.punch--active::before { background: currentColor; }
+
+/* ── The skeleton: unprinted paper — ruled rows, NO shimmer (Part 7.4) ── */
+.unprinted {
+  height: 12px; border-radius: var(--radius);
+  background: rgba(var(--ink-rgb), 0.07);
+}
+
+/* ── Misprint / error block ── */
+.misprint { padding: var(--s-8); text-align: left; max-width: 480px; }
+.misprint__stamp { margin-bottom: var(--s-3); }
+.misprint__detail {
+  font-family: var(--font-machine);
+  font-size: var(--text-12);
+  color: var(--ink-mut);
+  margin-bottom: var(--s-4);
+}

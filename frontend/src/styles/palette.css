@@ -1,0 +1,40 @@
+/* ═══════════════════════════════════════════════════════════════
+   THE SECURITY PRESS · palette.css — raw inks.
+   THE ONLY FILE IN THE CODEBASE PERMITTED TO CONTAIN HEX VALUES.
+   (UI-MASTER-BLUEPRINT Part 16.1 / Appendix A.1)
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+  /* NOTE — the printed banknote */
+  --palette-note-paper: #F1EDE3;
+  --palette-note-paper-raised: #F7F4EC;
+  --palette-note-paper-sunken: #E9E4D6;
+  --palette-note-paper-aged: #E4DCC8;
+  --palette-note-ink: #1A1B18;
+  --palette-note-ink-rgb: 26, 27, 24;
+  --palette-note-reserve: #1F3FB5;
+  --palette-note-reserve-pressed: #16308F;
+  --palette-note-reserve-rgb: 31, 63, 181;
+  --palette-note-vermilion: #E33F1E;
+  --palette-note-vermilion-pressed: #C13317;
+  --palette-note-vermilion-rgb: 227, 63, 30;
+  --palette-note-intaglio: #2E5D4B;
+  --palette-note-verified: #2E7D52;
+
+  /* PLATE — the engraver's negative */
+  --palette-plate-paper: #12130F;
+  --palette-plate-paper-raised: #1A1B16;
+  --palette-plate-paper-sunken: #0C0D0A;
+  --palette-plate-paper-aged: #181712;
+  --palette-plate-ink: #EFE9DA;
+  --palette-plate-ink-rgb: 239, 233, 218;
+  --palette-plate-reserve: #5C77E6;
+  --palette-plate-reserve-pressed: #7D93F0;
+  --palette-plate-reserve-rgb: 92, 119, 230;
+  --palette-plate-vermilion: #FF5A38;
+  --palette-plate-vermilion-pressed: #FF7A5C;
+  --palette-plate-vermilion-rgb: 255, 90, 56;
+  --palette-plate-intaglio: #7FA694;
+  --palette-plate-verified: #5FBF8F;
+
+  --palette-black-rgb: 0, 0, 0;
+}

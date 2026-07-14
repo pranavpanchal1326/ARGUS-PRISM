@@ -1,0 +1,66 @@
+/* SHEET 00 · THE NOTE ITSELF */
+.note-page { min-height: 100%; background: var(--paper); color: var(--ink); padding: var(--s-8); }
+
+.note {
+  position: relative; max-width: 1000px; margin: 0 auto;
+  background: var(--paper-raised); padding: var(--s-16) var(--s-16) var(--s-12);
+  min-height: 560px;
+}
+.note__border { position: absolute; inset: 0; color: var(--intaglio); pointer-events: none; }
+.note__frame-draw {
+  stroke-dasharray: 3120; animation: m4-draw 1200ms var(--press-out) both;
+}
+.note__top { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--s-16); }
+.note__serial { font-size: var(--text-12); color: var(--ink-mut); }
+
+.note__hero { display: grid; grid-template-columns: 1fr auto; gap: var(--s-16); align-items: center; }
+.note__title { font-size: var(--text-96); line-height: 0.95; margin: var(--s-3) 0 var(--s-6); }
+.note__creed { font-size: var(--text-16); max-width: 52ch; color: var(--ink-mut); }
+.note__cta { display: flex; align-items: center; gap: var(--s-4); margin-top: var(--s-8); }
+.note__micro { font-size: 8px; letter-spacing: 0.2em; color: var(--ink-faint); margin-top: var(--s-8); overflow: hidden; white-space: nowrap; }
+.note__rosette { color: var(--ink); }
+
+/* ── The examination stations ── */
+.examine { max-width: 1000px; margin: var(--s-16) auto 0; }
+.section-head { margin-bottom: var(--s-12); }
+.station {
+  display: grid; grid-template-columns: 200px 1fr; gap: var(--s-16);
+  align-items: center; padding: var(--s-12) 0; border-top: 1px solid var(--rule);
+}
+.station--flip { direction: rtl; }
+.station--flip > * { direction: ltr; }
+.station__loupe {
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink); border: 1px solid var(--rule-strong); border-radius: 50%;
+  width: 180px; height: 180px; overflow: hidden;
+}
+.station__truth { margin: var(--s-2) 0 var(--s-3); }
+.station__line { font-size: var(--text-16); color: var(--ink-mut); max-width: 62ch; }
+
+/* ── Stats strip ── */
+.note-stats {
+  max-width: 1000px; margin: var(--s-16) auto 0;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-8);
+  border-top: 1px solid var(--rule-strong); border-bottom: 1px solid var(--rule-strong);
+  padding: var(--s-8) 0;
+}
+.note-stat__v { font-size: var(--text-40); font-weight: 600; }
+.note-stat__k { margin-top: var(--s-1); }
+
+/* ── Creed ── */
+.note-creed { max-width: 1000px; margin: var(--s-16) auto; text-align: center; }
+.note-creed blockquote { margin-bottom: var(--s-8); }
+
+.note-foot { max-width: 1000px; margin: 0 auto; text-align: center; font-size: var(--text-11); color: var(--ink-faint); letter-spacing: 0.1em; padding-top: var(--s-8); }
+
+/* ── Reveal ── */
+.reveal { opacity: 0; transform: translateY(12px); transition: opacity 500ms var(--press-out), transform 500ms var(--press-out); }
+.reveal--in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; } .note__frame-draw { animation: none; } }
+
+@media (max-width: 860px) {
+  .note__hero { grid-template-columns: 1fr; }
+  .note__title { font-size: var(--text-64); }
+  .station, .station--flip { grid-template-columns: 1fr; direction: ltr; }
+  .note-stats { grid-template-columns: repeat(2, 1fr); }
+}

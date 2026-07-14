@@ -1,0 +1,25 @@
+/* THE PRESS LEXICON (Part 12) — canonical strings. One voice, everywhere.
+   Institutional, precise, unhurried. No exclamation marks in the console. */
+export const LEX = {
+  queueEmpty: "No sheets await examination. The press runs clean.",
+  connectionLost: "The press has stopped. Reconnecting…",
+  reconnected: (n: number) => `The press resumes. ${n} sheets arrived while away.`,
+  loginError: "RETURNED — credentials not recognized.",
+  mfaEnrol: "Your key is cut once. The press keeps no copy.",
+  sessionExpired: "Your session has lapsed. Present your credentials.",
+  fpReason: "State the basis. The register keeps reasons, not moods.",
+  deskGate: "A wider desk is required. The press prints on sheets no narrower than 1280 pixels.",
+  notFound: "THIS SHEET DOES NOT EXIST.",
+  returnToPress: "Return to the press.",
+  misprint: "MISPRINT",
+  queueError: "The sheet could not be printed.",
+  awaiting: "AWAITING EXAMINATION",
+  docketPolicy: "Ordered by urgency: deadline × severity × taint × exposure.",
+  underConstruction: "This sheet has not yet been struck.",
+  leaveDesk: "LEAVE THE DESK",
+  basisOfExamination: "BASIS OF EXAMINATION",
+  indications: "INDICATIONS",
+  contraIndications: "CONTRA-INDICATIONS",
+  noneRecorded: "NONE RECORDED",
+  feed: (n: number) => `${n} NEW ${n === 1 ? "SHEET" : "SHEETS"} — FEED`,
+} as const;

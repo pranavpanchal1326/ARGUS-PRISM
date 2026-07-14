@@ -1,0 +1,20 @@
+/* SHEET 06 — The Engraver's Plate */
+.plate-sheet { display: grid; grid-template-columns: minmax(200px, 260px) 1fr; gap: var(--s-8); align-items: start; }
+.plate-margin { display: flex; flex-direction: column; gap: var(--s-6); position: sticky; top: 0; }
+.plate-depth__stops { display: flex; gap: var(--s-2); margin-top: var(--s-2); }
+.plate-legend { padding: var(--s-4); }
+.plate-legend__list { list-style: none; display: flex; flex-direction: column; gap: var(--s-2); margin-top: var(--s-3); font-size: var(--text-12); color: var(--ink-mut); }
+
+.plate-canvas-wrap {
+  border: 1px solid var(--rule-strong); background: var(--paper-sunken);
+  min-height: 620px; display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+}
+.plate-canvas { display: block; cursor: crosshair; }
+
+.plate-drawer { display: flex; flex-direction: column; align-items: center; gap: var(--s-4); }
+
+@media (max-width: 1200px) {
+  .plate-sheet { grid-template-columns: 1fr; }
+  .plate-margin { position: static; }
+}

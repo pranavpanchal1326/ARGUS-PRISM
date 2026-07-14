@@ -1,0 +1,28 @@
+/* SHEET 04 — The Examination Desk */
+.margin__filters { display: flex; flex-wrap: wrap; gap: var(--s-2); margin-top: var(--s-6); }
+.feed-note {
+  display: inline-block; margin-top: var(--s-4);
+  color: var(--reserve); border: 1px solid var(--reserve);
+  border-radius: var(--radius); padding: var(--s-1) var(--s-3);
+  font-size: var(--text-11); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+}
+
+.desk { display: grid; grid-template-columns: 5fr 5fr; gap: var(--s-6); align-items: start; }
+.tray { list-style: none; }
+.desk__dossier { position: sticky; top: 0; }
+
+/* ── The dossier ── */
+.dossier { padding: var(--s-6); }
+.certificate { display: grid; grid-template-columns: 72px 1fr auto; gap: var(--s-4); align-items: center; padding-bottom: var(--s-4); border-bottom: 1px solid var(--rule); }
+.certificate__id { display: flex; flex-direction: column; gap: var(--s-1); }
+.certificate__serial { font-size: var(--text-16); }
+.certificate__score { display: flex; flex-direction: column; align-items: flex-end; gap: var(--s-2); }
+
+.dossier .worksheet { margin-top: var(--s-4); }
+.dossier__sla { display: flex; align-items: center; justify-content: space-between; margin-top: var(--s-4); padding-top: var(--s-4); border-top: 1px solid var(--rule); }
+.dossier__actions { display: flex; align-items: center; gap: var(--s-4); margin-top: var(--s-6); padding-top: var(--s-4); border-top: 1px solid var(--rule); flex-wrap: wrap; }
+
+@media (max-width: 1439px) {
+  .desk { grid-template-columns: 1fr; }
+  .desk__dossier { position: static; }
+}
