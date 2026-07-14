@@ -154,6 +154,77 @@
 .index-row__hint { font-size: var(--text-12); color: var(--ink-mut); }
 .index-empty { padding: var(--s-6); color: var(--ink-faint); text-align: center; }
 
+/* ── WATERMARK IDLE (M11) ──────────────────────────────────────── */
+.watermark-layer {
+  position: fixed; inset: 0; z-index: 1; pointer-events: none;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink); opacity: 0.08;
+  animation: watermark-in 3s var(--press-out) both;
+}
+.watermark-layer--breathe { animation: watermark-in 3s var(--press-out) both, m11-breathe 8s 3s infinite; }
+@keyframes watermark-in { from { opacity: 0; } to { opacity: 0.08; } }
+
+/* ── THE KEYBOARD SHEET (Appendix B) ───────────────────────────── */
+.help-scrim { position: fixed; inset: 0; z-index: 75; background: rgba(var(--ink-rgb), 0.25); display: flex; align-items: center; justify-content: center; padding: var(--s-6); }
+.help-sheet { background: var(--paper-raised); border: 1px solid var(--rule-strong); box-shadow: var(--shadow-card); padding: var(--s-8); width: 480px; max-width: 92vw; animation: m1-feed var(--dur-feed) var(--press-out); }
+.help-map { margin-top: var(--s-4); display: flex; flex-direction: column; }
+.help-row { display: grid; grid-template-columns: 140px 1fr; gap: var(--s-4); padding: var(--s-2) 0; border-bottom: 1px solid var(--rule); }
+.help-row dt { font-size: var(--text-12); color: var(--ink-mut); }
+.help-row dd { font-size: var(--text-13); }
+
+/* ── HATCH CHART (9.5) ─────────────────────────────────────────── */
+.hatch-fig { margin: 0; }
+.hatch-svg { width: 100%; height: auto; display: block; }
+.hatch-band { font-family: var(--font-machine); font-size: 8px; fill: var(--ink-faint); }
+.hatch-caption { font-family: var(--font-machine); font-size: var(--text-11); color: var(--ink-mut); margin-top: var(--s-2); letter-spacing: 0.04em; }
+
+/* ── THE REPLAY (9.13) ─────────────────────────────────────────── */
+.replay { margin-top: var(--s-4); }
+.replay__track { position: relative; height: 24px; }
+.replay__density { position: absolute; inset: 0 0 12px 0; }
+.replay__tick { position: absolute; top: 0; width: 1px; height: 10px; }
+.replay__bar { position: absolute; left: 0; right: 0; bottom: 0; height: 12px; cursor: pointer; display: flex; align-items: center; }
+.replay__bar::before { content: ""; position: absolute; left: 0; right: 0; height: 2px; background: var(--rule-strong); }
+.replay__thumb { position: absolute; width: 3px; height: 12px; background: var(--ink); transform: translateX(-50%); transition: left 120ms var(--press-out); }
+.replay__bar:focus-visible { outline: 2px solid var(--reserve); outline-offset: 3px; }
+.replay__foot { display: flex; align-items: center; gap: var(--s-3); margin-top: var(--s-2); }
+.replay__date { font-size: var(--text-11); color: var(--ink-faint); }
+.replay__now { flex: 1; text-align: center; font-size: var(--text-11); color: var(--ink-mut); }
+.replay__now--live { color: var(--verified); font-weight: 600; }
+.replay__live-chip { display: inline-flex; align-items: center; gap: var(--s-1); font-size: var(--text-11); font-weight: 700; letter-spacing: 0.06em; padding: 2px var(--s-2); border: 1px solid var(--rule-strong); border-radius: var(--radius); color: var(--ink-mut); }
+.replay__live-chip--on { color: var(--verified); border-color: var(--verified); }
+.cert-head--replaying { outline: 1px dashed var(--reserve); outline-offset: 2px; }
+
+/* ── THE REDACTION BAR (9.17) ──────────────────────────────────── */
+.redaction { display: inline-flex; align-items: center; gap: var(--s-2); }
+.redaction__bar { color: var(--ink); letter-spacing: -1px; font-family: var(--font-machine); user-select: none; }
+.redaction--open { color: var(--ink); }
+
+/* ── THE ROUTING SLIP (9.14) ───────────────────────────────────── */
+.deckle { clip-path: polygon(0 4px, 4% 0, 9% 4px, 15% 0, 22% 4px, 30% 0, 38% 4px, 46% 0, 54% 4px, 62% 0, 70% 4px, 78% 0, 86% 4px, 93% 0, 100% 4px, 100% 100%, 0 100%); }
+.routing { display: flex; flex-direction: column; gap: var(--s-6); padding-top: var(--s-2); }
+.routing__block > .v-label { display: block; margin-bottom: var(--s-2); }
+.routing__req { color: var(--vermilion); margin-left: var(--s-2); }
+.routing__basis { width: 100%; border: 1px solid var(--rule-strong); border-radius: var(--radius); padding: var(--s-3); resize: vertical; }
+.routing__count { font-size: var(--text-11); color: var(--vermilion); margin-top: var(--s-1); }
+.routing__count--ok { color: var(--verified); }
+.routing__actions { display: flex; gap: var(--s-2); }
+.routing__sign { border-top: 1px solid var(--rule-strong); padding-top: var(--s-4); display: flex; flex-direction: column; gap: var(--s-4); align-items: flex-start; }
+.routing__signline { font-size: var(--text-11); color: var(--ink-mut); }
+
+/* ── THE COMPARATOR (9.12) ─────────────────────────────────────── */
+.comparator { display: flex; flex-direction: column; gap: var(--s-6); }
+.comparator__pair { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-4); }
+.comparator__fig { display: flex; flex-direction: column; align-items: center; gap: var(--s-2); padding: var(--s-4); border: 1px solid var(--rule); }
+.comparator__cohort { font-size: var(--text-11); color: var(--ink-mut); text-align: center; }
+.comparator__ledger { display: flex; flex-direction: column; }
+.comparator__row { display: grid; grid-template-columns: 1fr 70px 70px 100px; gap: var(--s-2); align-items: center; padding: var(--s-2) 0; border-bottom: 1px solid var(--rule); font-size: var(--text-13); }
+.comparator__row--head { color: var(--ink-mut); font-size: var(--text-11); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.comparator__r { text-align: right; }
+.comparator__dev { display: flex; align-items: center; justify-content: flex-end; gap: var(--s-2); }
+.comparator__hatch { height: 8px; background: repeating-linear-gradient(45deg, var(--intaglio) 0 1px, transparent 1px 3px); }
+.comparator__none { font-size: var(--text-12); color: var(--ink-faint); padding: var(--s-4) 0; }
+
 /* ── THE EXAMINER (Sheet 12 / 9.22) ────────────────────────────── */
 .loupe-btn {
   position: fixed; right: var(--s-6); bottom: var(--s-6); z-index: 55;

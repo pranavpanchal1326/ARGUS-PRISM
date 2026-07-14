@@ -5,10 +5,8 @@ import { createRoot } from "react-dom/client";
    until the Fontshare subset lands); Display/Text fall back gracefully. */
 import "@fontsource/ibm-plex-mono/400.css";
 import "@fontsource/ibm-plex-mono/500.css";
-import "@fontsource/inter/400.css";
-import "@fontsource/inter/500.css";
-import "@fontsource/inter/700.css";
 
+import "./styles/fonts.css";
 import "./styles/palette.css";
 import "./styles/semantic.css";
 import "./styles/type.css";

@@ -1,0 +1,30 @@
+/* ═══════════════════════════════════════════════════════════════
+   fonts.css — the two display voices, self-hosted (Part 3.2).
+   Zodiak (DISPLAY) · Supreme (TEXT) from Fontshare (ITF Free Font
+   License — commercial OK, self-host). Machine = Martian/IBM Plex Mono
+   loaded via @fontsource in main.tsx.
+   ═══════════════════════════════════════════════════════════════ */
+@font-face {
+  font-family: "Zodiak"; font-style: normal; font-weight: 400;
+  font-display: swap; src: url("/fonts/zodiak-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Zodiak"; font-style: normal; font-weight: 500;
+  font-display: swap; src: url("/fonts/zodiak-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Zodiak"; font-style: normal; font-weight: 700;
+  font-display: swap; src: url("/fonts/zodiak-700.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Supreme"; font-style: normal; font-weight: 400;
+  font-display: swap; src: url("/fonts/supreme-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Supreme"; font-style: normal; font-weight: 500;
+  font-display: swap; src: url("/fonts/supreme-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Supreme"; font-style: normal; font-weight: 700;
+  font-display: swap; src: url("/fonts/supreme-700.woff2") format("woff2");
+}

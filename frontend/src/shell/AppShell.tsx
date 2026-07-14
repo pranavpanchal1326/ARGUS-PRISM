@@ -7,6 +7,7 @@ import { Rosette } from "../canon/Rosette";
 import { Index } from "../canon/Index";
 import { ProfileDrawer } from "../canon/ProfileDrawer";
 import { Examiner } from "../canon/Examiner";
+import { Ambient } from "./Ambient";
 import { ViewBoundary } from "./ViewBoundary";
 import { useAuth } from "./AuthContext";
 import { useMode } from "./ModeContext";
@@ -148,6 +149,7 @@ export function AppShell() {
       <Index />
       <ProfileDrawer open={profileOpen} onClose={() => setProfileOpen(false)} />
       <Examiner />
+      <Ambient warmth={warmth} />
     </>
   );
 }
