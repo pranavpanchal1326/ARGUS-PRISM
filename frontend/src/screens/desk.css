@@ -22,6 +22,9 @@
 .dossier__sla { display: flex; align-items: center; justify-content: space-between; margin-top: var(--s-4); padding-top: var(--s-4); border-top: 1px solid var(--rule); }
 .dossier__actions { display: flex; align-items: center; gap: var(--s-4); margin-top: var(--s-6); padding-top: var(--s-4); border-top: 1px solid var(--rule); flex-wrap: wrap; }
 
+.fp-reason { margin-top: var(--s-4); padding-top: var(--s-4); border-top: 1px solid var(--rule); display: flex; flex-direction: column; gap: var(--s-3); }
+.fp-reason__actions { display: flex; align-items: center; gap: var(--s-4); }
+
 @media (max-width: 1439px) {
   .desk { grid-template-columns: 1fr; }
   .desk__dossier { position: static; }

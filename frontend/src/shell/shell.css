@@ -87,7 +87,11 @@
 .folio__aperture--lost { color: var(--vermilion); }
 
 /* ── THE WORKING AREA (9 cols; ornament-free) ── */
-.working { flex: 1; overflow-y: auto; padding: var(--s-8) var(--s-6) var(--s-16); }
+.working { flex: 1; overflow-y: auto; padding: var(--s-8) var(--s-6) var(--s-16); scroll-behavior: smooth; }
+/* Plate wipe (M5) — the sheet re-prints on route change */
+.working > * { animation: sheet-wipe var(--dur-wipe) var(--press-out); }
+@keyframes sheet-wipe { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .working > * { animation: none; } }
 
 /* ── THE MARGINALIA (9.11) ── */
 .marginalia { border-left: 1px solid var(--rule); background: transparent; position: relative; overflow: hidden; }

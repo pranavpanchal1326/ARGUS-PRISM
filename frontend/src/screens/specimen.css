@@ -29,6 +29,14 @@
 .cert-section { margin-bottom: var(--s-8); }
 .cert-section > .v-label { display: block; margin-bottom: var(--s-3); }
 
+/* ── Specifications S1–S6 ── */
+.spec-ledger { display: flex; flex-direction: column; }
+.spec-row { display: grid; grid-template-columns: 40px 1fr 120px 56px; gap: var(--s-3); align-items: center; padding: var(--s-2) 0; border-bottom: 1px solid var(--rule); }
+.spec-row__code { font-size: var(--text-12); color: var(--ink-mut); }
+.spec-row__name { font-size: var(--text-13); }
+.spec-row__hatch { height: 8px; background: repeating-linear-gradient(45deg, var(--intaglio) 0 1px, transparent 1px 3px); }
+.spec-row__val { text-align: right; font-size: var(--text-12); }
+
 /* ── The ledger table (9.6) ── */
 .ledger { width: 100%; border-collapse: collapse; }
 .ledger th {
@@ -39,6 +47,10 @@
 .ledger td { font-size: var(--text-13); padding: var(--s-2) var(--s-3); border-bottom: 1px solid var(--rule); height: var(--ledger-row-h); }
 .ledger__r { text-align: right; }
 .ledger__out { color: var(--vermilion); }
+
+.linked-plate { display: inline-flex; align-items: center; gap: var(--s-4); padding: var(--s-3) var(--s-4); border: 1px solid var(--rule-strong); color: var(--ink); transition: background var(--dur-hover) var(--press-out); }
+.linked-plate:hover { background: var(--paper-sunken); text-decoration: none; }
+.linked-plate__label { font-size: var(--text-13); }
 
 .cert-actions { display: flex; gap: var(--s-6); padding-top: var(--s-6); border-top: 1px solid var(--rule-strong); }
 

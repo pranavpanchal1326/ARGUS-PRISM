@@ -1,7 +1,8 @@
 /* SHEET 00 · THE NOTE ITSELF (Part 10). The public face is one oversized
    engraved banknote on cotton paper. NOTE mode always. */
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { api, type Pulse } from "../api/client";
 import { useAuth } from "../shell/AuthContext";
 import { useLockMode } from "../shell/ModeContext";
 import { Rosette } from "../canon/Rosette";
@@ -39,6 +40,13 @@ export function Landing() {
     );
     els.forEach((el) => io.observe(el));
     return () => io.disconnect();
+  }, []);
+
+  /* Even the landing obeys Law 2 — live figures where the API is reachable;
+     the claims stand without them where it is not. No fakes. */
+  const [pulse, setPulse] = useState<Pulse | null>(null);
+  useEffect(() => {
+    api<{ data: Pulse }>("/api/v1/metrics/pulse").then((r) => setPulse(r.data)).catch(() => setPulse(null));
   }, []);
 
   const serial = `AP-2026-0714-${String(Math.floor(Math.random() * 9000) + 1000)}`;
@@ -100,7 +108,19 @@ export function Landing() {
       </section>
 
       <section className="note-stats reveal">
-        {STATS.map((s) => (
+        {pulse && (
+          <div className="note-stat">
+            <div className="note-stat__v mx num">{pulse.accounts_watched.toLocaleString("en-IN")}</div>
+            <div className="note-stat__k v-label">ACCOUNTS · WATCHED NOW</div>
+          </div>
+        )}
+        {pulse && (
+          <div className="note-stat">
+            <div className="note-stat__v mx num">{pulse.active_alerts}</div>
+            <div className="note-stat__k v-label">ALERTS · OPEN NOW</div>
+          </div>
+        )}
+        {STATS.slice(0, pulse ? 2 : 4).map((s) => (
           <div key={s.k} className="note-stat">
             <div className="note-stat__v mx num">{s.v}</div>
             <div className="note-stat__k v-label">{s.k}</div>

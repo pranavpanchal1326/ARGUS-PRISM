@@ -4,12 +4,15 @@
    accumulate in the folio; the operator FEEDS them — the tray a reader
    holds never reorders under the cursor. */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { api, WS_BASE, tokens, ApiProblem, WatchInterrupted, type Alert, type Severity } from "../api/client";
 import { Slip } from "../canon/Slip";
 import { Worksheet } from "../canon/Worksheet";
 import { Rosette } from "../canon/Rosette";
 import { Overprint } from "../canon/Overprint";
 import { Seal } from "../canon/Seal";
+import { RoutingSlip } from "../canon/RoutingSlip";
+import { useNotices } from "../canon/Notices";
 import { paramsFromScore } from "../engine/rosette";
 import { timestamp, slaState } from "../lib/format";
 import { LEX } from "../lexicon/strings";
@@ -20,15 +23,27 @@ const SEV_RANK: Record<Severity, number> = { IMMINENT: 0, CRITICAL: 1, HOT: 2, W
 type Filter = "all" | Severity;
 
 export function ExaminationDesk() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [alerts, setAlerts] = useState<Alert[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(() => searchParams.get("sel"));
+
+  /* Selection round-trips through the URL (Part 19.2 deep-link grammar) —
+     synced in an effect so we never touch the router during render. */
+  useEffect(() => {
+    setSearchParams((p) => {
+      if (selectedId) { if (p.get("sel") !== selectedId) p.set("sel", selectedId); }
+      else if (p.has("sel")) p.delete("sel");
+      return p;
+    }, { replace: true });
+  }, [selectedId, setSearchParams]);
   const [examined, setExamined] = useState<Set<string>>(new Set());
   const [pending, setPending] = useState<Alert[]>([]); // arrivals awaiting FEED
   const [feedIds, setFeedIds] = useState<Set<string>>(new Set());
   const [filter, setFilter] = useState<Filter>("all");
   const [, tick] = useState(0);
   const trayRef = useRef<HTMLOListElement | null>(null);
+  const { post } = useNotices();
 
   const load = useCallback(async () => {
     setError(null);
@@ -102,12 +117,35 @@ export function ExaminationDesk() {
     if (next) setSelectedId(next.id);
   }, [docket, selectedId]);
 
-  const markExamined = useCallback((id: string) => {
-    setExamined((s) => new Set(s).add(id));
+  const advanceFrom = useCallback((id: string) => {
     const i = docket.findIndex((a) => a.id === id);
     const next = docket.slice(i + 1).find((a) => !examined.has(a.id));
     if (next) setSelectedId(next.id);
   }, [docket, examined]);
+
+  /* Examined = acknowledge (reversible). Optimistic; reverts on failure. */
+  const markExamined = useCallback(async (id: string) => {
+    setExamined((s) => new Set(s).add(id));
+    advanceFrom(id);
+    try {
+      await api(`/api/v1/alerts/${id}`, { method: "PATCH", body: JSON.stringify({ action: "acknowledge" }) });
+    } catch (err) {
+      setExamined((s) => { const n = new Set(s); n.delete(id); return n; });
+      post({ msg: err instanceof ApiProblem ? err.title : "The acknowledgement was returned.", tone: "error" });
+    }
+  }, [advanceFrom, post]);
+
+  /* False positive = hard-reversible; requires a reason (audit-logged). */
+  const falsePositive = useCallback(async (id: string, reason: string) => {
+    try {
+      await api(`/api/v1/alerts/${id}`, { method: "PATCH", body: JSON.stringify({ action: "mark_false_positive", note: reason }) });
+      setAlerts((cur) => (cur ?? []).filter((a) => a.id !== id));
+      advanceFrom(id);
+      post({ msg: "Marked false positive. The register keeps the reason.", tone: "success" });
+    } catch (err) {
+      post({ msg: err instanceof ApiProblem ? err.title : "The dismissal was returned.", tone: "error" });
+    }
+  }, [advanceFrom, post]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -172,7 +210,11 @@ export function ExaminationDesk() {
           </ol>
         </div>
         <div className="desk__dossier">
-          {selected ? <Dossier alert={selected} onExamined={() => markExamined(selected.id)} /> : null}
+          {selected ? (
+            <Dossier alert={selected}
+              onExamined={() => void markExamined(selected.id)}
+              onFalsePositive={(reason) => void falsePositive(selected.id, reason)} />
+          ) : null}
         </div>
       </div>
     </Frame>
@@ -206,13 +248,31 @@ function Frame({ count, filter, setFilter, pending = 0, onFeed, children }: {
   );
 }
 
-function Dossier({ alert, onExamined }: { alert: Alert; onExamined: () => void }) {
+function Dossier({ alert, onExamined, onFalsePositive }: {
+  alert: Alert; onExamined: () => void; onFalsePositive: (reason: string) => void;
+}) {
+  const [routing, setRouting] = useState(false);
+  const [fpOpen, setFpOpen] = useState(false);
+  const [fpReason, setFpReason] = useState("");
+  const { post } = useNotices();
   const params = paramsFromScore(
     alert.warmth_score,
     (alert.top_signals ?? []).map((s) => s.contribution),
     alert.account_ref,
   );
   const sla = alert.sla_deadline ? slaState(alert.sla_deadline, alert.first_signal_at) : null;
+
+  async function escalate(basis: string, actions: string[]) {
+    try {
+      await api(`/api/v1/alerts/${alert.id}`, { method: "PATCH", body: JSON.stringify({ action: "assign", note: `ESCALATE [${actions.join("/")}] ${basis}` }) });
+      post({ msg: `${alert.account_ref} routed to MLRO. Slip filed with audit ref.`, tone: "success" });
+    } catch (err) {
+      post({ msg: err instanceof ApiProblem ? err.title : "The routing slip was returned.", tone: "error" });
+    }
+    setRouting(false);
+    onExamined();
+  }
+
   return (
     <article className="dossier card">
       <header className="certificate">
@@ -242,9 +302,27 @@ function Dossier({ alert, onExamined }: { alert: Alert; onExamined: () => void }
 
       <footer className="dossier__actions">
         <button className="btn btn--quiet" onClick={onExamined}>Mark examined</button>
-        <Seal label="Escalate" variant="reserve" onAuthorize={onExamined} />
-        <Seal label="False positive" variant="ink" onAuthorize={onExamined} />
+        <button className="btn btn--secondary" onClick={() => setRouting(true)}>Escalate</button>
+        {!fpOpen && <button className="btn btn--quiet" onClick={() => setFpOpen(true)}>False positive</button>}
       </footer>
+
+      {fpOpen && (
+        <div className="fp-reason">
+          <label className="field">
+            <span className="field__label">{LEX.fpReason}</span>
+            <input className="field__input" autoFocus value={fpReason}
+              placeholder="State the basis…" onChange={(e) => setFpReason(e.target.value)} />
+          </label>
+          <div className="fp-reason__actions">
+            <Seal label="Confirm false positive" variant="ink"
+              disabled={fpReason.trim().length < 3} disabledReason="A reason is required"
+              onAuthorize={() => { onFalsePositive(fpReason.trim()); setFpOpen(false); setFpReason(""); }} />
+            <button className="btn btn--quiet" onClick={() => { setFpOpen(false); setFpReason(""); }}>Cancel</button>
+          </div>
+        </div>
+      )}
+
+      <RoutingSlip open={routing} alert={alert} onClose={() => setRouting(false)} onSubmit={escalate} />
     </article>
   );
 }

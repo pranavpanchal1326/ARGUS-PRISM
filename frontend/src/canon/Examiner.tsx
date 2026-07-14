@@ -4,6 +4,7 @@
    Offline: the loupe lies at 45°, input disabled, the rest untouched. */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { Icon } from "./Icon";
 import { tokens } from "../api/client";
 
 const BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8000";
@@ -81,9 +82,7 @@ export function Examiner() {
     <>
       <button className={`loupe-btn${offline ? " loupe-btn--off" : ""}`} onClick={() => setOpen((o) => !o)}
         aria-label={offline ? "The examiner has stepped away" : "Open the examiner"}>
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <circle cx="10" cy="10" r="6" /><path d="M14.5 14.5 L20 20" strokeLinecap="round" />
-        </svg>
+        <Icon name="examine" size={28} decorative />
       </button>
 
       {open && (
