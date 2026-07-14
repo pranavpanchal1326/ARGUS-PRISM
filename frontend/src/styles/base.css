@@ -1,117 +1,124 @@
-/* Base — reset, voices, focus, scrollbars, selection, reduced motion */
+/* ═══════════════════════════════════════════════════════════════
+   base.css — reset, surfaces, controls, states.
+   LAW I: ink, never glow. No gradients, no blur, no neon.
+   ═══════════════════════════════════════════════════════════════ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body, #root { height: 100%; }
 
 body {
-  background: var(--vault-900);
-  color: var(--ivory-text);
-  font-family: var(--font-analyst);
-  font-size: var(--text-14);
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
+  background: var(--paper);
+  color: var(--ink);
   overflow-x: hidden;
 }
 
-/* ── The three voices ── */
-.v-institution {
-  font-family: var(--font-institution);
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  line-height: 1.15;
+/* Fiber texture — literal short fiber strokes, not noise (Part 6.2).
+   Never applied to data tables (the Ration). */
+.fibered {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cg stroke='%231A1B18' stroke-opacity='0.016' stroke-width='0.6'%3E%3Cpath d='M12 30l9 2M60 14l7-3M110 44l8 1M170 22l6 4M210 60l9-2M34 90l8-2M84 120l7 3M140 96l9 1M196 130l7-3M20 160l9 2M70 190l8-1M126 170l7 3M180 200l9-2M228 170l6 2M48 224l8-2M104 214l9 1M160 228l7-3M8 120l7 2M224 100l8 2M150 60l7-2'/%3E%3C/g%3E%3C/svg%3E");
 }
-.v-machine {
-  font-family: var(--font-machine);
-  font-variant-numeric: tabular-nums;
-  line-height: 1.4;
-}
-.v-label {
-  font-family: var(--font-analyst);
-  font-size: var(--text-11);
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  color: var(--ivory-muted);
-}
-.num { font-variant-numeric: tabular-nums; }
 
-/* ── Focus: ARGUS looks where you look ── */
+/* ── Focus ring: 2px reserve @ 3px offset, never suppressed ── */
 :focus-visible {
-  outline: 1.5px solid var(--mint);
+  outline: 2px solid var(--reserve);
   outline-offset: 3px;
-  border-radius: var(--r-xs);
+  border-radius: var(--radius);
 }
 
-/* ── Selection ── */
-::selection { background: var(--brass); color: var(--vault-900); }
+::selection { background: var(--reserve-wash); color: var(--ink); }
 
-/* ── Scrollbars: thin gold rail ── */
-* { scrollbar-width: thin; scrollbar-color: var(--gold-dim) transparent; }
-*::-webkit-scrollbar { width: 6px; height: 6px; }
-*::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: var(--r-full); }
-*::-webkit-scrollbar-thumb:hover { background: var(--gold-deep); }
-*::-webkit-scrollbar-track { background: transparent; }
+* { scrollbar-width: thin; scrollbar-color: var(--rule-strong) transparent; }
 
-a { color: var(--gold-bright); text-decoration: none; }
+a { color: var(--reserve); text-decoration: none; }
 a:hover { text-decoration: underline; text-underline-offset: 3px; }
 
 button { font: inherit; cursor: pointer; background: none; border: none; color: inherit; }
-input, textarea, select { font: inherit; }
+input, textarea, select { font: inherit; color: inherit; }
 
-/* ── Glass surface: the modern chrome ── */
-.glass {
-  background: var(--vault-glass);
-  backdrop-filter: blur(18px) saturate(1.2);
-  -webkit-backdrop-filter: blur(18px) saturate(1.2);
-  border: 1px solid rgb(255 255 255 / 0.06);
-  border-radius: var(--r-lg);
-}
-
-/* ── Card: elevated vault surface, curved ── */
+/* ── Plane 1 — the index card. NEVER moves on hover. ── */
 .card {
-  background: var(--vault-800);
-  border: 1px solid var(--gold-hairline);
-  border-radius: var(--r-lg);
-  box-shadow: var(--shadow-md);
+  background: var(--paper-raised);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
 }
 
-/* ── Paper surface: fact world (documents), now softly curved ── */
-.paper {
-  background: var(--paper);
-  color: var(--ink);
-  border: 1px solid var(--gold-deep);
-  border-radius: var(--r-md);
-  box-shadow: var(--shadow-paper);
-  position: relative;
+/* ── Buttons (Part 9.15) — one PRIMARY per view ── */
+.btn {
+  display: inline-flex; align-items: center; gap: var(--s-2);
+  height: 32px; padding: 0 var(--s-4);
+  border-radius: var(--radius);
+  font-size: var(--text-13); font-weight: 500;
+  transition: background var(--dur-hover) var(--press-out);
 }
-.paper::after {
-  content: "";
-  position: absolute; inset: 0;
-  pointer-events: none;
-  border-radius: inherit;
-  opacity: 0.02;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+.btn--primary { background: var(--ink); color: var(--paper); }
+.btn--primary:hover { background: var(--ink-mut); }
+.btn--secondary { border: 1px solid var(--rule-strong); color: var(--ink); }
+.btn--secondary:hover { background: var(--paper-sunken); }
+.btn--quiet {
+  color: var(--ink-mut); text-decoration: underline;
+  text-underline-offset: 3px; padding: 0 var(--s-1); height: auto;
+}
+.btn--quiet:hover { color: var(--ink); }
+.btn:active { transform: translateY(1px); background-color: var(--paper-sunken); }
+.btn--primary:active { background: var(--ink); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── Ruled input (Part 9.15) ── */
+.field { display: flex; flex-direction: column; gap: var(--s-1); }
+.field__label {
+  font-size: var(--text-11); font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--ink-mut);
+}
+.field__input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--rule-strong);
+  border-radius: 0;
+  padding: var(--s-2) 0;
+  font-size: var(--text-14);
+  transition: border-color var(--dur-hover) var(--press-out);
+}
+.field__input:focus {
+  outline: none;
+  border-bottom: 2px solid var(--reserve);
+  margin-bottom: -1px;
+}
+.field__input::placeholder { color: var(--ink-faint); }
+.field--error .field__input { border-bottom-color: var(--vermilion); }
+
+/* ── Punch-card filter (Part 9.19) ── */
+.punch {
+  display: inline-flex; align-items: center; gap: var(--s-2);
+  padding: var(--s-1) var(--s-3);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  font-size: var(--text-11); font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--ink-mut);
+  transition: background var(--dur-hover) var(--press-out);
+}
+.punch::before {
+  content: ""; width: 8px; height: 8px;
+  border: 1.5px solid currentColor; border-radius: 50%;
+}
+.punch:hover { background: var(--paper-sunken); }
+.punch--active { color: var(--ink); border-color: var(--ink); }
+.punch--active::before { background: currentColor; }
+
+/* ── The skeleton: unprinted paper — ruled rows, NO shimmer (Part 7.4) ── */
+.unprinted {
+  height: 12px; border-radius: var(--radius);
+  background: rgba(var(--ink-rgb), 0.07);
 }
 
-/* ── Minimum desk width — gates the console only, not landing/login ── */
-.desk-gate { display: none; }
-@media (max-width: 1279px) {
-  .desk-gate {
-    display: flex;
-    position: fixed; inset: 0; z-index: 100;
-    align-items: center; justify-content: center;
-    background: var(--vault-900);
-    padding: var(--s-6);
-  }
-  .app-frame { display: none; }
-}
-
-/* ── Reduced motion: mechanical → instant, optical → fade ── */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
+/* ── Misprint / error block ── */
+.misprint { padding: var(--s-8); text-align: left; max-width: 480px; }
+.misprint__stamp { margin-bottom: var(--s-3); }
+.misprint__detail {
+  font-family: var(--font-machine);
+  font-size: var(--text-12);
+  color: var(--ink-mut);
+  margin-bottom: var(--s-4);
 }

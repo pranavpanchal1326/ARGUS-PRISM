@@ -1,16 +1,17 @@
-/* Honest placeholder — a wing not yet opened. Never fake-populated. */
-import { Eye } from "../components/Eye";
+/* Honest placeholder — a sheet not yet struck. Never fake-populated. */
+import { Rosette } from "../canon/Rosette";
+import { MASTER_PARAMS } from "../engine/rosette";
+import { LEX } from "../lexicon/strings";
 
 export function UnderConstruction({ title }: { title: string }) {
   return (
     <div>
-      <h1 className="screen-title">{title}</h1>
-      <div className="void-state">
-        <Eye state="closed" size={28} title="This wing is not yet open" />
-        <p className="void-state__epigraph v-institution">This wing is not yet open.</p>
-        <p className="void-state__detail">
-          The {title} desk is being fitted. Its records are already kept in the vault —
-          the room to read them is under construction.
+      <h1 className="sheet-title">{title}</h1>
+      <div className="void">
+        <Rosette params={MASTER_PARAMS} size={96} tier={3} title="The Master Rosette" ink="var(--ink-faint)" />
+        <p className="void__line">{LEX.underConstruction}</p>
+        <p className="void__detail">
+          The records are already kept in the register — the sheet to read them is at the press.
         </p>
       </div>
     </div>

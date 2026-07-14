@@ -1,0 +1,52 @@
+/* ═══════════════════════════════════════════════════════════════
+   motion.css — the press mechanics (Part 7).
+   Fast attack, damped settle, zero overshoot beyond one 2% correction.
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+  --press-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --press-settle: cubic-bezier(0.34, 1.02, 0.44, 1);
+  --light-linear: linear;
+  --dur-hover: 140ms;
+  --dur-feed: 240ms;
+  --dur-wipe: 320ms;
+  --dur-draw: 600ms;
+  --dur-strike-in: 90ms;
+  --dur-strike-settle: 220ms;
+  --dur-hold: 900ms;
+}
+
+/* M1 — row feed */
+@keyframes m1-feed {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+/* M2 — seal strike */
+@keyframes m2-strike {
+  0%   { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+/* M9 — overprint land */
+@keyframes m9-land {
+  0%   { opacity: 0; transform: scale(1.12) rotate(var(--stamp-tilt, -1deg)); }
+  100% { opacity: 1; transform: scale(1) rotate(var(--stamp-tilt, -1deg)); }
+}
+/* M4 — border/line draw-on */
+@keyframes m4-draw {
+  from { stroke-dashoffset: var(--draw-len, 1000); }
+  to   { stroke-dashoffset: 0; }
+}
+/* M11 — watermark breath */
+@keyframes m11-breathe {
+  0%, 100% { opacity: 0.08; }
+  50%      { opacity: 0.09; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  /* Exception: the Seal hold IS the safety (M3) — restored in canon.css */
+  .seal__fill { transition-duration: var(--dur-hold) !important; }
+}

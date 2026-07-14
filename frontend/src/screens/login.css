@@ -1,80 +1,44 @@
+/* SHEET 01 · THE TELLER — the watermark develops as credentials fill. */
 .teller-field {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background:
-    radial-gradient(ellipse at 50% 120%, #10241e 0%, var(--vault-900) 65%);
+  min-height: 100%; display: flex; align-items: center; justify-content: center;
+  padding: var(--s-8); background: var(--paper); position: relative; overflow: hidden;
 }
-
+.teller-watermark {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  pointer-events: none; color: var(--ink);
+  transition: opacity 400ms var(--press-out);
+}
 .teller {
-  width: 420px;
-  padding: var(--s-8) var(--s-8) var(--s-6);
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-6);
+  position: relative; z-index: 1;
+  width: 100%; max-width: 400px;
+  background: var(--paper-raised);
+  border: 1px solid var(--rule-strong);
+  box-shadow: var(--shadow-card);
+  padding: var(--s-12);
 }
-
-.teller__head { text-align: center; }
-.teller__wordmark {
-  font-size: var(--text-13);
-  letter-spacing: 0.22em;
-  color: var(--brass);
-}
-.teller__rule {
-  height: 1px; background: var(--brass);
-  opacity: 0.35; margin: var(--s-3) auto; width: 64px;
-}
-.teller__invite {
-  font-size: var(--text-28);
-  color: var(--ink);
-}
-
-.teller__form { display: flex; flex-direction: column; gap: var(--s-4); }
-.teller__submit { align-self: center; margin-top: var(--s-2); }
-.teller__back { align-self: center; }
-
-.teller__micr {
-  text-align: center;
-  font-size: var(--text-11);
-  color: var(--ink-faint);
-  letter-spacing: 0.1em;
-  border-top: 1px dashed var(--brass-hairline);
-  padding-top: var(--s-3);
-}
+.teller__head { margin-bottom: var(--s-8); }
+.teller__wordmark { font-family: var(--font-display); font-size: var(--text-16); letter-spacing: 0.12em; }
+.teller__rule { height: 1px; background: var(--rule-strong); margin: var(--s-3) 0; }
+.teller__invite { font-family: var(--font-display); font-size: var(--text-28); letter-spacing: -0.02em; }
+.teller__form { display: flex; flex-direction: column; gap: var(--s-6); }
+.teller__submit { justify-content: center; height: 40px; }
+.teller__micr { margin-top: var(--s-8); font-size: var(--text-11); color: var(--ink-faint); letter-spacing: 0.06em; text-align: center; font-family: var(--font-machine); }
 
 .teller__enrol { align-items: center; text-align: center; }
-.teller__qr {
-  border: 1px solid var(--brass);
-  border-radius: 2px;
-  width: 180px; height: 180px;
-}
-.teller__enrol-note {
-  font-size: var(--text-12);
-  color: var(--ink-faint);
-  max-width: 280px;
-}
+.teller__qr { border: 1px solid var(--rule-strong); padding: var(--s-2); background: var(--paper); }
+.teller__enrol-note { font-size: var(--text-12); color: var(--ink-mut); }
 
-.returned {
-  display: flex; align-items: center; gap: var(--s-2);
-  padding: var(--s-1) 0;
+/* TOTP — six serial slots, letterpress per digit (M13) */
+.totp { display: flex; gap: var(--s-2); justify-content: center; }
+.totp__digit {
+  width: 44px; height: 56px; text-align: center;
+  font-family: var(--font-machine); font-size: var(--text-28);
+  background: var(--paper-sunken); border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
 }
-.returned__reason { font-size: var(--text-11); color: var(--oxblood); }
+.totp__digit--filled { animation: m13-press 90ms var(--press-settle); border-color: var(--ink); }
+@keyframes m13-press { from { transform: scale(1.08); } to { transform: scale(1); } }
+.totp__digit:focus { outline: 2px solid var(--reserve); outline-offset: 2px; }
 
-/* ── The vault door: 600ms, once, then Alert Queue ── */
-.vault-door {
-  width: 100%; height: 100%;
-  overflow: hidden;
-  position: relative;
-}
-.vault-door__leaf {
-  position: absolute; inset: 0;
-  background: var(--vault-800);
-  border-right: 2px solid var(--brass);
-  transform-origin: left center;
-  animation: door-swing var(--dur-scene) var(--ease-mechanical) forwards;
-}
-@keyframes door-swing {
-  from { transform: perspective(1200px) rotateY(0deg); }
-  to { transform: perspective(1200px) rotateY(-88deg); }
-}
+.returned { display: flex; align-items: center; gap: var(--s-3); }
+.returned__reason { font-family: var(--font-machine); font-size: var(--text-12); color: var(--vermilion); }

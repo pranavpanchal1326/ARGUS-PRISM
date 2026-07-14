@@ -1,0 +1,26 @@
+/* ═══════════════════════════════════════════════════════════════
+   print.css — the three artifacts someone would actually file
+   (Part 20.1): case sheet, package summary, register certification.
+   Ink on white; chrome removed; the sheet becomes a document.
+   ═══════════════════════════════════════════════════════════════ */
+@media print {
+  :root { --paper: #fff; --paper-raised: #fff; --paper-sunken: #fff; }
+
+  .register, .folio, .marginalia, .notice-dock, .index-scrim,
+  .drawer-scrim, .lever, .register__foot, .desk-gate { display: none !important; }
+
+  .press { display: block; }
+  .working { overflow: visible; padding: 0; }
+
+  body { background: #fff; color: #000; }
+  .card { box-shadow: none; border: 1px solid #000; }
+
+  /* seals and interactive controls have no meaning on paper */
+  .seal, .btn, .punch { display: none !important; }
+
+  /* let long documents break naturally */
+  .case-sheet, .certificate-sheet, .press-bed, .register-book { page-break-inside: auto; }
+  .register-entry, .ledger tr { page-break-inside: avoid; }
+
+  a[href]::after { content: ""; }
+}

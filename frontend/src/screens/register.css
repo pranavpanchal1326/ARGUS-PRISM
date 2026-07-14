@@ -1,0 +1,38 @@
+/* SHEET 09 — The Bound Register */
+.verify-block { margin-top: var(--s-4); display: flex; flex-direction: column; gap: var(--s-2); align-items: flex-start; }
+.verify-detail { font-size: var(--text-11); color: var(--ink-mut); max-width: 30ch; }
+.verify-block--broken .verify-detail { color: var(--vermilion); }
+
+.register-book { position: relative; padding-left: var(--s-6); }
+/* the security thread — a continuous line down the gutter = the HMAC chain */
+.thread { position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: var(--rule-strong); }
+.register-book--pulsing .thread { overflow: hidden; }
+.register-book--pulsing .thread::after {
+  content: ""; position: absolute; left: 0; width: 2px; height: 40px;
+  background: var(--reserve);
+  animation: thread-pulse 2.4s var(--light-linear);
+}
+@keyframes thread-pulse { from { top: -40px; } to { top: 100%; } }
+
+.register-entry {
+  display: grid; grid-template-columns: 44px 190px 90px 1fr 80px; gap: var(--s-3);
+  align-items: baseline; padding: var(--s-2) 0; border-bottom: 1px solid var(--rule);
+  font-size: var(--text-12);
+}
+.register-entry__seq { color: var(--ink-faint); }
+.register-entry__actor { color: var(--ink-mut); }
+.register-entry__action { font-family: var(--font-text); font-size: var(--text-13); }
+.register-entry__hash { color: var(--ink-faint); text-align: right; }
+.register-entry--broken { background: var(--vermilion-wash); }
+.register-entry--broken::before {
+  content: ""; position: absolute; left: 6px; width: 6px; height: 6px;
+  background: var(--vermilion); border-radius: 50%; margin-top: 4px;
+}
+
+/* fairness */
+.fairness { max-width: 720px; }
+.fair-row { display: grid; grid-template-columns: 160px 1fr 56px; gap: var(--s-3); align-items: center; padding: var(--s-2) 0; border-bottom: 1px solid var(--rule); }
+.fair-row__seg { font-size: var(--text-13); }
+.fair-row__hatch { height: 12px; background: repeating-linear-gradient(45deg, var(--intaglio) 0 1px, transparent 1px 3px); min-width: 2px; }
+.fair-row__val { text-align: right; font-size: var(--text-12); }
+.fairness__note { margin-top: var(--s-6); font-size: var(--text-13); color: var(--ink-mut); max-width: 62ch; }

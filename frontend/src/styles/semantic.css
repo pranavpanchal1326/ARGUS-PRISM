@@ -1,0 +1,70 @@
+/* ═══════════════════════════════════════════════════════════════
+   semantic.css — mode-switched semantic tokens. Components reference
+   ONLY these. [data-mode="plate"] swaps the layer (Part 16.1).
+   ═══════════════════════════════════════════════════════════════ */
+:root,
+[data-mode="note"] {
+  --paper: var(--palette-note-paper);
+  --paper-raised: var(--palette-note-paper-raised);
+  --paper-sunken: var(--palette-note-paper-sunken);
+  --paper-aged: var(--palette-note-paper-aged);
+  --ink: var(--palette-note-ink);
+  --ink-rgb: var(--palette-note-ink-rgb);
+  --ink-mut: rgba(var(--palette-note-ink-rgb), 0.62);
+  --ink-faint: rgba(var(--palette-note-ink-rgb), 0.38);
+  --rule: rgba(var(--palette-note-ink-rgb), 0.14);
+  --rule-strong: rgba(var(--palette-note-ink-rgb), 0.30);
+  --reserve: var(--palette-note-reserve);
+  --reserve-ink: var(--palette-note-reserve-pressed);
+  --reserve-wash: rgba(var(--palette-note-reserve-rgb), 0.08);
+  --vermilion: var(--palette-note-vermilion);
+  --vermilion-ink: var(--palette-note-vermilion-pressed);
+  --vermilion-wash: rgba(var(--palette-note-vermilion-rgb), 0.07);
+  --intaglio: var(--palette-note-intaglio);
+  --verified: var(--palette-note-verified);
+  /* The ONLY elevation shadow in the product (LAW I exception file). */
+  --shadow-card: 0 1px 0 rgba(var(--palette-note-ink-rgb), 0.10),
+                 0 6px 24px rgba(var(--palette-note-ink-rgb), 0.08);
+  color-scheme: light;
+}
+
+[data-mode="plate"] {
+  --paper: var(--palette-plate-paper);
+  --paper-raised: var(--palette-plate-paper-raised);
+  --paper-sunken: var(--palette-plate-paper-sunken);
+  --paper-aged: var(--palette-plate-paper-aged);
+  --ink: var(--palette-plate-ink);
+  --ink-rgb: var(--palette-plate-ink-rgb);
+  --ink-mut: rgba(var(--palette-plate-ink-rgb), 0.62);
+  --ink-faint: rgba(var(--palette-plate-ink-rgb), 0.38);
+  --rule: rgba(var(--palette-plate-ink-rgb), 0.14);
+  --rule-strong: rgba(var(--palette-plate-ink-rgb), 0.30);
+  --reserve: var(--palette-plate-reserve);
+  --reserve-ink: var(--palette-plate-reserve-pressed);
+  --reserve-wash: rgba(var(--palette-plate-reserve-rgb), 0.10);
+  --vermilion: var(--palette-plate-vermilion);
+  --vermilion-ink: var(--palette-plate-vermilion-pressed);
+  --vermilion-wash: rgba(var(--palette-plate-vermilion-rgb), 0.09);
+  --intaglio: var(--palette-plate-intaglio);
+  --verified: var(--palette-plate-verified);
+  --shadow-card: 0 1px 0 rgba(var(--palette-black-rgb), 0.5),
+                 0 6px 24px rgba(var(--palette-black-rgb), 0.45);
+  color-scheme: dark;
+}
+
+/* Dimensions (Appendix A.3) */
+:root {
+  --register-w: 228px;
+  --register-w-collapsed: 64px;
+  --folio-h: 32px;
+  --marginalia-w: 40px;
+  --slip-h: 44px;
+  --ledger-row-h: 34px;
+  --drawer-w: 420px;
+  --content-max: 1680px;
+  --gutter: 24px;
+  --radius: 2px;
+  --radius-card: 3px;
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px;
+  --s-6: 24px; --s-8: 32px; --s-12: 48px; --s-16: 64px;
+}

@@ -1,0 +1,16 @@
+/* SHEET 07 — The Counterfeiter's Die */
+.die-sheet { display: grid; grid-template-columns: minmax(220px, 300px) 1fr; gap: var(--s-8); align-items: start; }
+.die-margin { position: sticky; top: 0; display: flex; flex-direction: column; gap: var(--s-4); }
+.die-list { list-style: none; display: flex; flex-direction: column; gap: var(--s-2); }
+.die-list__item { display: flex; flex-direction: column; gap: 2px; width: 100%; text-align: left; padding: var(--s-3); border: 1px solid var(--rule); border-radius: var(--radius); transition: background var(--dur-hover) var(--press-out); }
+.die-list__item:hover { background: var(--paper-sunken); }
+.die-list__item--active { border-color: var(--ink); background: var(--paper-sunken); }
+.die-list__ref { font-size: var(--text-13); }
+.die-list__class { font-size: 10px; }
+.die-list__meta { font-size: var(--text-11); color: var(--ink-mut); }
+
+.die-canvas-wrap { border: 1px solid var(--rule-strong); background: var(--paper-sunken); min-height: 620px; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.die-canvas { display: block; }
+.die-edition { position: absolute; top: var(--s-3); left: var(--s-4); font-size: var(--text-11); color: var(--ink-mut); letter-spacing: 0.04em; }
+
+@media (max-width: 1200px) { .die-sheet { grid-template-columns: 1fr; } .die-margin { position: static; } }

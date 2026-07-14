@@ -5,6 +5,10 @@ import { useNavigate } from "react-router-dom";
 import QRCode from "qrcode";
 import { api, tokens, ApiProblem, WatchInterrupted, type MfaChallenge, type TokenPair } from "../api/client";
 import { useAuth } from "../shell/AuthContext";
+import { useLockMode } from "../shell/ModeContext";
+import { Rosette } from "../canon/Rosette";
+import { Overprint } from "../canon/Overprint";
+import { MASTER_PARAMS } from "../engine/rosette";
 import "./login.css";
 
 type Stage = "credentials" | "enrol" | "totp" | "vault-door";
@@ -21,6 +25,13 @@ export function Login() {
   const digitRefs = useRef<(HTMLInputElement | null)[]>([]);
   const navigate = useNavigate();
   const { reload } = useAuth();
+  useLockMode("note"); // public documents are printed notes
+
+  /* The watermark develops: each field completed raises its opacity a step. */
+  const filled = (email ? 1 : 0) + (password ? 1 : 0);
+  const watermarkOpacity = stage === "totp" || stage === "enrol"
+    ? 0.06 + digits.filter(Boolean).length * 0.01
+    : filled * 0.03;
 
   async function submitCredentials(e: React.FormEvent) {
     e.preventDefault();
@@ -100,20 +111,23 @@ export function Login() {
   if (stage === "vault-door") {
     return (
       <div className="teller-field">
-        <div className="vault-door" aria-label="Entering the vault">
-          <div className="vault-door__leaf" />
+        <div className="teller-watermark" style={{ opacity: 0.12 }}>
+          <Rosette params={MASTER_PARAMS} size={320} tier={3} />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="teller-field">
-      <div className="teller paper">
+    <div className="teller-field fibered">
+      <div className="teller-watermark" style={{ opacity: watermarkOpacity }} aria-hidden>
+        <Rosette params={MASTER_PARAMS} size={340} tier={3} />
+      </div>
+      <div className="teller">
         <div className="teller__head">
-          <div className="teller__wordmark v-institution">ARGUS · PRISM</div>
+          <div className="teller__wordmark v-display">ARGUS · PRISM</div>
           <div className="teller__rule" />
-          <h1 className="teller__invite v-institution">
+          <h1 className="teller__invite v-display">
             {stage === "credentials" ? "Present your credentials."
               : stage === "enrol" ? "Your key is cut once."
               : "The second key, please."}
@@ -135,7 +149,7 @@ export function Login() {
                 value={password} onChange={(e) => setPassword(e.target.value)} />
             </label>
             {error && <ReturnedNote reason={error} />}
-            <button className="btn-brass teller__submit" disabled={busy} type="submit">
+            <button className="btn btn--primary teller__submit" disabled={busy} type="submit">
               {busy ? "Verifying…" : "Approach the window"}
             </button>
           </form>
@@ -146,13 +160,14 @@ export function Login() {
               Scan with your authenticator app. This key is shown once and
               never again — regenerating cuts a different key.
             </p>
-            <button className="btn-brass" onClick={() => {
+            <button className="btn btn--primary" onClick={() => {
               setQrDataUrl(null);
               setStage("totp");
               setTimeout(() => digitRefs.current[0]?.focus(), 50);
             }}>
               I hold the key — continue
             </button>
+            {error && <ReturnedNote reason={error} />}
           </div>
         ) : (
           <div className="teller__form">
@@ -168,7 +183,7 @@ export function Login() {
               ))}
             </div>
             {error && <ReturnedNote reason={error} />}
-            <button className="btn-quiet teller__back" onClick={() => { setStage("credentials"); setError(null); }}>
+            <button className="btn btn--quiet teller__back" onClick={() => { setStage("credentials"); setError(null); }}>
               Return to the window
             </button>
           </div>
@@ -184,8 +199,8 @@ export function Login() {
 function ReturnedNote({ reason }: { reason: string }) {
   return (
     <div className="returned" role="alert">
-      <span className="stamp stamp--oxblood stamp--sm stamp--landing">RETURNED</span>
-      <span className="returned__reason v-machine">{reason}</span>
+      <Overprint tone="vermilion" size="body">RETURNED</Overprint>
+      <span className="returned__reason">{reason}</span>
     </div>
   );
 }

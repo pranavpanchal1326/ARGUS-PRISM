@@ -1,27 +1,33 @@
-/* Landing — the showpiece. Modern Vault: gradient mesh, the watching
-   eye, curved engine cards. Public; "Enter" routes to the app. */
+/* SHEET 00 · THE NOTE ITSELF (Part 10). The public face is one oversized
+   engraved banknote on cotton paper. NOTE mode always. */
 import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../shell/AuthContext";
+import { useLockMode } from "../shell/ModeContext";
+import { Rosette } from "../canon/Rosette";
+import { MASTER_PARAMS } from "../engine/rosette";
 import "./landing.css";
 
-const ENGINES = [
-  { name: "FlowGraph", line: "Traces layering, round-tripping and structuring across a live transaction graph — four hops deep.", glyph: "graph" },
-  { name: "WarmthScore", line: "A six-signal ensemble scores every account 0–100 for mule-warming — before the illicit money arrives.", glyph: "dial" },
-  { name: "AutoSTR", line: "One click assembles the FIU-IND, CBI and RBI packages — sealed in under an hour, not seven days.", glyph: "seal" },
-  { name: "Taint Propagation", line: "A confirmed mule stains its network. The taint persists so it can't hide by going dormant.", glyph: "taint" },
-  { name: "Recruiter Mapper", line: "Finds the coordinator fanning out test payments — the boss, not the disposable employees.", glyph: "hub" },
+/* Each station examines one security feature of the note and reveals a
+   real product engine (Part 10, Sheet 00 table). */
+const STATIONS = [
+  { feature: "THE MICROPRINTING", truth: "FlowGraph", line: "Read the transactions others cannot see — layering, round-tripping and structuring traced across a live graph, four hops deep." },
+  { feature: "THE WATERMARK", truth: "Hidden-network detection", line: "Hold the note to the light and the network appears — taint that persists four hops from a confirmed mule." },
+  { feature: "THE SECURITY THREAD", truth: "The HMAC audit chain", line: "One unbroken line runs the length of the register. Every entry seals the next; a break is visible at a glance." },
+  { feature: "THE SEE-THROUGH REGISTER", truth: "Recruiter Mapper", line: "Front and back align to reveal the coordinator — the boss fanning out test payments, not the disposable mules." },
+  { feature: "THE INTAGLIO", truth: "WarmthScore", line: "Risk you can feel before it arrives. Six signals score every account 0–100 for mule-warming, before the money moves." },
 ];
 
 const STATS = [
-  { v: "< 60 min", k: "STR turnaround" },
-  { v: "0–100", k: "Warmth, pre-crime" },
-  { v: "4 hops", k: "Taint depth" },
-  { v: "100", k: "Eyes that never blink" },
+  { v: "< 60", k: "MIN · STR TURNAROUND" },
+  { v: "0–100", k: "WARMTH · PRE-CRIME" },
+  { v: "4", k: "HOPS · TAINT DEPTH" },
+  { v: "100", k: "EYES · NEVER BLINK" },
 ];
 
 export function Landing() {
   const { me } = useAuth();
+  useLockMode("note");
   const revealRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -35,151 +41,81 @@ export function Landing() {
     return () => io.disconnect();
   }, []);
 
-  return (
-    <div className="landing" ref={revealRef}>
-      <header className="lnav glass">
-        <div className="lnav__mark v-institution">ARGUS<span>·</span>PRISM</div>
-        <nav className="lnav__links">
-          <a href="#engines">The Engines</a>
-          <a href="#creed">The Creed</a>
-          <Link className="btn-brass lnav__cta" to={me ? "/alerts" : "/login"}>
-            {me ? "Enter the vault" : "Sign in"}
-          </Link>
-        </nav>
-      </header>
+  const serial = `AP-2026-0714-${String(Math.floor(Math.random() * 9000) + 1000)}`;
 
-      {/* ── Hero ── */}
-      <section className="hero">
-        <div className="hero__mesh" aria-hidden />
-        <div className="hero__eye" aria-hidden>
-          <EyeMark />
+  return (
+    <div className="note-page fibered" ref={revealRef}>
+      <div className="note">
+        <div className="note__border" aria-hidden>
+          <svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 1000 600">
+            <rect x="6" y="6" width="988" height="588" fill="none" stroke="currentColor" strokeWidth="1" className="note__frame-draw" />
+            <rect x="14" y="14" width="972" height="572" fill="none" stroke="currentColor" strokeWidth="0.5" />
+          </svg>
         </div>
-        <p className="hero__eyebrow v-label">Pre-crime intelligence for mule detection</p>
-        <h1 className="hero__title v-institution">
-          The bank that<br /><em>never blinks.</em>
-        </h1>
-        <p className="hero__sub">
-          PRISM watches every account in real time, scores it for mule behaviour
-          <span> before </span> the money moves, and seals the legal case the moment
-          the law requires it — all on-prem, nothing leaves the bank.
-        </p>
-        <div className="hero__cta">
-          <Link className="btn-brass" to={me ? "/alerts" : "/login"}>
-            {me ? "Enter the vault" : "Enter PRISM"} <Arrow />
+
+        <header className="note__top">
+          <span className="mx note__serial">Nº {serial}</span>
+          <Link className="btn btn--secondary" to={me ? "/alerts" : "/login"}>
+            {me ? "Return to the desk" : "Enter the press"}
           </Link>
-          <a className="btn-ghost" href="#engines">See the engines</a>
+        </header>
+
+        <div className="note__hero">
+          <div className="note__promise">
+            <p className="v-label">Pre-crime intelligence for mule detection</p>
+            <h1 className="note__title v-display">The promise<br />to detect.</h1>
+            <p className="note__creed">
+              Watches every account. Scores the warming mule before the money moves.
+              Seals the case the law requires — in under an hour.
+            </p>
+            <div className="note__cta">
+              <Link className="btn btn--primary" to={me ? "/alerts" : "/login"}>Enter the press</Link>
+              <a className="btn btn--quiet" href="#examine">Examine the note ↓</a>
+            </div>
+            <p className="mx note__micro" aria-hidden>ARGUSPRISM·ARGUSPRISM·ARGUSPRISM·ARGUSPRISM·</p>
+          </div>
+          <div className="note__rosette">
+            <Rosette params={MASTER_PARAMS} size={220} tier={3} title="The Master Rosette" />
+          </div>
         </div>
-        <div className="hero__ticker v-machine" aria-hidden>
-          <span>account.created</span><span>score.updated</span><span>alert.raised</span>
-          <span>taint.spread</span><span>package.sealed</span><span>ledger.verified</span>
-          <span>account.created</span><span>score.updated</span><span>alert.raised</span>
+      </div>
+
+      <section id="examine" className="examine">
+        <div className="section-head reveal">
+          <p className="v-label">The examination</p>
+          <h2 className="v-display v-display--section">Five features. One instrument.</h2>
         </div>
+        {STATIONS.map((s, i) => (
+          <article key={s.feature} className={`station reveal${i % 2 ? " station--flip" : ""}`}>
+            <div className="station__loupe">
+              <Rosette params={{ ...MASTER_PARAMS, warmth: i / 5 }} size={140} tier={3} />
+            </div>
+            <div className="station__card">
+              <p className="v-label">{s.feature}</p>
+              <h3 className="v-display v-display--section station__truth">{s.truth}</h3>
+              <p className="station__line">{s.line}</p>
+            </div>
+          </article>
+        ))}
       </section>
 
-      {/* ── Stats band ── */}
-      <section className="stats reveal">
+      <section className="note-stats reveal">
         {STATS.map((s) => (
-          <div key={s.k} className="stat">
-            <div className="stat__v v-institution">{s.v}</div>
-            <div className="stat__k v-label">{s.k}</div>
+          <div key={s.k} className="note-stat">
+            <div className="note-stat__v mx num">{s.v}</div>
+            <div className="note-stat__k v-label">{s.k}</div>
           </div>
         ))}
       </section>
 
-      {/* ── Engines ── */}
-      <section id="engines" className="engines">
-        <div className="section-head reveal">
-          <p className="v-label">The proven IP</p>
-          <h2 className="v-institution">Five engines, one unblinking watch.</h2>
-        </div>
-        <div className="engine-grid">
-          {ENGINES.map((e, i) => (
-            <article key={e.name} className={`engine card reveal engine--${i === 0 ? "wide" : "std"}`}>
-              <EngineGlyph kind={e.glyph} />
-              <h3 className="engine__name v-institution">{e.name}</h3>
-              <p className="engine__line">{e.line}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      {/* ── Creed ── */}
-      <section id="creed" className="creed reveal">
-        <div className="creed__glow" aria-hidden />
-        <p className="v-label">The creed</p>
-        <blockquote className="creed__quote v-institution">
-          “The hundred eyes see what others cannot.<br />This time, everything they show is real.”
+      <section className="note-creed reveal">
+        <blockquote className="v-display v-display--title">
+          Printed, not painted.<br />Held, not clicked.<br />Real, or not rendered.
         </blockquote>
-        <p className="creed__body">
-          No mock data. No secrets on glass. Every number is computed from real
-          transaction flow; every seal is a real signature; every alert is earned.
-        </p>
-        <Link className="btn-brass" to={me ? "/alerts" : "/login"}>
-          {me ? "Enter the vault" : "Present your credentials"} <Arrow />
-        </Link>
+        <Link className="btn btn--primary" to={me ? "/alerts" : "/login"}>Present your credentials</Link>
       </section>
 
-      <footer className="lfoot">
-        <span className="v-institution">ARGUS·PRISM</span>
-        <span className="v-machine">Union Bank of India · PRISM V3 · on-prem intelligence</span>
-      </footer>
+      <footer className="note-foot mx">UNION BANK OF INDIA · THE SECURITY PRESS · V3</footer>
     </div>
   );
 }
-
-/* ── Inline art ── */
-function EyeMark() {
-  return (
-    <svg viewBox="0 0 220 220" width="100%" height="100%" fill="none">
-      <defs>
-        <radialGradient id="iris" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="var(--mint)" stopOpacity="0.9" />
-          <stop offset="70%" stopColor="var(--mint)" stopOpacity="0.15" />
-          <stop offset="100%" stopColor="var(--mint)" stopOpacity="0" />
-        </radialGradient>
-      </defs>
-      {[0, 1, 2].map((r) => (
-        <ellipse key={r} cx="110" cy="110" rx={104 - r * 14} ry={62 - r * 9}
-          stroke="var(--gold)" strokeWidth="1" opacity={0.5 - r * 0.12} />
-      ))}
-      <circle cx="110" cy="110" r="34" fill="url(#iris)" />
-      <circle cx="110" cy="110" r="20" stroke="var(--mint)" strokeWidth="1.5" className="eyemark__iris" />
-      <circle cx="110" cy="110" r="7" fill="var(--mint)" />
-    </svg>
-  );
-}
-
-function EngineGlyph({ kind }: { kind: string }) {
-  return (
-    <span className="engine__glyph">
-      <svg viewBox="0 0 40 40" width="40" height="40" fill="none" stroke="var(--gold-bright)" strokeWidth="1.5">
-        {kind === "graph" && <>
-          <circle cx="8" cy="20" r="3.5" /><circle cx="30" cy="9" r="3.5" /><circle cx="32" cy="30" r="3.5" />
-          <path d="M11 19 26 11M11 21 29 29M28 12 31 27" opacity="0.7" />
-        </>}
-        {kind === "dial" && <>
-          <path d="M6 28a16 16 0 1 1 28 0" /><path d="M20 24 27 15" strokeLinecap="round" />
-          <circle cx="20" cy="24" r="2" fill="var(--gold-bright)" />
-        </>}
-        {kind === "seal" && <>
-          <circle cx="20" cy="20" r="12" /><path d="M20 12v16M12 20h16" opacity="0.6" />
-        </>}
-        {kind === "taint" && <>
-          <circle cx="12" cy="14" r="3.5" /><circle cx="28" cy="12" r="3.5" /><circle cx="22" cy="30" r="3.5" />
-          <path d="M15 15 25 13M14 17 20 27M26 15 23 27" opacity="0.7" strokeDasharray="2 2" />
-        </>}
-        {kind === "hub" && <>
-          <circle cx="20" cy="20" r="5" /><circle cx="8" cy="10" r="2.5" /><circle cx="32" cy="10" r="2.5" />
-          <circle cx="8" cy="30" r="2.5" /><circle cx="32" cy="30" r="2.5" />
-          <path d="M16 17 10 11M24 17 30 11M16 23 10 29M24 23 30 29" opacity="0.7" />
-        </>}
-      </svg>
-    </span>
-  );
-}
-
-const Arrow = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <path d="M3 8h10M9 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);

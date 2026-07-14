@@ -1,0 +1,45 @@
+/* SHEET 05 — The Specimen Book */
+.specimen__search { margin-top: var(--s-6); }
+
+.specimen-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-4); }
+.specimen-card {
+  display: grid; grid-template-columns: 56px 1fr auto; gap: var(--s-4);
+  align-items: center; padding: var(--s-4); text-align: left;
+  color: var(--ink); transition: background var(--dur-hover) var(--press-out);
+}
+.specimen-card:hover { background: var(--paper-sunken); }
+.specimen-card__body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.specimen-card__ref { font-size: var(--text-12); color: var(--ink-mut); }
+.specimen-card__holder { font-size: var(--text-14); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.specimen-card__meta { display: flex; align-items: center; gap: var(--s-2); margin-top: 2px; }
+.specimen-card__score { font-size: var(--text-20); font-weight: 600; }
+
+/* ── Phase B — the certificate ── */
+.certificate-sheet { max-width: 960px; }
+.cert-head {
+  display: grid; grid-template-columns: 96px 1fr auto; gap: var(--s-6);
+  align-items: center; padding: var(--s-6); margin: var(--s-4) 0 var(--s-8);
+}
+.cert-head__id { display: flex; flex-direction: column; gap: var(--s-1); }
+.cert-head__ref { font-size: var(--text-14); color: var(--ink-mut); }
+.cert-head__holder { font-size: var(--text-20); font-family: var(--font-display); }
+.cert-head__score { display: flex; flex-direction: column; align-items: flex-end; gap: var(--s-2); position: relative; }
+.cert-head__denom { font-size: var(--text-40); font-weight: 600; }
+
+.cert-section { margin-bottom: var(--s-8); }
+.cert-section > .v-label { display: block; margin-bottom: var(--s-3); }
+
+/* ── The ledger table (9.6) ── */
+.ledger { width: 100%; border-collapse: collapse; }
+.ledger th {
+  text-align: left; font-size: var(--text-11); font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--ink-mut); padding: var(--s-2) var(--s-3);
+  border-bottom: 1px solid var(--rule-strong);
+}
+.ledger td { font-size: var(--text-13); padding: var(--s-2) var(--s-3); border-bottom: 1px solid var(--rule); height: var(--ledger-row-h); }
+.ledger__r { text-align: right; }
+.ledger__out { color: var(--vermilion); }
+
+.cert-actions { display: flex; gap: var(--s-6); padding-top: var(--s-6); border-top: 1px solid var(--rule-strong); }
+
+@media (max-width: 1200px) { .specimen-grid { grid-template-columns: repeat(2, 1fr); } }

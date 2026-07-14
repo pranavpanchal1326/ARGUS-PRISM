@@ -1,84 +1,124 @@
-.app-frame {
+/* ═══════════════════════════════════════════════════════════════
+   shell.css — the sheet anatomy (Part 4.2): Register · Folio ·
+   Working Area · Marginalia. Broadsheet bones, left-aligned.
+   ═══════════════════════════════════════════════════════════════ */
+.press {
   display: grid;
-  grid-template-columns: var(--nav-rail) 1px 1fr var(--margin-watch);
+  grid-template-columns: var(--register-w) 1fr var(--marginalia-w);
+  grid-template-rows: 100%;
   height: 100%;
-  background: var(--grad-vault);
+  background: var(--paper);
 }
 
-/* ── Nav rail ── */
-.rail {
-  display: flex;
-  flex-direction: column;
-  background: var(--vault-850);
-  padding: var(--s-6) var(--s-3) var(--s-4);
-  overflow-y: auto;
-}
-.rail__wordmark {
-  font-size: var(--text-16);
-  letter-spacing: 0.14em;
-  color: var(--gold-bright);
-  padding: 0 var(--s-3) var(--s-8);
-  user-select: none;
-}
-.rail__sep { color: var(--gold-dim); margin: 0 2px; }
-
-.rail__items { display: flex; flex-direction: column; flex: 1; gap: 2px; }
-.rail__item {
-  padding: var(--s-3) var(--s-4);
-  border-radius: var(--r-md);
-  color: var(--ivory-muted);
-  font-size: var(--text-13);
-  position: relative;
-  transition: color var(--dur-tick) var(--ease-optical),
-              background var(--dur-tick) var(--ease-optical);
-}
-.rail__item:hover { color: var(--ivory-text); background: var(--vault-700); text-decoration: none; }
-.rail__item--active {
-  color: #24170a;
-  background: var(--grad-gold);
-  font-weight: 600;
-  box-shadow: var(--glow-gold);
-}
-
-.rail__foot { padding: var(--s-4) var(--s-3) 0; display: flex; flex-direction: column; gap: var(--s-3); }
-.rail__user {
+/* ── THE REGISTER (4.3) — a printed index, not icon nav ── */
+.register {
   display: flex; flex-direction: column;
-  padding: var(--s-3) var(--s-4);
-  border-radius: var(--r-md);
-  background: var(--vault-800);
-  border: 1px solid var(--gold-hairline);
-}
-.rail__name { font-size: var(--text-13); color: var(--ivory-text); }
-
-/* ── The Meridian: one gold hairline binding every screen ── */
-.meridian { background: var(--gold-hairline); }
-
-/* ── Content ── */
-.content {
+  background: var(--paper-raised);
+  border-right: 1px solid var(--rule-strong);
   overflow-y: auto;
-  padding: var(--s-8) var(--s-8) var(--s-16);
-  max-width: var(--content-max);
-  width: 100%;
+}
+.register__mark {
+  display: flex; align-items: center; gap: var(--s-2);
+  padding: var(--s-4) var(--s-4) var(--s-3);
+}
+.register__wordmark {
+  font-family: var(--font-display); font-weight: 500;
+  font-size: var(--text-16); letter-spacing: 0.12em;
+}
+.register__index { flex: 1; padding: var(--s-2) var(--s-2); }
+.register__entry {
+  display: flex; align-items: center; gap: var(--s-3);
+  height: 40px; padding: 0 var(--s-3);
+  border-radius: var(--radius);
+  color: var(--ink-mut);
+  position: relative;
+  transition: background var(--dur-hover) var(--press-out);
+}
+.register__entry:hover { background: var(--paper-sunken); color: var(--ink); text-decoration: none; }
+.register__entry--active { color: var(--ink); }
+.register__entry--active::before {
+  content: ""; position: absolute; left: 0; top: 8px; bottom: 8px;
+  width: 3px; background: var(--ink);
+}
+.register__entry--active::after {
+  content: ""; position: absolute; right: -4px; top: 12px;
+  width: 8px; height: 16px; background: var(--vermilion);
+}
+.register__no { font-family: var(--font-machine); font-size: var(--text-12); color: var(--ink-faint); }
+.register__name { font-size: var(--text-13); letter-spacing: 0.01em; }
+
+.register__foot { border-top: 1px solid var(--rule); padding: var(--s-3); display: flex; flex-direction: column; gap: var(--s-3); }
+.register__cred { display: flex; flex-direction: column; gap: 1px; text-align: left; padding: var(--s-2); border-radius: var(--radius); transition: background var(--dur-hover) var(--press-out); }
+.register__cred:hover { background: var(--paper-sunken); }
+.register__cred-name { font-size: var(--text-13); }
+.register__cred-role { font-size: var(--text-11); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); }
+
+/* NOTE / PLATE lever */
+.lever {
+  display: flex; align-items: center; gap: var(--s-2);
+  border: 1px solid var(--rule-strong); border-radius: var(--radius);
+  padding: 2px; font-size: var(--text-11); font-weight: 700;
+  letter-spacing: 0.08em;
+}
+.lever__pos { flex: 1; text-align: center; padding: var(--s-1); color: var(--ink-faint); border-radius: 1px; }
+.lever__pos--on { background: var(--ink); color: var(--paper); }
+
+/* ── THE WORKING COLUMN (folio + working area) ── */
+.workcol { display: flex; flex-direction: column; min-width: 0; height: 100%; }
+
+/* ── THE FOLIO STRIP (9.10) ── */
+.folio {
+  display: flex; align-items: center; gap: var(--s-4);
+  height: var(--folio-h); padding: 0 var(--s-6);
+  border-bottom: 1px solid var(--rule);
+  background: var(--paper-raised);
+  font-family: var(--font-machine); font-size: var(--text-11);
+  color: var(--ink-mut); flex-shrink: 0;
+}
+.folio__id { letter-spacing: 0.04em; }
+.folio__clock { color: var(--ink-faint); }
+.folio__spacer { flex: 1; }
+.folio__feed {
+  color: var(--reserve); font-weight: 600; cursor: pointer;
+  border: 1px solid var(--reserve); border-radius: var(--radius);
+  padding: 1px var(--s-2);
+}
+.folio__aperture { display: inline-flex; color: var(--ink-mut); }
+.folio__aperture--lost { color: var(--vermilion); }
+
+/* ── THE WORKING AREA (9 cols; ornament-free) ── */
+.working { flex: 1; overflow-y: auto; padding: var(--s-8) var(--s-6) var(--s-16); }
+
+/* ── THE MARGINALIA (9.11) ── */
+.marginalia { border-left: 1px solid var(--rule); background: transparent; position: relative; overflow: hidden; }
+.tick { position: absolute; right: 12px; width: 6px; height: 2px; background: var(--ink-faint); }
+.tick--alert { height: 3px; }
+
+/* ── THE MARGIN (left content column inside a sheet) ── */
+.sheet { display: grid; grid-template-columns: minmax(200px, 3fr) 9fr; gap: var(--s-8); align-items: start; }
+.margin { position: sticky; top: 0; }
+.margin__title { font-family: var(--font-display); font-size: var(--text-40); letter-spacing: -0.03em; margin-bottom: var(--s-2); }
+.margin__count { font-family: var(--font-display); font-size: var(--text-64); line-height: 1; }
+.margin__count-label { font-size: var(--text-11); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-mut); }
+.margin__note { font-size: var(--text-12); color: var(--ink-faint); margin-top: var(--s-4); border-top: 1px solid var(--rule); padding-top: var(--s-2); }
+
+/* ── DESK GATE (9.21) — console under 1280px ── */
+.desk-gate { display: none; }
+@media (max-width: 1279px) {
+  .desk-gate {
+    display: flex; position: fixed; inset: 0; z-index: 100;
+    align-items: center; justify-content: center;
+    background: var(--paper); padding: var(--s-6);
+  }
+  .desk-gate__card { max-width: 440px; text-align: center; padding: var(--s-12); }
+  .desk-gate__title { font-family: var(--font-display); font-size: var(--text-28); margin-bottom: var(--s-3); }
+  .press { display: none; }
 }
 
-/* ── The Margin of the Watch ── */
-.margin-watch {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-top: var(--s-8);
-  background: transparent;
-}
+/* ── Sheet title (non-master-detail sheets) ── */
+.sheet-title { font-family: var(--font-display); font-size: var(--text-40); letter-spacing: -0.03em; margin-bottom: var(--s-8); }
 
-/* ── Screen title: The Institution speaks once per screen ── */
-.screen-title {
-  font-family: var(--font-institution);
-  font-weight: 600;
-  font-size: var(--text-40);
-  color: var(--ivory-text);
-  letter-spacing: -0.02em;
-  margin-bottom: var(--s-8);
-}
-
-/* ── Desk-width gate (console only) ── */
-.desk-gate__card { padding: var(--s-8) var(--s-12); text-align: center; max-width: 440px; }
+/* ── Void / empty states ── */
+.void { display: flex; flex-direction: column; align-items: center; gap: var(--s-3); padding: var(--s-16) var(--s-6); text-align: center; }
+.void__line { font-family: var(--font-display); font-size: var(--text-28); }
+.void__detail { font-size: var(--text-13); color: var(--ink-mut); }

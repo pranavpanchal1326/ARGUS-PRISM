@@ -1,17 +1,21 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
-/* The three voices — self-hosted, on-prem, no CDN */
-import "@fontsource/playfair-display/600.css";
-import "@fontsource/inter/400.css";
-import "@fontsource/inter/500.css";
-import "@fontsource/inter/600.css";
+/* The three voices — Machine self-hosted (IBM Plex Mono stands for Martian
+   until the Fontshare subset lands); Display/Text fall back gracefully. */
 import "@fontsource/ibm-plex-mono/400.css";
 import "@fontsource/ibm-plex-mono/500.css";
+import "@fontsource/inter/400.css";
+import "@fontsource/inter/500.css";
+import "@fontsource/inter/700.css";
 
-import "./styles/tokens.css";
+import "./styles/palette.css";
+import "./styles/semantic.css";
+import "./styles/type.css";
+import "./styles/motion.css";
 import "./styles/base.css";
-import "./components/controls.css";
+import "./styles/print.css";
+import "./canon/canon.css";
 
 import App from "./App";
 

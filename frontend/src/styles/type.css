@@ -1,0 +1,66 @@
+/* ═══════════════════════════════════════════════════════════════
+   type.css — the three voices (Part 3).
+   DISPLAY = Zodiak · TEXT = Supreme · MACHINE = Martian Mono.
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+  --font-display: "Zodiak", "Sentient", "Georgia", "Times New Roman", serif;
+  --font-text: "Supreme", "Noto Sans Devanagari", "Inter", system-ui, sans-serif;
+  --font-machine: "Martian Mono", "IBM Plex Mono", "Consolas", monospace;
+
+  --text-11: 11px; --text-12: 12px; --text-13: 13px; --text-14: 14px;
+  --text-16: 16px; --text-20: 20px; --text-28: 28px; --text-40: 40px;
+  --text-64: 64px; --text-96: 96px;
+}
+
+body {
+  font-family: var(--font-text);
+  font-size: var(--text-14);
+  line-height: 1.5;
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* DISPLAY — Zodiak; the Margin's voice only */
+.v-display {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+.v-display--xl { font-size: var(--text-64); letter-spacing: -0.03em; }
+.v-display--title { font-size: var(--text-40); letter-spacing: -0.03em; }
+.v-display--section { font-size: var(--text-28); }
+
+/* MACHINE — evidence wears mono (LAW III) */
+.v-machine {
+  font-family: var(--font-machine);
+  font-variant-numeric: tabular-nums slashed-zero;
+  font-size: var(--text-13);
+  line-height: 1.45;
+}
+.v-machine--12 { font-size: var(--text-12); }
+.v-machine--11 { font-size: var(--text-11); }
+
+/* LABEL — Supreme 700 caps +8% */
+.v-label {
+  font-family: var(--font-text);
+  font-size: var(--text-11);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-mut);
+}
+
+.num { font-variant-numeric: tabular-nums slashed-zero; }
+
+/* THE LARGE PRINT EDITION (Part 13.2 §6) — +1 type step globally,
+   enlarged marks. Accessibility as a first-class edition. */
+:root[data-large-print] {
+  --text-11: 12px; --text-12: 13px; --text-13: 14px; --text-14: 16px;
+  --text-16: 18px; --text-20: 22px; --text-28: 30px;
+}
+:root[data-large-print] .sevmark svg { transform: scale(1.5); }
+
+h1, h2, h3 { text-wrap: balance; }
+p { text-wrap: pretty; }

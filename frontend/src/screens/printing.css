@@ -1,0 +1,27 @@
+/* SHEET 08 — The Printing Room */
+.pkg-list { list-style: none; display: flex; flex-direction: column; gap: var(--s-2); margin-top: var(--s-3); }
+.pkg-stub { display: grid; grid-template-columns: auto 1fr auto; gap: var(--s-2); align-items: baseline; font-size: var(--text-11); border-left: 2px solid var(--rule-strong); padding-left: var(--s-2); }
+.pkg-stub__no { color: var(--ink-mut); }
+.pkg-stub__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-text); }
+.pkg-stub__fp { color: var(--verified); }
+
+.press-bed { padding: 0; overflow: hidden; }
+.press-bed__tabs { display: flex; border-bottom: 1px solid var(--rule-strong); }
+.press-tab { padding: var(--s-3) var(--s-6); font-size: var(--text-12); color: var(--ink-mut); border-bottom: 2px solid transparent; }
+.press-tab--active { color: var(--ink); border-bottom-color: var(--ink); }
+.press-bed__doc { padding: var(--s-8); min-height: 260px; position: relative; }
+.doc-letterhead { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--rule); padding-bottom: var(--s-3); margin-bottom: var(--s-6); }
+.press-bed__doc--assembling { animation: doc-etch 1s var(--press-out); }
+@keyframes doc-etch { from { opacity: 0.4; } to { opacity: 1; } }
+.doc-status { font-size: var(--text-16); color: var(--reserve); }
+.doc-sealed { display: flex; flex-direction: column; gap: var(--s-4); align-items: flex-start; }
+.doc-fp { font-size: var(--text-13); color: var(--verified); }
+
+.strike-line { list-style: none; display: flex; gap: var(--s-8); margin: var(--s-8) 0; }
+.strike-station { display: flex; align-items: center; gap: var(--s-2); }
+.strike-station__pin { width: 11px; height: 11px; border: 1.5px solid var(--rule-strong); border-radius: 50%; }
+.strike-station--done .strike-station__pin { background: var(--ink); border-color: var(--ink); }
+.strike-station--active .strike-station__pin { background: var(--reserve); border-color: var(--reserve); animation: m11-breathe 1.2s infinite; }
+
+.printing-actions { display: flex; gap: var(--s-8); padding-top: var(--s-4); border-top: 1px solid var(--rule-strong); }
+.impression-note { margin-top: var(--s-4); font-size: var(--text-12); color: var(--ink-mut); }
