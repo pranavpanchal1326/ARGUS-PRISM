@@ -96,6 +96,16 @@ export function PrintingRoom() {
             ))}
           </div>
           <div className={`press-bed__doc${running ? " press-bed__doc--assembling" : ""}`}>
+            {/* The border scribes as the package assembles; microtext fills
+                it as it signs — the visual of signing without a key on the wire. */}
+            {(running || job?.status === "SEALED") && (
+              <svg className="doc-border" aria-hidden viewBox="0 0 400 260" preserveAspectRatio="none">
+                <rect x="3" y="3" width="394" height="254" fill="none"
+                  stroke={job?.status === "SIGNING" || job?.status === "SEALED" ? "var(--verified)" : "var(--reserve)"}
+                  strokeWidth="1" pathLength={1}
+                  className={job?.status === "SEALED" ? "doc-border__rect doc-border__rect--done" : "doc-border__rect"} />
+              </svg>
+            )}
             <div className="doc-letterhead">
               <span className="v-label">UNION BANK OF INDIA · {ARTIFACTS[tab].label}</span>
               <span className="mx" style={{ fontSize: "var(--text-11)", color: "var(--ink-faint)" }}>CASE {caseId}</span>

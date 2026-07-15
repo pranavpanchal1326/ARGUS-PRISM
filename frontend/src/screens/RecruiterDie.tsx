@@ -20,6 +20,9 @@ export function RecruiterDie() {
   const [sel, setSel] = useState<Recruiter | null>(null);
   const [campaign, setCampaign] = useState<RecruiterCampaign | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const cancelStart = useRef<number | null>(null);
+  const cancelRaf = useRef<number>(0);
+  const [cancelled, setCancelled] = useState(false);
   const { post } = useNotices();
 
   const load = useCallback(async () => {
@@ -50,7 +53,9 @@ export function RecruiterDie() {
 
   const mules = useMemo(() => campaign?.nodes.filter((n) => n.id !== sel?.id) ?? [], [campaign, sel]);
 
-  useEffect(() => {
+  /* Draw the die at a given cancellation progress (0 = intact, ≥1 = fully
+     struck). The M10 wave cancels copies outward in generation order. */
+  const draw = useCallback((cancelT: number) => {
     const cv = canvasRef.current; if (!cv || !sel) return;
     const dpr = window.devicePixelRatio || 1;
     cv.width = CANVAS_W * dpr; cv.height = CANVAS_H * dpr;
@@ -62,14 +67,14 @@ export function RecruiterDie() {
     ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
     const cx = CANVAS_W / 2, cy = CANVAS_H / 2;
 
-    const drawRosette = (x: number, y: number, r: number, warmth: number, seed: string, noise: number, color: string, weight: number) => {
+    const drawRosette = (x: number, y: number, r: number, warmth: number, seed: string, noise: number, color: string, weight: number, alphaMul = 1) => {
       const params = paramsFromScore(warmth, [], seed);
       const { harmonics, alpha, phiAlpha } = deriveHarmonics(params);
       const ampSum = harmonics.reduce((a, h) => a + h.A, 0);
       const scale = r / (ampSum * (1 + alpha));
       let rnd = hashSeed(seed);
       const rand = () => { rnd = (rnd * 1664525 + 1013904223) >>> 0; return rnd / 4294967296; };
-      ctx.strokeStyle = color; ctx.lineWidth = weight;
+      ctx.globalAlpha = alphaMul; ctx.strokeStyle = color; ctx.lineWidth = weight;
       ctx.beginPath();
       for (let i = 0; i <= 180; i++) {
         const th = (i / 180) * Math.PI * 2;
@@ -80,29 +85,71 @@ export function RecruiterDie() {
         py = y + py * mod * scale + (rand() - 0.5) * noise;
         if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
       }
-      ctx.closePath(); ctx.stroke();
+      ctx.closePath(); ctx.stroke(); ctx.globalAlpha = 1;
     };
+
+    const positions = mules.map((m, i) => {
+      const ang = (i / Math.max(1, mules.length)) * Math.PI * 2;
+      const gen = 1 + (i % 3);
+      const rr = 120 + gen * 60;
+      return { m, x: cx + Math.cos(ang) * rr, y: cy + Math.sin(ang) * rr, gen, order: i };
+    });
 
     // edges to mules
     ctx.strokeStyle = faint; ctx.lineWidth = 0.6;
-    const positions = mules.map((m, i) => {
-      const ang = (i / Math.max(1, mules.length)) * Math.PI * 2;
-      const gen = 1 + (i % 3); // proxy generation from sequence
-      const rr = 120 + gen * 60;
-      return { m, x: cx + Math.cos(ang) * rr, y: cy + Math.sin(ang) * rr, gen };
-    });
     for (const p of positions) { ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(p.x, p.y); ctx.stroke(); }
 
-    // mules — degraded copies (noise grows per generation)
+    // mules — degraded copies; the wave strikes each in strike order
     for (const p of positions) {
-      drawRosette(p.x, p.y, 22, p.m.warmth_score, p.m.account_ref, p.gen * 1.6, p.m.tainted ? vermilion : ink, 0.6);
+      // per-copy local progress: staggered by strike order (40ms → normalized)
+      const local = cancelT <= 0 ? 0 : Math.max(0, Math.min(1, (cancelT - p.order * 0.03) / 0.35));
+      const fade = 1 - local * 0.7; // fades to 30%
+      drawRosette(p.x, p.y, 22, p.m.warmth_score, p.m.account_ref, p.gen * 1.6, p.m.tainted ? vermilion : ink, 0.6, fade);
+      if (local > 0) {
+        // cancel-cross draws over the struck copy
+        ctx.globalAlpha = Math.min(1, local * 1.5); ctx.strokeStyle = vermilion; ctx.lineWidth = 1.2;
+        const s = 14 * Math.min(1, local * 1.5);
+        ctx.beginPath(); ctx.moveTo(p.x - s, p.y - s); ctx.lineTo(p.x + s, p.y + s);
+        ctx.moveTo(p.x + s, p.y - s); ctx.lineTo(p.x - s, p.y + s); ctx.stroke(); ctx.globalAlpha = 1;
+      }
     }
-    // the master die — crisp, framed
-    ctx.strokeStyle = ink; ctx.lineWidth = 1; ctx.strokeRect(cx - 44, cy - 44, 88, 88);
-    drawRosette(cx, cy, 36, sel.warmth_score ?? 80, sel.account_ref, 0, ink, 1.4);
+
+    // the master die — crisp, framed; the punch strikes it last
+    const masterStruck = Math.max(0, Math.min(1, cancelT - 0.2));
+    ctx.strokeStyle = ink; ctx.lineWidth = 1; ctx.globalAlpha = 1 - masterStruck * 0.5;
+    ctx.strokeRect(cx - 44, cy - 44, 88, 88);
+    drawRosette(cx, cy, 36, sel.warmth_score ?? 80, sel.account_ref, 0, ink, 1.4, 1 - masterStruck * 0.5);
+    ctx.globalAlpha = 1;
     ctx.fillStyle = ink; ctx.font = "11px 'IBM Plex Mono', monospace"; ctx.textAlign = "center";
     ctx.fillText(sel.account_ref, cx, cy + 60);
+    if (masterStruck > 0.4) {
+      ctx.strokeStyle = vermilion; ctx.lineWidth = 2;
+      ctx.strokeRect(cx - 44, cy - 44, 88, 88);
+      ctx.beginPath(); ctx.moveTo(cx - 44, cy - 44); ctx.lineTo(cx + 44, cy + 44);
+      ctx.moveTo(cx + 44, cy - 44); ctx.lineTo(cx - 44, cy + 44); ctx.stroke();
+    }
   }, [sel, mules]);
+
+  useEffect(() => {
+    if (cancelStart.current === null) draw(cancelled ? 1.6 : 0);
+  }, [draw, cancelled]);
+
+  /* The cancellation wave (M10) — never exceeds 1.6s regardless of n. */
+  const runCancelWave = useCallback(() => {
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) { setCancelled(true); return; }
+    cancelStart.current = performance.now();
+    const step = (now: number) => {
+      const t = (now - (cancelStart.current ?? now)) / 1600; // 1.6s max
+      draw(Math.min(1.6, t * 1.6));
+      if (t < 1) cancelRaf.current = requestAnimationFrame(step);
+      else { cancelStart.current = null; setCancelled(true); }
+    };
+    cancelRaf.current = requestAnimationFrame(step);
+  }, [draw]);
+
+  useEffect(() => { setCancelled(false); }, [sel]);
+  useEffect(() => () => cancelAnimationFrame(cancelRaf.current), []);
 
   return (
     <div className="die-sheet">
@@ -129,10 +176,11 @@ export function RecruiterDie() {
         )}
         {sel && (
           <div style={{ marginTop: "var(--s-6)" }}>
-            <Seal label="Freeze campaign" variant="vermilion"
+            <Seal label="Freeze campaign" variant="vermilion" disabled={cancelled} disabledReason="The die is cancelled"
               onAuthorize={async () => {
                 try {
                   await api(`/api/v1/recruiters/${sel.id}/freeze-campaign`, { method: "POST" });
+                  runCancelWave(); // the product's most theatrical 900ms — every frame a real state change
                   post({ msg: `DIE CANCELLED — campaign of ${mules.length} copies struck. Audit ref printed.`, tone: "success" });
                 } catch (err) { post({ msg: err instanceof ApiProblem ? err.title : "The freeze was returned.", tone: "error" }); }
               }} />

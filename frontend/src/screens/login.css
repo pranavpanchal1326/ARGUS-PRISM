@@ -16,7 +16,15 @@
   box-shadow: var(--shadow-card);
   padding: var(--s-12);
 }
-.teller__head { margin-bottom: var(--s-8); }
+.teller__specimen {
+  position: absolute; inset: 0; z-index: 2;
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none;
+}
+.teller__specimen .overprint { transform: rotate(-14deg) scale(1.4); opacity: 0.16; }
+
+.teller__head { margin-bottom: var(--s-8); position: relative; z-index: 3; }
+.teller__form { position: relative; z-index: 3; }
 .teller__wordmark { font-family: var(--font-display); font-size: var(--text-16); letter-spacing: 0.12em; }
 .teller__rule { height: 1px; background: var(--rule-strong); margin: var(--s-3) 0; }
 .teller__invite { font-family: var(--font-display); font-size: var(--text-28); letter-spacing: -0.02em; }

@@ -3,7 +3,7 @@
    forbid one). Nodes = rosettes, edges = engraved strokes. The art and the
    engineering are the same thing here. */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { api, ApiProblem, WatchInterrupted, type Graph, type GraphNode } from "../api/client";
+import { api, ApiProblem, WatchInterrupted, type Graph, type GraphNode, type AccountSummary } from "../api/client";
 import { useLockMode } from "../shell/ModeContext";
 import { Drawer } from "../canon/Drawer";
 import { Rosette } from "../canon/Rosette";
@@ -16,21 +16,32 @@ import "./plate.css";
 
 const CANVAS_W = 900, CANVAS_H = 620;
 
-/* Seed account: the demo neighborhood. Real focus arrives via deep-link. */
-const DEFAULT_FOCUS = "AC-0847";
-
 export function Plate() {
   useLockMode("plate");
-  const [focus, setFocus] = useState(() => new URLSearchParams(location.search).get("focus") ?? DEFAULT_FOCUS);
+  const [focus, setFocus] = useState(() => new URLSearchParams(location.search).get("focus") ?? "");
   const [hops, setHops] = useState(2);
   const [graph, setGraph] = useState<Graph | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<GraphNode | null>(null);
+  const [frozen, setFrozen] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const posRef = useRef<Positioned[]>([]);
   const { post } = useNotices();
 
+  /* No deep-link focus? Resolve a real starting account (Law 2 — never a
+     hardcoded serial that may not exist). Prefer the warmest account. */
+  useEffect(() => {
+    if (focus) return;
+    (async () => {
+      try {
+        const res = await api<{ data: AccountSummary[] }>("/api/v1/accounts?limit=1");
+        if (res.data[0]) setFocus(res.data[0].id);
+      } catch { /* leave empty; the sheet prints its blank state */ }
+    })();
+  }, [focus]);
+
   const load = useCallback(async () => {
+    if (!focus) return;
     setError(null); setGraph(null);
     try {
       const res = await api<{ data: Graph }>(`/api/v1/graph/neighborhood/${focus}?hops=${hops}`);
@@ -95,6 +106,7 @@ export function Plate() {
       ctx.strokeStyle = nd.tainted || nd.severity === "CRITICAL" || nd.severity === "IMMINENT"
         ? vermilion : nd.severity === "HOT" ? reserve : ink;
       ctx.lineWidth = nd.id === graph.root ? 1.3 : 0.7;
+      ctx.globalAlpha = frozen ? 0.3 : 1; // struck nodes fade to 30% (M10)
       ctx.beginPath();
       for (let i = 0; i <= 180; i++) {
         const th = (i / 180) * Math.PI * 2;
@@ -106,6 +118,13 @@ export function Plate() {
       }
       ctx.closePath(); ctx.stroke();
 
+      if (frozen) { // cancel-cross over each struck node
+        ctx.globalAlpha = 1; ctx.strokeStyle = vermilion; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(p.x - r, p.y - r); ctx.lineTo(p.x + r, p.y + r);
+        ctx.moveTo(p.x + r, p.y - r); ctx.lineTo(p.x - r, p.y + r); ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+
       // focused node carries a serial tag plate
       if (nd.id === graph.root || nd === selected) {
         ctx.fillStyle = ink; ctx.font = "10px 'IBM Plex Mono', monospace";
@@ -114,7 +133,9 @@ export function Plate() {
       }
       void seedRand;
     }
-  }, [positioned, graph, selected]);
+  }, [positioned, graph, selected, frozen]);
+
+  useEffect(() => { setFrozen(false); }, [graph]); // fresh plate, fresh state
 
   const onCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -155,10 +176,11 @@ export function Plate() {
           </ul>
         </div>
         {graph && (
-          <Seal label="Freeze cluster" variant="vermilion"
+          <Seal label="Freeze cluster" variant="vermilion" disabled={frozen} disabledReason="The cluster is cancelled"
             onAuthorize={async () => {
               try {
                 await api("/api/v1/graph/freeze-cluster", { method: "POST", body: JSON.stringify({ root: graph.root, hops }) });
+                setFrozen(true); // struck nodes fade to 30% + cancel-cross (M10)
                 post({ msg: `Cluster of ${graph.nodes.length} accounts cancelled. Audit ref printed.`, tone: "success" });
               } catch (err) {
                 post({ msg: err instanceof ApiProblem ? err.title : "The freeze was returned.", tone: "error" });

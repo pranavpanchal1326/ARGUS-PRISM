@@ -30,7 +30,9 @@
 .press-station:last-child::before { bottom: 50%; }
 .press-station__pin { width: 11px; height: 11px; border: 1.5px solid var(--rule-strong); border-radius: 50%; background: var(--paper); z-index: 1; }
 .press-station--done .press-station__pin { background: var(--ink); border-color: var(--ink); }
-.press-station--here .press-station__pin { background: var(--vermilion); border-color: var(--vermilion); }
+.press-station--here .press-station__pin { background: var(--vermilion); border-color: var(--vermilion); animation: pin-pulse 2s ease-in-out infinite; }
+@keyframes pin-pulse { 0%, 100% { box-shadow: 0 0 0 0 var(--vermilion-wash); } 50% { box-shadow: 0 0 0 4px var(--vermilion-wash); } }
+@media (prefers-reduced-motion: reduce) { .press-station--here .press-station__pin { animation: none; } }
 .press-station--done .press-station__label { color: var(--ink); }
 
 .gauge { display: flex; flex-wrap: wrap; gap: var(--s-4); border-top: 2px solid var(--rule-strong); padding-top: var(--s-3); }

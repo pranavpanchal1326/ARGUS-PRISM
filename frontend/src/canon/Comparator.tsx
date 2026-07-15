@@ -39,7 +39,7 @@ export function Comparator({ open, subject, onClose }: Props) {
         <div className="comparator">
           <div className="comparator__pair">
             <figure className="comparator__fig">
-              <Rosette size={96} tier={3} params={baseline
+              <Rosette size={96} tier={3} draw params={baseline
                 ? paramsFromScore(baseline.medianWarmth, [], "specimen")
                 : paramsFromScore(0, [], "specimen")} ink="var(--ink-mut)" />
               <figcaption className="v-label">SPECIMEN</figcaption>
@@ -48,7 +48,7 @@ export function Comparator({ open, subject, onClose }: Props) {
               </span>
             </figure>
             <figure className="comparator__fig">
-              <Rosette size={96} tier={3}
+              <Rosette size={96} tier={3} draw
                 params={paramsFromScore(subject.warmth_score, (subject.top_signals ?? []).map((s) => s.contribution), subject.account_ref)} />
               <figcaption className="v-label">SUBJECT</figcaption>
               <span className="mx comparator__cohort">{subject.account_ref}</span>

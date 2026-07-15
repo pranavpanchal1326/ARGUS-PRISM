@@ -124,6 +124,10 @@ export function Login() {
         <Rosette params={MASTER_PARAMS} size={340} tier={3} />
       </div>
       <div className="teller">
+        {/* SPECIMEN — the operator is a specimen until proven. Lifts on success. */}
+        <div className="teller__specimen" aria-hidden>
+          <Overprint tone="vermilion" size="full">SPECIMEN</Overprint>
+        </div>
         <div className="teller__head">
           <div className="teller__wordmark v-display">ARGUS · PRISM</div>
           <div className="teller__rule" />

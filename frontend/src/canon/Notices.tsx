@@ -16,10 +16,16 @@ const NoticeCtx = createContext<Ctx>({ post: () => {} });
 
 export function NoticeProvider({ children }: { children: React.ReactNode }) {
   const [notices, setNotices] = useState<Notice[]>([]);
+  const [leaving, setLeaving] = useState<Set<number>>(new Set());
   const seq = useRef(1);
 
   const dismiss = useCallback((id: number) => {
-    setNotices((n) => n.filter((x) => x.id !== id));
+    // play the exit, then remove
+    setLeaving((s) => new Set(s).add(id));
+    setTimeout(() => {
+      setNotices((n) => n.filter((x) => x.id !== id));
+      setLeaving((s) => { const c = new Set(s); c.delete(id); return c; });
+    }, 240);
   }, []);
 
   const post = useCallback((n: Omit<Notice, "id">) => {
@@ -40,7 +46,7 @@ export function NoticeProvider({ children }: { children: React.ReactNode }) {
       {children}
       <div className="notice-dock" aria-live="polite">
         {visible.map((n) => (
-          <div key={n.id} className={`notice${n.tone === "error" ? " notice--error" : ""}`}
+          <div key={n.id} className={`notice${n.tone === "error" ? " notice--error" : ""}${leaving.has(n.id) ? " notice--leaving" : ""}`}
             role={n.tone === "error" ? "alert" : "status"}>
             <span className="notice__dateline">{dateline()}</span>
             <div className="notice__msg">

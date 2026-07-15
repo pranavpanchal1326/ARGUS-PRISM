@@ -15,6 +15,7 @@ import { RoutingSlip } from "../canon/RoutingSlip";
 import { useNotices } from "../canon/Notices";
 import { paramsFromScore } from "../engine/rosette";
 import { timestamp, slaState } from "../lib/format";
+import { useCountUp } from "../lib/motion";
 import { LEX } from "../lexicon/strings";
 import "./desk.css";
 
@@ -200,11 +201,11 @@ export function ExaminationDesk() {
     <Frame count={count} filter={filter} setFilter={setFilter} pending={pending.length} onFeed={feed}>
       <div className="desk">
         <div className="desk__tray">
-          <ol className="tray" ref={trayRef}>
+          <ol className="tray tray--entrance" ref={trayRef}>
             {docket.map((a, i) => (
               <Slip key={a.id} alert={a} docket={i + 1}
                 selected={a.id === selectedId} examined={examined.has(a.id)}
-                feed={feedIds.has(a.id)}
+                feed={feedIds.has(a.id)} order={i}
                 onSelect={() => setSelectedId(a.id)} />
             ))}
           </ol>
@@ -226,11 +227,12 @@ function Frame({ count, filter, setFilter, pending = 0, onFeed, children }: {
   pending?: number; onFeed?: () => void; children: React.ReactNode;
 }) {
   const FILTERS: Filter[] = ["all", "IMMINENT", "CRITICAL", "HOT", "WARMING"];
+  const shownCount = Math.round(useCountUp(count));
   return (
     <div className="sheet">
       <div className="margin">
         <div className="margin__count-label">{LEX.awaiting}</div>
-        <div className="margin__count num">{count}</div>
+        <div className="margin__count num">{shownCount}</div>
         {pending > 0 && (
           <button className="feed-note" onClick={onFeed}>{LEX.feed(pending)}</button>
         )}
@@ -255,6 +257,7 @@ function Dossier({ alert, onExamined, onFalsePositive }: {
   const [fpOpen, setFpOpen] = useState(false);
   const [fpReason, setFpReason] = useState("");
   const { post } = useNotices();
+  const shownScore = Math.round(useCountUp(alert.warmth_score));
   const params = paramsFromScore(
     alert.warmth_score,
     (alert.top_signals ?? []).map((s) => s.contribution),
@@ -276,14 +279,14 @@ function Dossier({ alert, onExamined, onFalsePositive }: {
   return (
     <article className="dossier card">
       <header className="certificate">
-        <Rosette params={params} size={72} tier={2} />
+        <Rosette key={alert.id} params={params} size={72} tier={2} draw />
         <div className="certificate__id">
           <span className="mx certificate__serial">{alert.account_ref}</span>
           <span className="v-label">{alert.severity} · {alert.status}</span>
         </div>
         <div className="certificate__score">
           <span className="num v-display" style={{ fontSize: "var(--text-28)", fontWeight: 600, fontFamily: "var(--font-machine)" }}>
-            {Math.round(alert.warmth_score)}
+            {shownScore}
           </span>
           {alert.status === "ESCALATED" && <Overprint tone="vermilion" size="body" land>ESCALATED</Overprint>}
         </div>

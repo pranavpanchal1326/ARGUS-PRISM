@@ -14,11 +14,12 @@ interface Props {
   selected: boolean;
   examined: boolean;
   feed?: boolean;
+  order?: number;
   amountAtRisk?: number;
   onSelect: () => void;
 }
 
-export function Slip({ alert, docket, selected, examined, feed, amountAtRisk, onSelect }: Props) {
+export function Slip({ alert, docket, selected, examined, feed, order = 0, amountAtRisk, onSelect }: Props) {
   const critical = alert.severity === "CRITICAL" || alert.severity === "IMMINENT";
   const sla = alert.sla_deadline ? slaState(alert.sla_deadline, alert.first_signal_at) : null;
   const params = paramsFromScore(
@@ -31,6 +32,7 @@ export function Slip({ alert, docket, selected, examined, feed, amountAtRisk, on
   return (
     <li
       className={`slip${critical ? " slip--critical" : ""}${selected ? " slip--selected" : ""}${examined ? " slip--examined" : ""}${feed ? " slip--feed" : ""}`}
+      style={{ ["--slip-order" as string]: String(Math.min(order, 12)) }}
       onClick={onSelect}
       aria-current={selected}
     >
