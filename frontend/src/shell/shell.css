@@ -83,15 +83,31 @@
   border: 1px solid var(--reserve); border-radius: var(--radius);
   padding: 1px var(--s-2);
 }
-.folio__aperture { display: inline-flex; color: var(--ink-mut); }
-.folio__aperture--lost { color: var(--vermilion); }
+.folio__aperture { display: inline-flex; color: var(--ink-mut); transition: color var(--dur-feed) var(--press-out); }
+.folio__aperture svg { transition: opacity var(--dur-feed) var(--press-out); }
+.folio__aperture--lost { color: var(--vermilion); animation: aperture-lost 1.4s ease-in-out infinite; }
+@keyframes aperture-lost { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+@media (prefers-reduced-motion: reduce) { .folio__aperture--lost { animation: none; } }
 
 /* ── THE WORKING AREA (9 cols; ornament-free) ── */
 .working { flex: 1; overflow-y: auto; padding: var(--s-8) var(--s-6) var(--s-16); scroll-behavior: smooth; }
-/* Plate wipe (M5) — the sheet re-prints on route change */
-.working > * { animation: sheet-wipe var(--dur-wipe) var(--press-out); }
-@keyframes sheet-wipe { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
-@media (prefers-reduced-motion: reduce) { .working > * { animation: none; } }
+/* Plate wipe (M5) — the sheet re-prints on route change: an ink wipe
+   passes left→right and the content settles up beneath it. */
+.working > * { animation: sheet-wipe var(--dur-wipe) var(--press-out); position: relative; }
+.working > *::before {
+  content: ""; position: absolute; inset: 0; z-index: 40; pointer-events: none;
+  background: var(--ink); transform-origin: left;
+  animation: plate-wipe var(--dur-wipe) var(--press-out) forwards;
+}
+@keyframes sheet-wipe { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes plate-wipe {
+  0%   { transform: scaleX(1); opacity: 0.06; }
+  100% { transform: scaleX(0); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .working > * { animation: none; }
+  .working > *::before { display: none; }
+}
 
 /* ── THE MARGINALIA (9.11) ── */
 .marginalia { border-left: 1px solid var(--rule); background: transparent; position: relative; overflow: hidden; }

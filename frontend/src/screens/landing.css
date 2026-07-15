@@ -20,6 +20,63 @@
 .note__micro { font-size: 8px; letter-spacing: 0.2em; color: var(--ink-faint); margin-top: var(--s-8); overflow: hidden; white-space: nowrap; }
 .note__rosette { color: var(--ink); }
 
+/* ── The live, interactive note ── */
+.livenote { position: relative; cursor: crosshair; touch-action: none; user-select: none; }
+.livenote__canvas { display: block; }
+.livenote__readout {
+  position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 2px; pointer-events: none;
+}
+.livenote__band { font-size: var(--text-11); font-weight: 700; letter-spacing: 0.14em; }
+.livenote__band--clean { color: var(--ink-faint); }
+.livenote__band--warming { color: var(--ink); }
+.livenote__band--hot { color: var(--reserve); }
+.livenote__band--critical, .livenote__band--imminent { color: var(--vermilion); }
+.livenote__score { font-size: var(--text-40); font-weight: 600; line-height: 1; }
+.livenote__hint { font-size: var(--text-11); color: var(--ink-faint); letter-spacing: 0.06em; text-transform: uppercase; }
+
+/* ── Examination intro ── */
+.examine-intro { max-width: 1000px; margin: var(--s-16) auto 0; }
+.examine-intro__lead { font-size: var(--text-20); line-height: 1.5; max-width: 62ch; margin-top: var(--s-3); color: var(--ink); font-family: var(--font-display); }
+.station__nth { color: var(--ink-faint); font-weight: 400; letter-spacing: 0; }
+
+/* ── Feature demonstrations ── */
+.demo { width: 160px; height: 160px; color: var(--ink); }
+.reveal--in .demo-edge, .reveal--in .demo-node,
+.reveal--in .demo-taint-edge, .reveal--in .demo-taint-node,
+.reveal--in .demo-thread, .reveal--in .demo-die-copy,
+.reveal--in .demo-ring { animation-play-state: running; }
+.demo-edge, .demo-node, .demo-taint-edge, .demo-taint-node,
+.demo-thread, .demo-die-copy, .demo-ring { animation-play-state: paused; }
+
+.demo-node { animation: demo-pop 500ms var(--press-settle) both; }
+.demo-edge { stroke-dasharray: 120; animation: demo-draw 600ms var(--press-out) both; }
+@keyframes demo-pop { from { transform: scale(0); } to { transform: scale(1); } }
+@keyframes demo-draw { from { stroke-dashoffset: 120; } to { stroke-dashoffset: 0; } }
+.demo-node { transform-box: fill-box; transform-origin: center; }
+
+.demo-taint-src { animation: demo-pulse 1.8s ease-in-out infinite; }
+.demo-taint-edge { stroke-dasharray: 120; animation: demo-draw 700ms var(--press-out) both; }
+.demo-taint-node { animation: demo-stain 900ms var(--press-out) both; }
+@keyframes demo-stain { 0% { opacity: 0; } 100% { opacity: 1; } }
+@keyframes demo-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+.demo-thread { stroke-dasharray: 400; animation: demo-thread-draw 1500ms var(--press-out) both; }
+@keyframes demo-thread-draw { from { stroke-dashoffset: 400; } to { stroke-dashoffset: 0; } }
+
+.demo-die-master { transform-box: fill-box; transform-origin: center; animation: demo-pop 500ms var(--press-settle) both; }
+.demo-die-copy { animation: demo-stain 700ms var(--press-out) both; }
+
+.demo-ring { transform-box: fill-box; transform-origin: center; animation: demo-ring-grow 2s ease-in-out infinite; }
+@keyframes demo-ring-grow { 0%,100% { opacity: 0.3; transform: scale(0.9); } 50% { opacity: 0.8; transform: scale(1.05); } }
+.demo-core { animation: demo-pulse 1.4s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .demo-edge, .demo-node, .demo-taint-edge, .demo-taint-node, .demo-thread,
+  .demo-die-copy, .demo-die-master, .demo-ring, .demo-core, .demo-taint-src,
+  .note__frame-draw { animation: none !important; stroke-dashoffset: 0 !important; opacity: 1 !important; }
+}
+
 /* ── The examination stations ── */
 .examine { max-width: 1000px; margin: var(--s-16) auto 0; }
 .section-head { margin-bottom: var(--s-12); }

@@ -173,7 +173,7 @@ function Certificate({ id, onClose }: { id: string; onClose: () => void }) {
       <button className="btn btn--quiet" onClick={onClose}>← Return to the book</button>
 
       <header className={`cert-head card${scrubPoint ? " cert-head--replaying" : ""}`}>
-        <Rosette params={params} size={96} tier={3} />
+        <Rosette params={params} size={96} tier={3} draw={!scrubPoint} />
         <div className="cert-head__id">
           <span className="mx cert-head__ref">{acct.account_ref}</span>
           <span className="cert-head__holder">

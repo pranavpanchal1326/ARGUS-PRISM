@@ -40,6 +40,15 @@
   0%, 100% { opacity: 0.08; }
   50%      { opacity: 0.09; }
 }
+/* M4 — the guilloché line scribes itself on mount */
+.rosette-draw {
+  stroke-dasharray: 1;
+  animation: rosette-scribe var(--dur-draw) var(--press-out) both;
+}
+@keyframes rosette-scribe {
+  from { stroke-dashoffset: 1; }
+  to   { stroke-dashoffset: 0; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

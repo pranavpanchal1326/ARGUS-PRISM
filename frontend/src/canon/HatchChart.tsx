@@ -47,9 +47,9 @@ export function HatchChart({ points, caption }: { points: ScorePoint[]; caption:
             <text x={W - PAD} y={yFor(b.at) - 3} className="hatch-band" textAnchor="end">{b.label}</text>
           </g>
         ))}
-        {/* area hatch + line */}
-        {path.area && <path d={path.area} fill="url(#hatch45)" opacity="0.5" />}
-        {path.line && <path d={path.line} fill="none" stroke="var(--ink)" strokeWidth="1.5" />}
+        {/* area hatch + line (the line scribes itself, M4) */}
+        {path.area && <path d={path.area} fill="url(#hatch45)" opacity="0.5" className="hatch-area" />}
+        {path.line && <path d={path.line} fill="none" stroke="var(--ink)" strokeWidth="1.5" pathLength={1} className="hatch-line" />}
         {/* event margin ticks for band crossings into CRITICAL */}
         {points.map((p, i) => p.severity === "CRITICAL" || p.severity === "IMMINENT" ? (
           <circle key={i} cx={PAD + (i / Math.max(1, points.length - 1)) * (W - PAD * 2)} cy={PAD - 6} r="2" fill="var(--vermilion)" />

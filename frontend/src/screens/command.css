@@ -3,16 +3,26 @@
 
 .floor-ticker { overflow: hidden; border-bottom: 1px solid var(--rule); padding: var(--s-2) 0; }
 .floor-ticker--dim { opacity: 0.6; }
-.floor-ticker__rail { display: flex; gap: var(--s-6); white-space: nowrap; font-size: var(--text-12); color: var(--ink-mut); }
+.floor-ticker__rail {
+  display: inline-flex; gap: var(--s-6); white-space: nowrap;
+  font-size: var(--text-12); color: var(--ink-mut);
+  animation: ticker-scroll 40s linear infinite;
+}
+.floor-ticker:hover .floor-ticker__rail { animation-play-state: paused; } /* LAW V even here */
+@keyframes ticker-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 .floor-ticker__stub { flex-shrink: 0; }
 .floor-ticker__idle { color: var(--ink-faint); }
+@media (prefers-reduced-motion: reduce) { .floor-ticker__rail { animation: none; } }
 
 .floor-field {
   flex: 1; min-height: 280px;
   border: 1px solid var(--rule); background: var(--paper-sunken);
   display: flex; align-items: center; justify-content: center; position: relative;
+  overflow: hidden; transition: opacity var(--dur-feed) var(--press-out);
 }
-.floor-field__stopped { font-family: var(--font-display); font-size: var(--text-28); color: var(--vermilion); }
+.floor-field--stopped { opacity: 0.6; }
+.floor-canvas { display: block; }
+.floor-field__stopped { position: absolute; font-family: var(--font-display); font-size: var(--text-28); color: var(--vermilion); }
 
 .floor-counters { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-6); }
 .counter { display: flex; flex-direction: column; gap: var(--s-1); padding: var(--s-4); border-top: 2px solid var(--rule-strong); }
