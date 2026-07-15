@@ -547,10 +547,6 @@ does and does not demonstrate:
 
 ---
 
-## Authors
-
-- **Backend, ML, auth, infrastructure, simulator** — Aditya
-- **Frontend, design system, all screens, documentation** — Pranav
 
 ---
 
